@@ -1,0 +1,86 @@
+/* ==========================================================================
+   MARVEL TŌKON: FIGHTING SOULS — Replay Database skin (game #4)
+   Tokens only: colors + three font families. No new components.
+
+   Sampled from the official lobby logo (user-supplied asset
+   “marveltokonfightingsouls_lob_log_def_01.webp”, pixel-modal sample):
+     • FIGHTING block   #FE6C0C     • SOULS block   #03A5FE
+     • MARVEL badge     #EC1D24     • sumi-ink      #414336
+     • paper cream      #EAE2D5
+   SF6 COLLISION — LEVER 1: sampled orange #FE6C0C is a chip-size sibling
+   of SF6 primary #FF7D00 (Δhue 5.6°, both ~100% sat). So BLUE is primary,
+   orange is secondary/accent. Both wordmark colors stay in the skin.
+
+   Fonts (Google Fonts / @fontsource):
+     display  “Bangers”            @fontsource/bangers            400
+              (latin-ext: renders Ō natively — verified in spec doc)
+     ui       “Manrope”            @fontsource/manrope            400 500 600 700 800
+     mono     “JetBrains Mono”     @fontsource/jetbrains-mono     400 700
+
+   Ratios are WCAG contrast vs --color-surface #101627 unless noted.
+   NOTE: semantic names inferred (source folder unreadable this session)
+   — if the live schema differs, it is a rename-only pass.
+   ========================================================================== */
+:root {
+  --font-display: "Bangers", "Arial Black", sans-serif;
+  --font-ui: "Manrope", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-bg: #0A0E17;                /* page — deepest ink-navy (cool blue cast vs Tekken neutral carbon / SF6 warm asphalt) */
+  --color-surface: #101627;           /* card panel — accent AA reference */
+  --color-surface-raised: #161E33;    /* hover / raised panel */
+  --color-surface-high: #1D2740;      /* chips, inputs, top layer */
+  --color-border: #283350;            /* hairline panel gutter */
+  --color-border-strong: #3A4A73;     /* emphasized rules / focus adjacency */
+  --color-text: #F0EADD;              /* newsprint cream (from sampled paper #EAE2D5) · 15.0:1 */
+  --color-text-muted: #AEB6CC;        /* secondary copy, cool steel · 8.9:1 */
+  --color-text-faint: #8892AE;        /* meta / timestamps · 5.8:1 */
+  --color-primary: #03A5FE;           /* SOULS blue — sampled; PRIMARY by collision lever 1 · 6.7:1 */
+  --color-primary-contrast: #06101B;  /* ink-navy text on primary · 7.1:1 on primary */
+  --color-primary-hover: #3FBAFF;     /* primary hover/active lift · 8.3:1 */
+  --color-secondary: #FE6C0C;         /* FIGHTING orange — sampled; demoted to secondary/accent · 6.3:1 */
+  --color-secondary-contrast: #1C0F06;/* ink text on secondary · 6.6:1 on secondary */
+  --color-danger: #FF4B42;            /* scarlet — 11° orange-side of Tekken crimson #E13048, brighter + purer · 5.4:1 */
+  --color-warning: #FFEE8C;           /* pale caution lemon — 27° + big dL from secondary orange · 15.3:1 */
+  --color-success: #37E38A;           /* emerald — 59° from SF6 Drive-green, 28° from umbrella teal · 10.7:1 */
+  --color-info: #C9D4D6;              /* steel silver — sampled from the TŌKON letterforms · 11.9:1 */
+  --color-win: #37E38A;               /* W marker (success family) · 10.7:1 */
+  --color-loss: #FF7A6E;              /* L marker — softened scarlet; calmer than danger in dense rows · 7.1:1 */
+  --color-focus: #58C5FF;             /* focus ring azure · 9.3:1 */
+
+  /* 20 launch fighters · one accent each · all ≥4.5:1 on --color-surface.
+     Method (also for Year-1 DLC, e.g. Phoenix Cyclops — see spec doc):
+     1 anchor on the canonical costume/VFX hue · 2 snap chroma+lightness to
+     the team’s tone band · 3 enforce Δ8–12° of hue vs all neighbors, else
+     split by lightness (ΔL ≥ .12) or chroma and document · 4 AA-check. */
+
+  /* Fighting Avengers */
+  --char-captain-america: #5B8DEF;    /* shield steel-blue; team leader · 5.6:1 */
+  --char-iron-man: #E6961C;           /* armor gold (faceplate) — red arc ceded to Guardians/Knights; dH 10° from wolverine · 7.5:1 */
+  --char-hulk: #46CF52;               /* gamma green · 8.8:1 */
+  --char-black-panther: #9267F5;      /* Shuri suit — vibranium violet glow · 4.7:1 */
+
+  /* Amazing Guardians */
+  --char-spider-man: #5F7CFF;         /* suit blue — red arc was 5-deep; blue is equally canonical · 5.0:1 */
+  --char-ms-marvel: #FFD98A;          /* lightning-bolt pale gold; dH 5° from iron-man resolved by dL .26 · 13.3:1 */
+  --char-star-lord: #F4586A;          /* jacket rose-red · 5.5:1 */
+  --char-peni-parker: #F45FA8;        /* SP//dr pink · 6.0:1 */
+
+  /* Unbreakable X-Men */
+  --char-storm: #BFD9E8;              /* white hair / lightning — pale storm-silver (chroma-split from primary) · 12.3:1 */
+  --char-magik: #B650F2;              /* Soulsword sorcery violet · 4.6:1 */
+  --char-wolverine: #FFD23B;          /* classic suit yellow · 12.5:1 */
+  --char-danger-x: #2ED2C8;           /* Shi’ar chrome teal (fighter “Danger”; -x suffix avoids --color-danger clash) · 9.6:1 */
+
+  /* Knights of Doom */
+  --char-doctor-doom: #23C29E;        /* Latverian viridian; team leader · 8.0:1 */
+  --char-magneto: #D355DB;            /* helmet magenta-violet · 5.2:1 */
+  --char-green-goblin: #AFD32C;       /* goblin acid — darker/duller than SF6 Drive-green, never shares a row with it · 10.4:1 */
+  --char-carnage: #E8502B;            /* symbiote blood red-orange; dH 12° from --color-secondary · 4.8:1 */
+
+  /* Samurai Outriders */
+  --char-ghost-rider: #7B7BFF;        /* Robbie Reyes hellfire indigo (comics-canon blue flame) · 5.2:1 */
+  --char-blade: #6FA4B8;              /* tempered katana steel — muted chroma is the split from primary/storm · 6.6:1 */
+  --char-loki: #1FB47D;               /* deep asgardian emerald; dH 9° + dL from --color-success · 6.8:1 */
+  --char-deadpool: #DE4E79;           /* merc rose-wine — red arc ladder, dH 11° from star-lord & peni · 4.7:1 */
+}

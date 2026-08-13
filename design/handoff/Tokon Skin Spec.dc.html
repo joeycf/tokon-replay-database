@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<meta name="theme-color" content="#03A5FE">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&amp;family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body { margin: 0; background: #0A0E17; }
+a { color: #3FBAFF; text-decoration: none; }
+a:hover { color: #58C5FF; }
+</style>
+</helmet>
+<div style="width: 1500px; margin: 0 auto; padding: 48px 40px 64px; font-family: 'Manrope', 'Helvetica Neue', sans-serif; color: #F0EADD; display: flex; flex-direction: column; gap: 28px;">
+
+  <!-- 01 · WORDMARK + TYPE -->
+  <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 40px 44px;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">01 · WORDMARK &amp; TYPE — <span style="color: #FE6C0C;">REPLAY DATABASE GAME SKIN №4</span></div>
+      <div style="{{ oChipStyle }}">{{ oCheckLabel }}</div>
+    </div>
+    <div style="font-family: 'Bangers', 'Arial Black', sans-serif; font-size: 148px; line-height: 1; margin-top: 28px; letter-spacing: 0.015em;">
+      <span style="color: #03A5FE;">TŌKON</span><span style="color: #FE6C0C;">/</span><span style="color: #F0EADD;">REPLAY</span>
+    </div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #AEB6CC; margin-top: 14px; letter-spacing: 0.08em;">4V4 TAG-TEAM · 20 FIGHTERS · FIVE TEAMS · MARVEL × ARC SYSTEM WORKS</div>
+    <div style="display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap;">
+      <sc-for list="{{ sampled }}" as="s" hint-placeholder-count="5">
+        <div style="display: flex; align-items: center; gap: 10px; background: #161E33; border: 1px solid #283350; border-radius: 8px; padding: 8px 14px 8px 8px;">
+          <div style="{{ s.sw }}"></div>
+          <div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #F0EADD;">{{ s.hex }}</div>
+            <div style="font-size: 11px; color: #8892AE;">{{ s.label }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="font-size: 12px; color: #8892AE; margin-top: 12px; max-width: 900px;">Both hexes pixel-sampled from the official lobby logo asset supplied for this brief (<span style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">marveltokonfightingsouls_lob_log_def_01.webp</span>) — modal fill value per block, letterform and outline pixels excluded.</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 30px;">
+      <div style="background: #161E33; border: 1px solid #283350; border-radius: 10px; padding: 20px 22px;">
+        <div style="font-family: 'Bangers', sans-serif; font-size: 44px; color: #F0EADD; line-height: 1;">DISPLAY: BANGERS</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8892AE; margin-top: 10px;">@fontsource/bangers · 400 only</div>
+        <div style="font-size: 12px; color: #AEB6CC; margin-top: 6px;">Comic block lettering. Wordmark / display layer ONLY. latin-ext ships Ō (U+014C) — verified live above.</div>
+      </div>
+      <div style="background: #161E33; border: 1px solid #283350; border-radius: 10px; padding: 20px 22px;">
+        <div style="font-size: 30px; font-weight: 800; line-height: 1.2;">UI: Manrope</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8892AE; margin-top: 10px;">@fontsource/manrope · 400 500 600 700 800</div>
+        <div style="font-size: 12px; color: #AEB6CC; margin-top: 6px;">Clean grotesque, engineered counters, strong at data density. Distinct from Barlow, Archivo, Public Sans, Space Grotesk.</div>
+      </div>
+      <div style="background: #161E33; border: 1px solid #283350; border-radius: 10px; padding: 20px 22px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; line-height: 1.2;">MONO: JetBrains</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8892AE; margin-top: 10px;">@fontsource/jetbrains-mono · 400 700</div>
+        <div style="font-size: 12px; color: #AEB6CC; margin-top: 6px;">Timestamps, patch tags, replay IDs. Platform default retained — nothing serves the comic register better.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 · THE ORANGE COLLISION -->
+  <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 36px 44px;">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">02 · THE SF6 ORANGE COLLISION — <span style="color: #03A5FE;">RESOLVED WITH LEVER 1</span></div>
+    <div style="display: flex; gap: 40px; margin-top: 26px; align-items: flex-start;">
+      <div style="display: flex; gap: 18px;">
+        <div style="text-align: center;">
+          <div style="width: 120px; height: 120px; border-radius: 12px; background: #FF7D00;"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; margin-top: 10px;">#FF7D00</div>
+          <div style="font-size: 11px; color: #8892AE;">SF6 primary · hue 29°</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="width: 120px; height: 120px; border-radius: 12px; background: #FE6C0C;"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; margin-top: 10px;">#FE6C0C</div>
+          <div style="font-size: 11px; color: #8892AE;">Tōkon sampled · hue 24°</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; justify-content: center;">
+          <div style="display: flex; gap: 6px;"><div style="width: 22px; height: 22px; border-radius: 5px; background: #FF7D00;"></div><div style="width: 22px; height: 22px; border-radius: 5px; background: #FE6C0C;"></div></div>
+          <div style="display: flex; gap: 6px;"><div style="width: 14px; height: 14px; border-radius: 4px; background: #FF7D00;"></div><div style="width: 14px; height: 14px; border-radius: 4px; background: #FE6C0C;"></div></div>
+          <div style="font-size: 11px; color: #8892AE; max-width: 110px;">at chip size:<br>siblings.</div>
+        </div>
+      </div>
+      <div style="flex: 1; border-left: 1px solid #283350; padding-left: 40px;">
+        <div style="font-size: 15px; line-height: 1.65; color: #F0EADD; max-width: 640px;"><strong style="color: #03A5FE;">Blue takes primary.</strong> Δhue is 5.6° at near-identical saturation and lightness — the sampled orange is not "genuinely distinct" (lever 2 fails honestly), so primacy goes to SOULS blue <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">#03A5FE</span>. The orange survives verbatim as secondary/accent: hovers, highlights, the wordmark slash. Both sampled colors stay; two adjacent games no longer share a primary.</div>
+        <div style="display: flex; gap: 10px; margin-top: 22px; align-items: center;">
+          <sc-for list="{{ fourGames }}" as="g" hint-placeholder-count="5">
+            <div style="display: flex; align-items: center; gap: 8px; background: #161E33; border: 1px solid #283350; border-radius: 8px; padding: 7px 12px;">
+              <div style="{{ g.dot }}"></div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #AEB6CC;">{{ g.name }}</div>
+            </div>
+          </sc-for>
+          <div style="font-size: 11px; color: #8892AE;">← primaries across the shelf</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 · SEMANTIC TOKENS -->
+  <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 36px 44px;">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">03 · THE 21 SEMANTIC TOKENS — <span style="color: #FE6C0C;">tokens.css IS IN THE PROJECT, PASTE-READY</span></div>
+    <div style="font-size: 12px; color: #8892AE; margin-top: 10px;">Comic-print darks: cool ink-navy with a blue cast — four surface steps + two borders. Ratios are WCAG vs <span style="font-family: 'JetBrains Mono', monospace;">--color-surface</span>. Names inferred from platform convention; rename pass is trivial if the live schema differs.</div>
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 24px;">
+      <sc-for list="{{ tokens }}" as="t" hint-placeholder-count="21">
+        <div style="background: #161E33; border: 1px solid #283350; border-radius: 10px; padding: 10px;">
+          <div style="{{ t.sw }}"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 700; margin-top: 8px; color: #F0EADD;">{{ t.name }}</div>
+          <div style="display: flex; justify-content: space-between; margin-top: 3px;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #8892AE;">{{ t.hex }}</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #37E38A;">{{ t.ratio }}</div>
+          </div>
+          <div style="font-size: 10.5px; color: #AEB6CC; margin-top: 5px; line-height: 1.45;">{{ t.note }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- 04 · CHARACTER ACCENTS -->
+  <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 36px 44px;">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">04 · 20 FIGHTER ACCENTS — <span style="color: #03A5FE;">FIVE TEAM FAMILIES, ONE HUE EACH</span></div>
+    <div style="display: flex; flex-direction: column; gap: 18px; margin-top: 24px;">
+      <sc-for list="{{ teams }}" as="tm" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 18px; align-items: stretch;">
+          <div style="background: #161E33; border: 1px solid #283350; border-radius: 10px; padding: 16px 18px;">
+            <div style="font-weight: 800; font-size: 15px; color: #F0EADD;">{{ tm.name }}</div>
+            <div style="font-size: 11.5px; color: #8892AE; margin-top: 6px; line-height: 1.5;">{{ tm.band }}</div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+            <sc-for list="{{ tm.members }}" as="m" hint-placeholder-count="4">
+              <div style="background: #161E33; border: 1px solid #283350; border-radius: 10px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start;">
+                <div style="{{ m.chip }}">{{ m.code }}</div>
+                <div style="min-width: 0;">
+                  <div style="font-weight: 700; font-size: 13px; color: #F0EADD; white-space: nowrap;">{{ m.name }}<span style="color: #FE6C0C;">{{ m.lead }}</span></div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #8892AE; margin-top: 2px;">{{ m.varName }}</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; margin-top: 3px;"><span style="{{ m.hexStyle }}">{{ m.hex }}</span> <span style="color: #37E38A;">{{ m.ratio }}</span></div>
+                  <div style="font-size: 10.5px; color: #AEB6CC; margin-top: 4px; line-height: 1.4;">{{ m.anchor }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 22px;">
+      <div style="background: #161E33; border: 1px solid #283350; border-radius: 10px; padding: 18px 22px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #FE6C0C;">SEPARATION METHOD (BINDING FOR DLC)</div>
+        <div style="font-size: 12.5px; color: #AEB6CC; line-height: 1.7; margin-top: 10px;">1 — anchor on the canonical costume/VFX hue. 2 — snap chroma + lightness to the team's tone band. 3 — enforce ≥8–12° of hue vs every neighbor; where the roster makes that impossible, split by lightness (ΔL ≥ .12) or chroma, and document it. 4 — AA-check ≥4.5:1 on <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">--color-surface</span>.<br><br><strong style="color: #F0EADD;">Documented splits:</strong> the red arc was 7-deep, so Iron Man anchors on armor gold and Spider-Man on suit blue (both fully canonical); Carnage / danger / Star-Lord / Deadpool ladder the remaining reds at ≥10° apart. Ms. Marvel's pale gold sits 5° from Iron Man's — split by ΔL .26. Blade's katana steel is a chroma split from primary azure and Storm's silver.</div>
+      </div>
+      <div style="background: #161E33; border: 1px solid #283350; border-radius: 10px; padding: 18px 22px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #03A5FE;">WORKED EXAMPLE — YEAR-1 DLC №1</div>
+        <div style="display: flex; gap: 14px; align-items: center; margin-top: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 8px; background: #1D2740; border: 1px solid #FF9D5755; color: #FF9D57; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;">PX</div>
+          <div>
+            <div style="font-weight: 700; font-size: 14px;">Phoenix Cyclops</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8892AE;">--char-phoenix-cyclops: #FF9D57 · 7.4:1</div>
+          </div>
+        </div>
+        <div style="font-size: 12.5px; color: #AEB6CC; line-height: 1.7; margin-top: 12px;">Canonical anchor: phoenix ember. Step 2 → X-Men jewel band. Step 3: hue 25° collides with secondary orange (24°) — no free hue exists in the warm arc, so the documented fallback applies: lightness split, L .67 vs .52 (ΔL .15 ✓). Clears carnage by 13°, Ms. Marvel by 16°, Iron Man by ΔL .16. Step 4: 7.4:1 ✓.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 · BROWSE GRID AT REAL DENSITY -->
+  <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 36px 44px;">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">05 · BROWSE — <span style="color: #FE6C0C;">EIGHT BADGES PER CARD, REAL DENSITY</span></div>
+    <div style="margin-top: 24px; background: #0A0E17; border: 1px solid #283350; border-radius: 12px; overflow: hidden;">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 26px; border-bottom: 1px solid #283350; background: #101627;">
+        <div style="display: flex; align-items: center; gap: 34px;">
+          <div style="font-family: 'Bangers', sans-serif; font-size: 24px; letter-spacing: 0.02em;"><span style="color: #03A5FE;">TŌKON</span><span style="color: #FE6C0C;">/</span><span style="color: #F0EADD;">REPLAY</span></div>
+          <div style="display: flex; gap: 22px; font-size: 13.5px; font-weight: 600;">
+            <div style="color: #03A5FE; border-bottom: 2px solid #03A5FE; padding-bottom: 3px;">Browse</div>
+            <div style="color: #AEB6CC;">Stats</div>
+            <div style="color: #AEB6CC;">Fighters</div>
+            <div style="color: #AEB6CC;">Players</div>
+          </div>
+        </div>
+        <div style="background: #03A5FE; color: #06101B; font-weight: 800; font-size: 12.5px; border-radius: 7px; padding: 8px 16px;">Filters</div>
+      </div>
+      <div style="padding: 22px 26px 26px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 14px; color: #AEB6CC;">Browse <strong style="color: #F0EADD;">1,024</strong> competitive MARVEL Tōkon replays</div>
+          <div style="display: flex; gap: 8px;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #03A5FE; background: #1D2740; border: 1px solid #3A4A73; border-radius: 6px; padding: 5px 10px;">fighter: storm ✕</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #AEB6CC; background: #1D2740; border: 1px solid #283350; border-radius: 6px; padding: 5px 10px;">patch: 1.001</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #AEB6CC; background: #1D2740; border: 1px solid #283350; border-radius: 6px; padding: 5px 10px;">source: all</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px;">
+          <sc-for list="{{ cards }}" as="c" hint-placeholder-count="4">
+            <div style="background: #101627; border: 1px solid #283350; border-radius: 10px; padding: 16px 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <div style="font-weight: 700; font-size: 13px; color: #F0EADD;">{{ c.event }}</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #8892AE;">{{ c.date }}</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                <sc-for list="{{ c.sides }}" as="sd" hint-placeholder-count="2">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="display: flex; gap: 5px;">
+                      <sc-for list="{{ sd.badges }}" as="b" hint-placeholder-count="4">
+                        <div style="{{ b.chip }}">{{ b.code }}</div>
+                      </sc-for>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 700; color: #F0EADD; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ sd.player }}</div>
+                    <div style="{{ sd.wlStyle }}">{{ sd.wl }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display: flex; gap: 7px; margin-top: 12px; border-top: 1px solid #283350; padding-top: 10px;">
+                <sc-for list="{{ c.meta }}" as="mt" hint-placeholder-count="3">
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #8892AE; background: #161E33; border-radius: 5px; padding: 3px 8px;">{{ mt }}</div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ showAnnotations }}" hint-placeholder-val="{{ true }}">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #FE6C0C; margin-top: 16px;">▲ two runs of four, adjacent — every accent holds its own next to its neighbors and reads at 24 px. Layout is engine-fixed; only tokens changed.</div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 · CARD CLOSE-UP + CHIP-SIZE TORTURE TEST -->
+  <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px;">
+    <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 36px 40px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">06a · REPLAY CARD — CLOSE-UP</div>
+      <div style="background: #101627; border: 1px solid #3A4A73; border-radius: 12px; padding: 24px 26px; margin-top: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <div style="font-weight: 800; font-size: 17px;">Ignition Weekly #1 — Grand Final</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8892AE;">2026-08-08</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;">
+          <sc-for list="{{ heroSides }}" as="sd" hint-placeholder-count="2">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="display: flex; gap: 7px;">
+                <sc-for list="{{ sd.badges }}" as="b" hint-placeholder-count="4">
+                  <div style="{{ b.chip }}">{{ b.code }}</div>
+                </sc-for>
+              </div>
+              <div style="flex: 1;">
+                <div style="font-size: 16px; font-weight: 800;">{{ sd.player }}</div>
+                <div style="font-size: 11.5px; color: #8892AE;">{{ sd.teamNote }}</div>
+              </div>
+              <div style="{{ sd.wlStyle }}">{{ sd.wl }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 18px; border-top: 1px solid #283350; padding-top: 14px;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #06101B; background: #03A5FE; border-radius: 5px; padding: 4px 10px; font-weight: 700;">WATCH ▸</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8892AE; background: #161E33; border-radius: 5px; padding: 4px 10px;">4:12</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8892AE; background: #161E33; border-radius: 5px; padding: 4px 10px;">patch 1.001</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8892AE; background: #161E33; border-radius: 5px; padding: 4px 10px;">TKN-88F2-01</div>
+        </div>
+      </div>
+      <sc-if value="{{ showAnnotations }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size: 12px; color: #AEB6CC; margin-top: 16px; line-height: 1.6;">Badge = surface-high tile, accent ring at 33%, accent monogram. Win tag on <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #37E38A;">--color-win</span>, loss on <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #FF7A6E;">--color-loss</span> — loss is a softened scarlet so 50%-loss rows don't scream danger.</div>
+      </sc-if>
+    </div>
+    <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 36px 40px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">06b · SMALLEST-CHIP TEST — 4v4 RUNS</div>
+      <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 24px;">
+        <sc-for list="{{ scaleRows }}" as="row" hint-placeholder-count="3">
+          <div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #8892AE; margin-bottom: 8px;">{{ row.label }}</div>
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="display: flex; gap: 4px;">
+                <sc-for list="{{ row.left }}" as="b" hint-placeholder-count="4"><div style="{{ b.chip }}">{{ b.code }}</div></sc-for>
+              </div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #8892AE;">vs</div>
+              <div style="display: flex; gap: 4px;">
+                <sc-for list="{{ row.right }}" as="b" hint-placeholder-count="4"><div style="{{ b.chip }}">{{ b.code }}</div></sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="font-size: 12px; color: #AEB6CC; margin-top: 22px; line-height: 1.6;">Adjacent runs of four against <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">--color-surface</span>: every accent ≥4.5:1, worst neighbor pairs shown deliberately (red-arc ladder, gold ladder, teal ladder).</div>
+      <div style="display: flex; gap: 6px; margin-top: 16px; flex-wrap: wrap;">
+        <sc-for list="{{ allChips20 }}" as="b" hint-placeholder-count="20"><div style="{{ b.chip }}">{{ b.code }}</div></sc-for>
+      </div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #8892AE; margin-top: 8px;">full launch roster, one run</div>
+    </div>
+  </div>
+
+  <!-- 07 · STATS PAGE -->
+  <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 36px 44px;">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">07 · STATS — <span style="color: #03A5FE;">SAME ANATOMY, NEW INKS</span></div>
+    <div style="margin-top: 24px; background: #0A0E17; border: 1px solid #283350; border-radius: 12px; padding: 24px 28px;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+          <div style="background: #101627; border: 1px solid #283350; border-radius: 10px; padding: 16px 18px;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: #8892AE;">{{ k.label }}</div>
+            <div style="font-size: 30px; font-weight: 800; margin-top: 6px; color: #F0EADD;">{{ k.value }}<span style="font-size: 14px; font-weight: 600; color: #03A5FE;"> {{ k.suffix }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; margin-top: 24px;">
+        <div>
+          <div style="font-weight: 800; font-size: 15px;">Fighter usage — patch 1.001</div>
+          <div style="display: flex; flex-direction: column; gap: 9px; margin-top: 14px;">
+            <sc-for list="{{ bars }}" as="bar" hint-placeholder-count="8">
+              <div style="display: grid; grid-template-columns: 26px 130px 1fr 88px; gap: 12px; align-items: center;">
+                <div style="{{ bar.chip }}">{{ bar.code }}</div>
+                <div style="font-size: 13px; font-weight: 700; color: #F0EADD;">{{ bar.name }}</div>
+                <div style="height: 10px; background: #161E33; border-radius: 5px; overflow: hidden;"><div style="{{ bar.fill }}"></div></div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #AEB6CC; text-align: right;">{{ bar.pct }} · <span style="{{ bar.wrStyle }}">{{ bar.wr }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-weight: 800; font-size: 15px;">Team pick share</div>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+            <sc-for list="{{ teamShare }}" as="ts" hint-placeholder-count="5">
+              <div style="background: #101627; border: 1px solid #283350; border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="{{ ts.dot }}"></div>
+                  <div style="font-size: 12.5px; font-weight: 700;">{{ ts.name }}</div>
+                </div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #AEB6CC;">{{ ts.pct }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size: 11.5px; color: #8892AE; margin-top: 12px; line-height: 1.55;">Team dots use the leader's accent — the family read: a full canonical team looks related in a row without collapsing into one color.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 08 · OG CARD + FAVICON -->
+  <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 28px;">
+    <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 36px 40px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">08a · OG CARD — 1200 × 630, SHOWN AT 50%</div>
+      <div style="width: 600px; height: 315px; margin-top: 22px; background: #0A0E17; border: 1px solid #3A4A73; border-radius: 8px; overflow: hidden; position: relative;">
+        <div style="position: absolute; top: 0; right: 0; bottom: 0; width: 12px; background: #FE6C0C;"></div>
+        <div style="position: absolute; top: 0; right: 12px; bottom: 0; width: 5px; background: #03A5FE;"></div>
+        <div style="padding: 44px 48px;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; color: #8892AE;">REPLAYDATABASE.COM</div>
+          <div style="font-family: 'Bangers', sans-serif; font-size: 74px; line-height: 0.95; margin-top: 14px;"><span style="color: #03A5FE;">TŌKON</span><span style="color: #FE6C0C;">/</span><span style="color: #F0EADD;">REPLAY</span></div>
+          <div style="font-size: 14px; font-weight: 600; color: #AEB6CC; margin-top: 12px;">4v4 tag-team replays — browse, filter, study.</div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-top: 26px;">
+            <div style="display: flex; gap: 4px;"><sc-for list="{{ ogLeft }}" as="b" hint-placeholder-count="4"><div style="{{ b.chip }}">{{ b.code }}</div></sc-for></div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #FE6C0C; font-weight: 700;">VS</div>
+            <div style="display: flex; gap: 4px;"><sc-for list="{{ ogRight }}" as="b" hint-placeholder-count="4"><div style="{{ b.chip }}">{{ b.code }}</div></sc-for></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #AEB6CC; margin-top: 16px; line-height: 1.6;">Direction: ink-navy field, wordmark lockup, one live 4v4 badge strip (rotates per shared page — a replay's real teams), orange/blue panel gutter on the right edge. Flat panels only; no character art, no official lockup.</div>
+    </div>
+    <div style="background: #101627; border: 1px solid #283350; border-radius: 14px; padding: 36px 40px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #8892AE;">08b · FAVICON — GEOMETRIC TILE</div>
+      <div style="display: flex; align-items: flex-end; gap: 22px; margin-top: 26px;">
+        <div style="width: 96px; height: 96px; border-radius: 20px; background: linear-gradient(135deg, #03A5FE 0%, #03A5FE 46%, #F0EADD 46%, #F0EADD 54%, #FE6C0C 54%);"></div>
+        <div style="width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #03A5FE 0%, #03A5FE 46%, #F0EADD 46%, #F0EADD 54%, #FE6C0C 54%);"></div>
+        <div style="width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #03A5FE 0%, #03A5FE 44%, #F0EADD 44%, #F0EADD 56%, #FE6C0C 56%);"></div>
+        <div style="width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #03A5FE 0%, #03A5FE 44%, #F0EADD 44%, #F0EADD 56%, #FE6C0C 56%);"></div>
+      </div>
+      <div style="font-size: 12px; color: #AEB6CC; margin-top: 20px; line-height: 1.6;">The split-panel tile: SOULS blue over FIGHTING orange across a cream comic-panel gutter — same geometric family as the other games' tiles, readable at 16 px. Hard-stop diagonal only; no dots, no texture.</div>
+      <div style="display: flex; gap: 8px; margin-top: 18px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #06101B; background: #03A5FE; border-radius: 5px; padding: 4px 10px; font-weight: 700;">theme-color #03A5FE</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8892AE; background: #161E33; border-radius: 5px; padding: 4px 10px;">og-default.png per pattern</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size: 11.5px; color: #8892AE; line-height: 1.6; padding: 0 6px;">Fan project — not affiliated with or endorsed by Marvel Games, Arc System Works, or Sony Interactive Entertainment. MARVEL Tōkon: Fighting Souls and all character names are trademarks of their respective owners; used for identification only. No logos, lockups, or character art are reproduced — type and color evocation only, per the shell's existing disclaimer pattern. · <span style="font-family: 'JetBrains Mono', monospace;">tokens.css</span> ships alongside this spec, paste-ready.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showAnnotations&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Spec&quot;}}">
+class Component extends DCLogic {
+  state = { o: null };
+  componentDidMount() {
+    const probe = () => {
+      try {
+        const ok = document.fonts.check("64px Bangers", "\u014C");
+        this.setState({ o: ok });
+      } catch (e) { this.setState({ o: false }); }
+    };
+    document.fonts.load("64px Bangers", "T\u014CKON").then(probe).catch(probe);
+  }
+  renderVals() {
+    const HIGH = "#1D2740", MONO = "'JetBrains Mono', monospace";
+    const chip = (hex, s, f) => ({ width: s, height: s, borderRadius: Math.max(4, Math.round(s * 0.23)), background: HIGH, border: "1px solid " + hex + "55", color: hex, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: MONO, fontSize: f, fontWeight: 700, flex: "none", boxSizing: "border-box" });
+    const C = {
+      CA: ["Captain America", "#5B8DEF"], IM: ["Iron Man", "#E6961C"], HK: ["Hulk", "#46CF52"], BP: ["Black Panther", "#9267F5"],
+      SM: ["Spider-Man", "#5F7CFF"], MM: ["Ms. Marvel", "#FFD98A"], SL: ["Star-Lord", "#F4586A"], PP: ["Peni Parker", "#F45FA8"],
+      ST: ["Storm", "#BFD9E8"], MG: ["Magik", "#B650F2"], WV: ["Wolverine", "#FFD23B"], DG: ["Danger", "#2ED2C8"],
+      DD: ["Doctor Doom", "#23C29E"], MN: ["Magneto", "#D355DB"], GG: ["Green Goblin", "#AFD32C"], CN: ["Carnage", "#E8502B"],
+      GR: ["Ghost Rider", "#7B7BFF"], BL: ["Blade", "#6FA4B8"], LK: ["Loki", "#1FB47D"], DP: ["Deadpool", "#DE4E79"],
+    };
+    const mk = (codes, s, f) => codes.map(c => ({ code: c, chip: chip(C[c][1], s, f) }));
+    const sw = hex => ({ height: 40, borderRadius: 6, background: hex, border: "1px solid #3A4A73" });
+    const o = this.state.o;
+    const ratios = { CA: "5.6", IM: "7.5", HK: "8.8", BP: "4.7", SM: "5.0", MM: "13.3", SL: "5.5", PP: "6.0", ST: "12.3", MG: "4.7", WV: "12.5", DG: "9.6", DD: "8.0", MN: "5.2", GG: "10.4", CN: "4.8", GR: "5.3", BL: "6.6", LK: "6.8", DP: "4.7" };
+    const anchors = { CA: "shield steel-blue", IM: "armor gold — red arc ceded; gold faceplate is the read", HK: "gamma green", BP: "Shuri's vibranium violet glow", SM: "suit blue — the red arc was 5-deep; blue is equally canonical", MM: "lightning-bolt pale gold · ΔL .26 from Iron Man", SL: "jacket rose-red", PP: "SP//dr pink", ST: "storm-silver — chroma split from primary azure", MG: "Soulsword sorcery violet", WV: "classic suit yellow", DG: "Shi'ar chrome teal (slug --char-danger-x)", DD: "Latverian viridian", MN: "helmet magenta-violet", GG: "goblin acid — duller + darker than Drive-green", CN: "symbiote blood red-orange · 12° from secondary", GR: "Robbie Reyes hellfire indigo — comics-canon blue flame", BL: "tempered katana steel — chroma split", LK: "deep Asgardian emerald · ΔL from success", DP: "merc rose-wine · 11° from Star-Lord and Peni" };
+    const slug = { CA: "captain-america", IM: "iron-man", HK: "hulk", BP: "black-panther", SM: "spider-man", MM: "ms-marvel", SL: "star-lord", PP: "peni-parker", ST: "storm", MG: "magik", WV: "wolverine", DG: "danger-x", DD: "doctor-doom", MN: "magneto", GG: "green-goblin", CN: "carnage", GR: "ghost-rider", BL: "blade", LK: "loki", DP: "deadpool" };
+    const member = (c, lead) => ({ code: c, name: C[c][0], lead: lead ? " ★" : "", hex: C[c][1], hexStyle: { color: C[c][1] }, ratio: ratios[c] + ":1", anchor: anchors[c], varName: "--char-" + slug[c], chip: chip(C[c][1], 40, 12) });
+    const side = (player, codes, wl, note) => ({ player, teamNote: note || "", wl, badges: mk(codes, 26, 9.5), wlStyle: { fontFamily: MONO, fontSize: 11, fontWeight: 700, borderRadius: 5, padding: "3px 9px", flex: "none", color: wl === "W" ? "#06101B" : "#F0EADD", background: wl === "W" ? "#37E38A" : "transparent", border: wl === "W" ? "1px solid #37E38A" : "1px solid #FF7A6E55", ...(wl === "L" ? { color: "#FF7A6E" } : {}) } });
+    return {
+      showAnnotations: this.props.showAnnotations ?? true,
+      oCheckLabel: o === null ? "checking Ō…" : o ? "Ō U+014C RENDERS IN BANGERS — PASS" : "Ō FALLBACK REQUIRED — O + COMBINING MACRON",
+      oChipStyle: { fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: "0.08em", padding: "5px 12px", borderRadius: 6, color: o === false ? "#FFEE8C" : "#37E38A", border: "1px solid " + (o === false ? "#FFEE8C55" : "#37E38A55"), background: "#161E33" },
+      sampled: [
+        { hex: "#FE6C0C", label: "FIGHTING block", sw: { ...sw("#FE6C0C"), width: 34, height: 34 } },
+        { hex: "#03A5FE", label: "SOULS block", sw: { ...sw("#03A5FE"), width: 34, height: 34 } },
+        { hex: "#EC1D24", label: "MARVEL badge", sw: { ...sw("#EC1D24"), width: 34, height: 34 } },
+        { hex: "#414336", label: "sumi-ink brush", sw: { ...sw("#414336"), width: 34, height: 34 } },
+        { hex: "#EAE2D5", label: "paper cream", sw: { ...sw("#EAE2D5"), width: 34, height: 34 } },
+      ],
+      fourGames: [
+        { name: "2XKO #FF2E88", dot: { width: 16, height: 16, borderRadius: 4, background: "#FF2E88" } },
+        { name: "TEKKEN #E13048", dot: { width: 16, height: 16, borderRadius: 4, background: "#E13048" } },
+        { name: "SF6 #FF7D00", dot: { width: 16, height: 16, borderRadius: 4, background: "#FF7D00" } },
+        { name: "TŌKON #03A5FE", dot: { width: 16, height: 16, borderRadius: 4, background: "#03A5FE" } },
+        { name: "SHELL #17CFC8", dot: { width: 16, height: 16, borderRadius: 4, background: "#17CFC8" } },
+      ],
+      tokens: [
+        ["bg", "#0A0E17", "—", "deepest ink-navy, blue cast"], ["surface", "#101627", "—", "card panel · AA reference"], ["surface-raised", "#161E33", "—", "hover / raised"], ["surface-high", "#1D2740", "—", "chips, inputs"], ["border", "#283350", "—", "panel gutter"], ["border-strong", "#3A4A73", "—", "emphasized rules"],
+        ["text", "#F0EADD", "15.0:1", "newsprint cream, from paper"], ["text-muted", "#AEB6CC", "8.9:1", "secondary copy"], ["text-faint", "#8892AE", "5.8:1", "meta, timestamps"],
+        ["primary", "#03A5FE", "6.7:1", "SOULS blue — sampled"], ["primary-contrast", "#06101B", "7.1:1*", "*on primary"], ["primary-hover", "#3FBAFF", "8.3:1", "hover lift"],
+        ["secondary", "#FE6C0C", "6.3:1", "FIGHTING orange — sampled"], ["secondary-contrast", "#1C0F06", "6.6:1*", "*on secondary"],
+        ["danger", "#FF4B42", "5.4:1", "scarlet, 11° off Tekken crimson"], ["warning", "#FFEE8C", "15.3:1", "pale lemon — 27° off orange"], ["success", "#37E38A", "10.7:1", "emerald, 59° off Drive-green"], ["info", "#C9D4D6", "11.9:1", "steel silver, from TŌKON letters"],
+        ["win", "#37E38A", "10.7:1", "W marker"], ["loss", "#FF7A6E", "6.9:1", "L marker, softened"], ["focus", "#58C5FF", "9.3:1", "focus ring"],
+      ].map(t => ({ name: "--color-" + t[0], hex: t[1], ratio: t[2], note: t[3], sw: sw(t[1]) })),
+      teams: [
+        { name: "Fighting Avengers", band: "Flagship band — saturated, mid-bright heroic inks.", members: [member("CA", 1), member("IM"), member("HK"), member("BP")] },
+        { name: "Amazing Guardians", band: "Pop band — brightest lightness, Saturday-morning energy.", members: [member("SM", 1), member("MM"), member("SL"), member("PP")] },
+        { name: "Unbreakable X-Men", band: "Jewel band — high chroma, gem-toned.", members: [member("ST", 1), member("MG"), member("WV"), member("DG")] },
+        { name: "Knights of Doom", band: "Acid-regal band — as deep as AA allows, venomous chroma.", members: [member("DD", 1), member("MN"), member("GG"), member("CN")] },
+        { name: "Samurai Outriders", band: "Neon-edge band — cool-shifted glows, night-ride vivids.", members: [member("GR", 1), member("BL"), member("LK"), member("DP")] },
+      ],
+      cards: [
+        { event: "Ignition Weekly #1 — Grand Final", date: "2026-08-08", sides: [side("SoulNagare", ["ST", "MG", "DD", "GR"], "W"), side("PKS | Mercury", ["SM", "MM", "CA", "HK"], "L")], meta: ["4:12", "patch 1.001", "youtube", "TKN-88F2-01"] },
+        { event: "Ranked — Vibranium tier", date: "2026-08-08", sides: [side("WBK | Tatsu", ["WV", "DG", "PP", "CN"], "W"), side("EightFold", ["DD", "MN", "LK", "BL"], "L")], meta: ["6:03", "patch 1.001", "in-game", "TKN-91A4-77"] },
+        { event: "Launch Cup NA — Top 8", date: "2026-08-07", sides: [side("Kaminari", ["IM", "SL", "GG", "DP"], "L"), side("HALO | Vesper", ["CA", "BP", "ST", "WV"], "W")], meta: ["3:47", "patch 1.000", "twitch", "TKN-42C9-05"] },
+        { event: "Casual — Lobby 4F", date: "2026-08-07", sides: [side("Mixup Oracle", ["MM", "PP", "DG", "MN"], "W"), side("SoulNagare", ["ST", "MG", "DD", "GR"], "L")], meta: ["5:28", "patch 1.000", "in-game", "TKN-13B0-88"] },
+      ],
+      heroSides: [
+        { ...side("SoulNagare", [], "W"), badges: mk(["ST", "MG", "DD", "GR"], 40, 12), teamNote: "Storm · Magik · Doctor Doom · Ghost Rider" },
+        { ...side("PKS | Mercury", [], "L"), badges: mk(["SM", "MM", "CA", "HK"], 40, 12), teamNote: "Spider-Man · Ms. Marvel · Captain America · Hulk" },
+      ],
+      scaleRows: [
+        { label: "34 px — fighter pages", left: mk(["IM", "MM", "WV", "CN"], 34, 11), right: mk(["SL", "DP", "PP", "MN"], 34, 11) },
+        { label: "26 px — browse cards (default)", left: mk(["IM", "MM", "WV", "CN"], 26, 9.5), right: mk(["SL", "DP", "PP", "MN"], 26, 9.5) },
+        { label: "20 px — dense tables (smallest)", left: mk(["IM", "MM", "WV", "CN"], 20, 7.5), right: mk(["SL", "DP", "PP", "MN"], 20, 7.5) },
+      ],
+      allChips20: mk(["CA", "IM", "HK", "BP", "SM", "MM", "SL", "PP", "ST", "MG", "WV", "DG", "DD", "MN", "GG", "CN", "GR", "BL", "LK", "DP"], 26, 9.5),
+      kpis: [
+        { label: "REPLAYS", value: "1,024", suffix: "" }, { label: "FIGHTERS", value: "20", suffix: "of 20" }, { label: "AVG MATCH", value: "4:37", suffix: "" }, { label: "CURRENT PATCH", value: "1.001", suffix: "day-one" },
+      ],
+      bars: [
+        ["ST", "34%", "52%"], ["WV", "31%", "49%"], ["SM", "29%", "51%"], ["DD", "26%", "54%"], ["MM", "24%", "47%"], ["GR", "21%", "50%"], ["MG", "19%", "53%"], ["CA", "18%", "46%"],
+      ].map(b => ({ code: b[0], name: C[b[0]][0], pct: b[1], wr: b[2] + " WR", chip: chip(C[b[0]][1], 26, 9.5), wrStyle: { color: parseInt(b[2]) >= 50 ? "#37E38A" : "#FF7A6E" }, fill: { width: b[1], height: "100%", background: C[b[0]][1], borderRadius: 5 } })),
+      teamShare: [
+        ["Unbreakable X-Men", "26%", "#BFD9E8"], ["Amazing Guardians", "23%", "#5F7CFF"], ["Knights of Doom", "20%", "#23C29E"], ["Fighting Avengers", "17%", "#5B8DEF"], ["Samurai Outriders", "14%", "#7B7BFF"],
+      ].map(t => ({ name: t[0], pct: t[1], dot: { width: 14, height: 14, borderRadius: 4, background: t[2] } })),
+      ogLeft: mk(["ST", "MG", "DD", "GR"], 24, 8.5),
+      ogRight: mk(["SM", "MM", "CA", "HK"], 24, 8.5),
+    };
+  }
+}
+</script>
+</body>
+</html>
