@@ -1,0 +1,23 @@
+.env
+node_modules
+raw/
+
+# Nuxt / build artifacts
+.nuxt
+.output
+.vercel
+.data
+dist
+public/data/
+cache/
+
+# Local credentials — yt-dlp YouTube session cookies (scripts/hud-frames.ts,
+# TOKON_COOKIES to override). A live Google session; must never be committed.
+secrets/
+
+# Local agent config
+.claude/
+
+# tesseract.js drops its language model in the working directory on first run
+# (scripts/hud-read.ts). 5 MB of regenerable binary.
+*.traineddata

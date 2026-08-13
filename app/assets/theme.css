@@ -1,0 +1,126 @@
+/* ==========================================================================
+   MARVEL Tōkon: Fighting Souls — the skin.
+
+   Transcribed from design/handoff/tokens.css, which is the design system's
+   source of truth. Only the ENGINE'S semantic tokens live here; the 21
+   --char-* fighter accents are NOT in this file — they go to app.config.ts
+   `accents`, which the engine injects as --accent-<id> (app/plugins/accents.ts),
+   and scripts/characters.ts reads the same handoff block so the two cannot
+   drift.
+
+   THE CONTRACT (STACK §5.13, engine README "Theming"):
+   this MUST be a plain, UNLAYERED :root block — never @theme. An app
+   stylesheet does not pass through the engine's Tailwind root compile, so an
+   @theme block ships raw, the browser drops it as an unknown at-rule, and
+   production silently wears the umbrella defaults. `nuxt dev` compiles each
+   CSS file on its own and masks it exactly. Unlayered :root beats the
+   engine's @layer theme in every build mode because app CSS loads after it.
+   Gated by scripts/verify-override.mjs on the built bundle, both directions.
+
+   @fontsource specifiers are EXTENSIONLESS on purpose: the packages are not
+   uniform about their ./*.css exports, and the extension form is what broke
+   SF6's display face.
+
+   TRANSCRIPTION NOTE — the handoff's own header says its semantic names were
+   inferred ("source folder unreadable this session"). Reconciled against the
+   engine's 18 shadowable --color-* here:
+     · 15 tokens map 1:1 and are verbatim.
+     · 3 tokens the engine wants were absent and are DERIVED below, each on
+       the handoff's own ramp using the engine default theme's own step ratio.
+     · 6 tokens the handoff declares have no engine consumer; they are parked
+       at the bottom as comments so the design intent survives without
+       shipping dead custom properties.
+   Every ratio the handoff claimed was re-measured and all 10 matched to
+   0.02. The reference background for accent AA is --color-surface #101627.
+   ========================================================================== */
+
+@import '@fontsource/bangers/400';
+@import '@fontsource/manrope/400';
+@import '@fontsource/manrope/500';
+@import '@fontsource/manrope/600';
+@import '@fontsource/manrope/700';
+@import '@fontsource/manrope/800';
+@import '@fontsource/jetbrains-mono/400';
+@import '@fontsource/jetbrains-mono/700';
+
+:root {
+  /* Type. Bangers is display-only comic block lettering — its latin-ext
+     subset carries Ō (U+014C), which the wordmark "TŌKON / REPLAY" depends
+     on. That is asserted in e2e, not assumed: a latin-only subset renders
+     tofu in production and nowhere else. */
+  --font-display: 'Bangers', 'Arial Black', sans-serif;
+  --font-ui: 'Manrope', 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Surfaces — comic-print darks, cool ink-navy with a blue cast (against
+     Tekken's neutral carbon and SF6's warm asphalt). */
+  --color-bg: #0a0e17; /* page — deepest ink-navy */
+  --color-surface: #101627; /* card panel — THE accent AA reference; do not move */
+  --color-surface-raised: #161e33; /* hover / raised panel */
+  --color-surface-sunken: #070a11; /* DERIVED: inset tracks, inputs, wells. The
+                                      handoff's ramp only climbs (bg → surface →
+                                      raised → high) and never defines the step
+                                      BELOW bg. Engine default steps bg #0a0b0f →
+                                      sunken #07080b, a mean factor of 0.720;
+                                      applied to #0a0e17 that gives #070a11,
+                                      which keeps the blue cast instead of
+                                      collapsing toward neutral black. */
+
+  /* Borders */
+  --color-border: #283350; /* hairline panel gutter */
+  --color-border-subtle: #1c2438; /* DERIVED: the engine's quieter rule. Engine
+                                     steps border #2a3040 → subtle #1e222c, a mean
+                                     factor of 0.703; applied to #283350 that
+                                     gives #1c2438 — which lands just above
+                                     surface-raised, the same relationship the
+                                     engine default holds. */
+
+  /* Text ramp — four tiers. */
+  --color-text: #f0eadd; /* newsprint cream, from the sampled paper #eae2d5 · 15.02:1 */
+  --color-text-secondary: #c0c4d1; /* DERIVED: the engine places text-secondary
+                                      27.6% of the way from text-muted toward
+                                      text (#8b93a8 → #a8aebe → #f4f5f8). The
+                                      same fraction on Tōkon's ramp
+                                      (#aeb6cc → #f0eadd) gives #c0c4d1 · 10.34:1 */
+  --color-text-muted: #aeb6cc; /* secondary copy, cool steel · 8.89:1 */
+  --color-text-faint: #8892ae; /* meta / timestamps · 5.81:1 */
+
+  /* Brand. The SF6 collision was resolved by the handoff with lever 1: the
+     sampled FIGHTING orange #fe6c0c sits 5.6° from SF6's primary #ff7d00 at
+     near-identical saturation, so at chip size on the selector shelf they read
+     as siblings. Primacy therefore goes to SOULS blue; the orange survives
+     verbatim as secondary. Both wordmark colours stay in the skin. */
+  --color-primary: #03a5fe; /* SOULS blue · 6.70:1 */
+  --color-primary-hover: #3fbaff; /* hover / active lift · 8.30:1 */
+  --color-primary-contrast: #06101b; /* ink-navy ON primary · 7.12:1 */
+  --color-secondary: #fe6c0c; /* FIGHTING orange · 6.32:1 */
+  --color-focus: #58c5ff; /* focus ring azure · 9.30:1 */
+
+  /* Status */
+  --color-danger: #ff4b42; /* scarlet, 11° orange-side of Tekken crimson · 5.43:1 */
+  --color-warning: #ffee8c; /* pale caution lemon, 27° + large ΔL from secondary · 15.32:1 */
+  --color-success: #37e38a; /* emerald, 59° from SF6 drive-green, 28° from umbrella teal · 10.73:1 */
+}
+
+/* --------------------------------------------------------------------------
+   NOT CONSUMED BY THE ENGINE — design intent preserved.
+
+   The handoff declares these six; the engine has no semantic slot for any of
+   them, and inventing one would mean either a token knob (the README says
+   prefer a single-component override) or six dead custom properties in every
+   page's CSS. They are kept here, commented, so a future component override
+   can adopt them without re-deriving the palette:
+
+     --color-surface-high:       #1d2740   4th surface step, above raised
+     --color-border-strong:      #3a4a73   emphasized rules / focus adjacency
+     --color-secondary-contrast: #1c0f06   ink ON secondary · 6.57:1
+     --color-info:               #c9d4d6   steel silver, from the TŌKON letterforms
+     --color-win:                #37e38a   W marker (same value as success)
+     --color-loss:               #ff7a6e   L marker — softened scarlet, deliberately
+                                           calmer than danger so a 50%-loss column
+                                           of rows does not read as an error state
+
+   Reported upstream: the handoff should be regenerated against the engine's
+   real token list. Six declared with no consumer, three consumed tokens never
+   specified — a process gap in the brief, not in this game.
+   -------------------------------------------------------------------------- */

@@ -1,0 +1,337 @@
+// Pipeline-track types (plain node/tsx code — never enters the Nuxt graph, so
+// the engine contract is restated where emitted shapes must mirror it, exactly
+// like the SF6, Tekken and 2XKO pipelines do).
+
+/** The Replay.source contract: doubles as GameConfig.sourceChannels[].id
+ *  (badge/filter). Five channels, currently 1:1 with ChannelKey — the two
+ *  types stay distinct anyway, because SF6 learned the hard way that they stop
+ *  being 1:1 the moment one physical channel starts publishing two kinds of
+ *  footage, and retrofitting the split is worse than carrying it. */
+export type SourceId =
+  'highLevelReplays' | 'proReplays' | 'hadoukenReplays' | 'replaysHub' | 'fightingStationX';
+
+/** Per-YouTube-channel intake key: names raw/<key>.json and the coverage
+ *  report's rows. THE DEDUPE KEY (checklist step 2) — never the SourceId, which
+ *  two channels may one day deliberately share. */
+export type ChannelKey = SourceId;
+
+/** How a channel's descriptions state the bench, when they do at all. Measured
+ *  per channel on the launch corpus; see scripts/bench.ts.
+ *   'prose-comma'  proReplays       "HANDLE (Magik, Doctor Doom, Blade, Black Panther) vs …"
+ *                                   (also hyphen-separated: "(Ghost Rider- Storm- Magik)")
+ *   'prose-and'    highLevelReplays "match: Wawa (Magik, Storm, Spider-Man and Blade) versus …"
+ *   'player-lines' replaysHub       "Player 1: HANDLE (Char)" — ONE per side, no bench.
+ *                                   Parsed for handle CASING only, never as a bench.
+ *  Absent  ⇒ the description is boilerplate and is not read at all. */
+export type DescriptionBench = 'prose-comma' | 'prose-and' | 'player-lines';
+
+export interface ChannelConfig {
+  /** Raw-dump key / report row (unique per YouTube channel). */
+  id: ChannelKey;
+  /** The source this channel's replays publish under. */
+  source: SourceId;
+  /** Display name (mirrors app/app.config.ts sourceChannels[].name). */
+  name: string;
+  /** YouTube channel id. */
+  channelId: string;
+  /** The channel's uploads playlist (UU + channelId.slice(2), pinned — saves a
+   *  quota unit per channel per run, and the id is stable where a handle is not). */
+  uploadsPlaylist: string;
+  /** Where the is-Tōkon game marker may appear. Default 'title'. Only
+   *  fightingStationX needs the widened gate: it is a general FGC channel whose
+   *  Tōkon uploads are a minority and whose titles are inconsistent. */
+  tokonSignal?: 'title' | 'titleOrDescription';
+  /** The prose shape of this channel's descriptions, if it states characters. */
+  descriptionBench?: DescriptionBench;
+  /** A channel that stopped publishing this game. Its committed records are
+   *  still real and still play at their URLs, so they are CARRIED FORWARD
+   *  byte-stable rather than pruned; fetch skips it entirely. `records` is a
+   *  hard-asserted pin — the committed data file is both the source and the
+   *  target of the carry, so one bad run would poison the next run's reference
+   *  permanently and silently. Editing the pin IS the deliberate-prune
+   *  mechanism, and it shows up in review. (Checklist step 7.) */
+  frozen?: { since: string; reason: string; records: number };
+}
+
+/** One upload as fetched from the YouTube Data API (raw/<key>.json). */
+export interface RawVideoRecord {
+  id: string;
+  /** Intake channel, NOT the source — parse maps it via CHANNELS. */
+  channel: ChannelKey;
+  title: string;
+  description: string;
+  publishedAt: string; // ISO
+  /** ISO8601 duration decoded to seconds; 0 = live/upcoming/unknown. */
+  durationSec: number;
+  viewCount?: number;
+  /** 'none' for normal VODs; 'live'/'upcoming' are excluded by parse. */
+  liveBroadcastContent: string;
+  tags?: string[];
+}
+
+/** Which stage produced a side's characters. Ordered weakest → strongest. */
+export type CharTier = 'title' | 'description' | 'footage' | 'review';
+
+/** How the description's two sides were matched to the title's two sides.
+ *  NEVER positional: hadoukenReplays reverses its second title slot on 27 of 34
+ *  uploads, so assuming the description follows title order would compound one
+ *  order error with another. */
+export type DescAlign = 'handle' | 'character-subset' | 'ambiguous' | 'none';
+
+/** Which order a title's side segment used. Telemetry, not control flow — the
+ *  parser extracts the paren wherever it sits and takes the remainder as the
+ *  handle, so it never has to CHOOSE an order. Recorded so a channel changing
+ *  its grammar shows up as a shift in the mix instead of as silence. */
+export type SlotOrder = 'handle-first' | 'chars-first';
+
+/**
+ * Per-side character provenance — the answer to "how did this record get its
+ * characters", recorded at the moment it is decided.
+ *
+ * Tōkon sources characters from three tiers (titles carry 1–2 of 4;
+ * descriptions carry the full bench on ~30% of the corpus; footage completes
+ * the rest), so without this the question is unanswerable after the fact and a
+ * regression in one tier is invisible.
+ *
+ * SUBSTRATE ONLY. The engine's `Side` is { player, players?, characters, rank? }
+ * with no `extra` bag, and none should be made for this: the two-schema
+ * boundary — a rich pipeline substrate projected down to a narrow emitted
+ * contract — is what keeps the engine generic. scripts/emit.ts projects sides
+ * field-by-field rather than spreading, so provenance cannot leak into
+ * replays.json by construction; emit asserts that anyway.
+ */
+export interface CharProvenance {
+  /** The tier that produced the FINAL list (the strongest that contributed). */
+  tier: CharTier;
+  /** Every tier that contributed, in the order applied. */
+  tiers: CharTier[];
+  /** Ids the TITLE stated. Always present — the seed of every record. */
+  fromTitle: string[];
+  /** Ids the DESCRIPTION bench stated for this side, once aligned. */
+  fromDescription?: string[];
+  /** Ids read from FOOTAGE for this side. */
+  fromFootage?: string[];
+  /** How the description was aligned to THIS side. */
+  descAlign?: DescAlign;
+  /** Which slot order this side's title segment used. */
+  slotOrder?: SlotOrder;
+  /** Tiers disagreed — a title-stated id absent from the bench, or vice versa.
+   *  The union is kept (never silently drop what the title said) and the record
+   *  is queued for review. */
+  conflict?: boolean;
+  /** characters.length === 4, i.e. the side's bench is fully known. */
+  complete: boolean;
+  /** Extractor confidence, when tier === 'footage'. */
+  confidence?: number;
+}
+
+/** One parsed side: one pilot, and every character they fielded.
+ *
+ *  Tōkon is 4v4 tag, so a saturated side holds FOUR. It is a union of 1..N in
+ *  first-appearance order, not a fixed-length tuple:
+ *   · fewer than 4 is a partially-known bench — true, publishable data. Titles
+ *     alone give 1–2, and the bench fills in over time as the description and
+ *     footage tiers land. The engine renders 1..N natively.
+ *   · MORE than 4 is a mid-set team change. Legal data, counted in
+ *     characterUsage, and excluded from any future pairing surface with the
+ *     excluded count reported — naive C(n,2) over an oversize side fabricates
+ *     pairs that were never played, and fabrication poisons a synergy panel
+ *     silently while under-counting stays recoverable.
+ *   · ZERO is the only failure, and emit hard-fails on it. */
+export interface MatchSide {
+  /** Player id (slug of handle). */
+  player: string;
+  /** Display handle, nicest casing seen (descriptions beat ALL-CAPS titles). */
+  handle: string;
+  /** Roster character ids (data/characters.json), 1..N, first-appearance order. */
+  characters: string[];
+  /** How this side's characters were sourced. Substrate only — never emitted. */
+  provenance: CharProvenance;
+}
+
+/** The committed parse substrate (data/videos.json): only structurally parsed
+ *  matches enter it; misses are reported, not stored. */
+export interface MatchVideo {
+  id: string;
+  /** Resolved source (Replay.source), not the intake channel. */
+  channel: SourceId;
+  /** The INTAKE channel — the dedupe key (checklist step 2). Carried on the
+   *  record because channel priority and override protection are both keyed on
+   *  it, and a shared public token would break both silently. */
+  intake: ChannelKey;
+  title: string;
+  publishedAt: string;
+  durationSec: number;
+  viewCount?: number;
+  /** Balance era, resolved from the date boundaries. Season 1 opened at launch
+   *  and nothing else exists yet.
+   *
+   *  Unlike SF6 there IS a weak label signal here — highLevelReplays writes
+   *  "(Season 1)" into its descriptions — but the date remains the authority
+   *  and the label is only cross-checked, with disagreements counted in the
+   *  report. A label that contradicts the calendar is an uploader's typo, not
+   *  a boundary. */
+  season: number;
+  sides: [MatchSide, MatchSide];
+}
+
+/** data/players.json entry (mirrors the engine's Player). */
+export interface PlayerRecord {
+  id: string;
+  handle: string;
+  featured?: boolean;
+  extra?: { aliases?: string[] };
+}
+
+/** data/characters.json entry (mirrors the engine's Character). `aliases` is
+ *  the shared search/parse key — the app's search vocabulary and the parser's
+ *  vocabulary are the same data, which is why a new nickname only has to be
+ *  added once. */
+export interface CharacterRecord {
+  id: string;
+  name: string;
+  imgPortrait: string;
+  imgSplash?: string;
+  accent: string;
+  extra?: { aliases: string[]; [k: string]: unknown };
+}
+
+/** Per-video manual corrections (data/overrides.json). A hand verdict beats
+ *  every automatic tier. */
+export type VideoOverride = Partial<Pick<MatchVideo, 'season' | 'sides' | 'channel'>> & {
+  exclude?: boolean;
+  /** Who resolved this. 'extractor' marks a machine resolution, which only
+   *  happens at or above auto-accept AND on a decided side.
+   *
+   *  Load-bearing for dedupe: extraction-origin overrides confer NO dedupe
+   *  priority (only hand-authored ones protect a record), so the priority check
+   *  must test THIS field — not the mere presence of `sides`. Testing for
+   *  `sides` would make every extracted record beat every duplicate and
+   *  silently invert declared channel precedence. */
+  resolvedBy?: 'extractor' | 'human';
+  /** The extractor's confidence when it resolved this (0..1). */
+  confidence?: number;
+  /** Signed vote margin from reading the HUD to decide which side each handle
+   *  sat on. Recorded because attribution is the half of a footage-read record
+   *  that no character-confidence number covers: the characters can be perfect
+   *  while the players are swapped. Positive = the title's first-named player
+   *  was on the left. */
+  sideVotes?: number;
+};
+
+/** One pending item in data/review-queue.json — footage the pipeline refuses to
+ *  publish. REGENERATED by every parse run (derived state: resolutions live
+ *  solely in overrides.json, so the queue self-clears as verdicts land).
+ *  Pending items NEVER reach videos.json or replays.json.
+ *
+ *  Kinds:
+ *   'character-completion' — match-shaped footage whose characters no text states.
+ *   'bench-conflict'       — title and description disagree about a side.
+ *   'slot-ambiguous'       — a side segment carried 2+ parens, so which one names
+ *                            the characters is a guess. Never guessed. */
+export interface ReviewQueueItem {
+  id: string;
+  kind: 'character-completion' | 'bench-conflict' | 'slot-ambiguous';
+  channel: ChannelKey;
+  title: string;
+  publishedAt: string;
+  durationSec: number;
+  /** Handles the title DID state, canonicalised against players.json.
+   *  Pre-fills the review form so a reviewer answers only the characters — and,
+   *  more importantly, stops a verdict minting a second player page under a
+   *  different spelling of an existing player. */
+  handles?: [string, string];
+  /** For 'bench-conflict': what each tier claimed, so the reviewer sees the
+   *  disagreement rather than re-deriving it. */
+  conflict?: { side: 0 | 1; fromTitle: string[]; fromDescription: string[] };
+}
+
+/**
+ * One item in data/bench-queue.json — a record that IS published but whose
+ * bench is incomplete (fewer than 4 known on at least one side).
+ *
+ * WHY THIS IS A SEPARATE FILE FROM THE REVIEW QUEUE. The engine MUST is
+ * "pending items never reach replays.json — an unresolved item is absent from
+ * the site, not present-and-guessed." A side with 2 of 4 fighters is not a
+ * guess; it is true-but-incomplete data, which the contract explicitly blesses
+ * (`characters` is 1..N, emit hard-fails only on 0). Overloading the review
+ * queue with these would force one of two bad outcomes: hold ~70% of the corpus
+ * off the site, or break the "pending never ships" invariant on the very file
+ * that invariant is asserted against. So: review-queue = not publishable,
+ * bench-queue = published and improvable. The extractor's worklist is this one.
+ *
+ * (Reported upstream as a new-game-checklist gap — the checklist knows only one
+ * queue because it assumes titles-or-footage, with nothing in between.)
+ */
+export interface BenchQueueItem {
+  id: string;
+  channel: ChannelKey;
+  title: string;
+  publishedAt: string;
+  durationSec: number;
+  /** How many characters are known per side right now, e.g. [2, 4]. */
+  known: [number, number];
+  /** The tier that got each side to its current state. */
+  tiers: [CharTier, CharTier];
+}
+
+/** One balance era. Season 1 opened at launch; there is no second yet. */
+export interface SeasonBoundary {
+  season: number;
+  start: string; // ISO date, inclusive
+  end: string | null; // exclusive; null = open (current season)
+  confirmed: boolean;
+  note?: string;
+}
+
+/**
+ * One released Tōkon patch.
+ *
+ * THE VENDOR PUBLISHES NO VERSION STRING. Arc System Works / Sony ship
+ * date-titled posts on the Steam news hub — "Patch Update 8/10/2026" — and
+ * nothing else: no semver, no build id, no update-history page. The one
+ * version-shaped number in circulation (`1.002.002`) is a press report of a
+ * PS5 system build, never vendor-published, and is deliberately not used.
+ *
+ * So the token IS the date, ISO-normalised for URL and sort stability. The
+ * checklist's "never invent a version to fill a sequence gap" still holds and
+ * gets stricter here: with dates there is no sequence to feel obliged to fill,
+ * and `announcedOn` records where each row was found so an undocumented row is
+ * visible rather than plausible.
+ *
+ * (Reported upstream as a checklist gap: step 4 assumes a version grammar
+ * exists.)
+ */
+export interface PatchBoundary {
+  /** ISO date, e.g. '2026-08-10' — unique, and never an era token. */
+  version: string;
+  /** ISO release day, inclusive. Equals `version`; the validator asserts it. */
+  start: string;
+  /** Where the vendor announced it. An undocumented row cannot hide. */
+  announcedOn: 'steam' | 'x' | 'discord' | 'launch';
+  /** Builds shipped inside this window that the vendor did not post
+   *  separately, recorded so they are declared rather than silently absorbed. */
+  includes?: string[];
+  /** Short community-facing hint, surfaced beside the child in the dropdown. */
+  note?: string;
+}
+
+/** A patch plus its computed window and resolved era. */
+export interface PatchWindow extends PatchBoundary {
+  /** exclusive end: the next patch's start within the era, else the era's end,
+   *  else null (open). Computed, never authored. */
+  end: string | null;
+  season: number;
+}
+
+/** A time-bomb that has gone off: something the data can tell us is due, rather
+ *  than something a human has to remember. See scripts/expiries.ts. */
+export interface Expiry {
+  kind: 'unreleased-character' | 'unconfirmed-season' | 'stale-patch-table';
+  /** roster id, `S${n}` for a season row, or 'patch-table' */
+  id: string;
+  /** the ISO date that has now passed */
+  date: string;
+  /** what a human must do to clear it */
+  action: string;
+}

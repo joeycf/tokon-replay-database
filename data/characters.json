@@ -1,0 +1,310 @@
+[
+  {
+    "id": "captain-america",
+    "name": "Captain America",
+    "imgPortrait": "/img/characters/captain-america-portrait.webp",
+    "imgSplash": "/img/characters/captain-america-splash.webp",
+    "accent": "#5b8def",
+    "extra": {
+      "aliases": [
+        "captain america",
+        "captain-america",
+        "c. america",
+        "c america",
+        "cap america"
+      ],
+      "team": "Fighting Avengers",
+      "role": "Team leader"
+    }
+  },
+  {
+    "id": "iron-man",
+    "name": "Iron Man",
+    "imgPortrait": "/img/characters/iron-man-portrait.webp",
+    "imgSplash": "/img/characters/iron-man-splash.webp",
+    "accent": "#e6961c",
+    "extra": {
+      "aliases": [
+        "iron man",
+        "iron-man",
+        "ironman"
+      ],
+      "team": "Fighting Avengers"
+    }
+  },
+  {
+    "id": "hulk",
+    "name": "Hulk",
+    "imgPortrait": "/img/characters/hulk-portrait.webp",
+    "imgSplash": "/img/characters/hulk-splash.webp",
+    "accent": "#46cf52",
+    "extra": {
+      "aliases": [
+        "hulk"
+      ],
+      "team": "Fighting Avengers"
+    }
+  },
+  {
+    "id": "black-panther",
+    "name": "Black Panther",
+    "imgPortrait": "/img/characters/black-panther-portrait.webp",
+    "imgSplash": "/img/characters/black-panther-splash.webp",
+    "accent": "#9267f5",
+    "extra": {
+      "aliases": [
+        "black panther",
+        "black-panther",
+        "b. panther"
+      ],
+      "team": "Fighting Avengers"
+    }
+  },
+  {
+    "id": "spider-man",
+    "name": "Spider-Man",
+    "imgPortrait": "/img/characters/spider-man-portrait.webp",
+    "imgSplash": "/img/characters/spider-man-splash.webp",
+    "accent": "#5f7cff",
+    "extra": {
+      "aliases": [
+        "spider-man",
+        "spider man",
+        "spiderman",
+        "spidey",
+        "sipder man"
+      ],
+      "team": "Amazing Guardians",
+      "role": "Team leader"
+    }
+  },
+  {
+    "id": "ms-marvel",
+    "name": "Ms. Marvel",
+    "imgPortrait": "/img/characters/ms-marvel-portrait.webp",
+    "imgSplash": "/img/characters/ms-marvel-splash.webp",
+    "accent": "#ffd98a",
+    "extra": {
+      "aliases": [
+        "ms. marvel",
+        "ms marvel",
+        "ms.marvel"
+      ],
+      "team": "Amazing Guardians"
+    }
+  },
+  {
+    "id": "star-lord",
+    "name": "Star-Lord",
+    "imgPortrait": "/img/characters/star-lord-portrait.webp",
+    "imgSplash": "/img/characters/star-lord-splash.webp",
+    "accent": "#f4586a",
+    "extra": {
+      "aliases": [
+        "star-lord",
+        "star lord",
+        "starlord"
+      ],
+      "team": "Amazing Guardians"
+    }
+  },
+  {
+    "id": "peni-parker",
+    "name": "Peni Parker",
+    "imgPortrait": "/img/characters/peni-parker-portrait.webp",
+    "imgSplash": "/img/characters/peni-parker-splash.webp",
+    "accent": "#f45fa8",
+    "extra": {
+      "aliases": [
+        "peni parker",
+        "peni-parker",
+        "peni"
+      ],
+      "team": "Amazing Guardians"
+    }
+  },
+  {
+    "id": "storm",
+    "name": "Storm",
+    "imgPortrait": "/img/characters/storm-portrait.webp",
+    "imgSplash": "/img/characters/storm-splash.webp",
+    "accent": "#bfd9e8",
+    "extra": {
+      "aliases": [
+        "storm",
+        "strom"
+      ],
+      "team": "Unbreakable X-Men",
+      "role": "Team leader"
+    }
+  },
+  {
+    "id": "magik",
+    "name": "Magik",
+    "imgPortrait": "/img/characters/magik-portrait.webp",
+    "imgSplash": "/img/characters/magik-splash.webp",
+    "accent": "#b650f2",
+    "extra": {
+      "aliases": [
+        "magik"
+      ],
+      "team": "Unbreakable X-Men"
+    }
+  },
+  {
+    "id": "wolverine",
+    "name": "Wolverine",
+    "imgPortrait": "/img/characters/wolverine-portrait.webp",
+    "imgSplash": "/img/characters/wolverine-splash.webp",
+    "accent": "#ffd23b",
+    "extra": {
+      "aliases": [
+        "wolverine"
+      ],
+      "team": "Unbreakable X-Men"
+    }
+  },
+  {
+    "id": "danger",
+    "name": "Danger",
+    "imgPortrait": "/img/characters/danger-portrait.webp",
+    "imgSplash": "/img/characters/danger-splash.webp",
+    "accent": "#2ed2c8",
+    "extra": {
+      "aliases": [
+        "danger"
+      ],
+      "team": "Unbreakable X-Men"
+    }
+  },
+  {
+    "id": "doctor-doom",
+    "name": "Doctor Doom",
+    "imgPortrait": "/img/characters/doctor-doom-portrait.webp",
+    "imgSplash": "/img/characters/doctor-doom-splash.webp",
+    "accent": "#23c29e",
+    "extra": {
+      "aliases": [
+        "doctor doom",
+        "doctor-doom",
+        "dr. doom",
+        "dr doom",
+        "d. doom",
+        "doom"
+      ],
+      "team": "Knights of Doom",
+      "role": "Team leader"
+    }
+  },
+  {
+    "id": "magneto",
+    "name": "Magneto",
+    "imgPortrait": "/img/characters/magneto-portrait.webp",
+    "imgSplash": "/img/characters/magneto-splash.webp",
+    "accent": "#d355db",
+    "extra": {
+      "aliases": [
+        "magneto"
+      ],
+      "team": "Knights of Doom"
+    }
+  },
+  {
+    "id": "green-goblin",
+    "name": "Green Goblin",
+    "imgPortrait": "/img/characters/green-goblin-portrait.webp",
+    "imgSplash": "/img/characters/green-goblin-splash.webp",
+    "accent": "#afd32c",
+    "extra": {
+      "aliases": [
+        "green goblin",
+        "green-goblin",
+        "goblin"
+      ],
+      "team": "Knights of Doom"
+    }
+  },
+  {
+    "id": "carnage",
+    "name": "Carnage",
+    "imgPortrait": "/img/characters/carnage-portrait.webp",
+    "imgSplash": "/img/characters/carnage-splash.webp",
+    "accent": "#e8502b",
+    "extra": {
+      "aliases": [
+        "carnage"
+      ],
+      "team": "Knights of Doom"
+    }
+  },
+  {
+    "id": "ghost-rider",
+    "name": "Ghost Rider",
+    "imgPortrait": "/img/characters/ghost-rider-portrait.webp",
+    "imgSplash": "/img/characters/ghost-rider-splash.webp",
+    "accent": "#7b7bff",
+    "extra": {
+      "aliases": [
+        "ghost rider",
+        "ghost-rider",
+        "ghostrider"
+      ],
+      "team": "Samurai Outriders",
+      "role": "Team leader"
+    }
+  },
+  {
+    "id": "blade",
+    "name": "Blade",
+    "imgPortrait": "/img/characters/blade-portrait.webp",
+    "imgSplash": "/img/characters/blade-splash.webp",
+    "accent": "#6fa4b8",
+    "extra": {
+      "aliases": [
+        "blade"
+      ],
+      "team": "Samurai Outriders"
+    }
+  },
+  {
+    "id": "loki",
+    "name": "Loki",
+    "imgPortrait": "/img/characters/loki-portrait.webp",
+    "imgSplash": "/img/characters/loki-splash.webp",
+    "accent": "#1fb47d",
+    "extra": {
+      "aliases": [
+        "loki"
+      ],
+      "team": "Samurai Outriders"
+    }
+  },
+  {
+    "id": "deadpool",
+    "name": "Deadpool",
+    "imgPortrait": "/img/characters/deadpool-portrait.webp",
+    "imgSplash": "/img/characters/deadpool-splash.webp",
+    "accent": "#de4e79",
+    "extra": {
+      "aliases": [
+        "deadpool",
+        "dead pool"
+      ],
+      "team": "Samurai Outriders"
+    }
+  },
+  {
+    "id": "champion",
+    "name": "Champion",
+    "imgPortrait": "/img/characters/champion-portrait.webp",
+    "imgSplash": "/img/characters/champion-splash.webp",
+    "accent": "#ec51c9",
+    "extra": {
+      "aliases": [
+        "champion"
+      ],
+      "team": "Unaffiliated",
+      "availability": "Unlockable — clear Episode chapter 11"
+    }
+  }
+]
