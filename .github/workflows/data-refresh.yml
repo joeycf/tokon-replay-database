@@ -1,0 +1,95 @@
+name: Daily data refresh
+
+on:
+  schedule:
+    # 07:47 UTC daily (odd minute to dodge cron rush; the fourth stagger slot on
+    # the platform, after 2XKO's 06:17, Tekken's 06:47 and SF6's 07:17, so the
+    # four refreshes never contend)
+    - cron: '47 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # matches engines.node (the platform's Node policy — STACK.md §1)
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # fetch + parse + emit. Character art and the roster are NOT part of the
+      # daily run — scripts/characters.ts and scripts/art.ts only run when the
+      # roster changes, and scripts/complete-characters.ts (footage) never runs
+      # here at all: YouTube blocks datacenter IPs, so extraction is local-only
+      # and the cron simply carries the committed overrides forward.
+      - name: Rebuild data
+        run: npm run data:build
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+
+      - name: Commit if changed
+        run: |
+          git config user.name "tokon-data-refresh[bot]"
+          git config user.email "data-refresh@users.noreply.github.com"
+          # substrate + generic artifacts land in the same commit or the site's
+          # data desyncs from the pipeline substrate. patchGroups.json is
+          # included because the patch table is date-keyed and this vendor ships
+          # frequently, so a daily run can legitimately change it. summary.json
+          # is the apex selector's card payload; it is content-derived (newest
+          # replay date, never build time), so a no-new-video day leaves it
+          # byte-identical and the guard below still skips the commit.
+          # review-queue.json and bench-queue.json are parse-regenerated derived
+          # state — both are content-only with no timestamp, so a quiet day
+          # leaves them byte-identical too.
+          git add data/videos.json data/replays.json data/stats.json data/players.json data/patchGroups.json data/patchBoundaries.json data/summary.json data/seasonBoundaries.json data/review-queue.json data/bench-queue.json data/report.md
+          # report.md's "_Generated <timestamp>_" line changes every run; a diff
+          # that is ONLY that line is not a data change — drop it so a no-change
+          # day produces no commit (and no deploy). report.md still ships
+          # whenever anything real changes alongside it — including the day an
+          # "## ⚠ ACTION REQUIRED" block first appears, which is real content.
+          REAL=$(git diff --cached -- data/report.md | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' | { grep -vc '^[+-]_Generated ' || true; })
+          if [ "$REAL" -eq 0 ]; then
+            git restore --staged --worktree data/report.md
+          fi
+          if git diff --cached --quiet; then
+            echo "No data changes — skipping commit."
+            exit 0
+          fi
+          N=$(node -p "require('./data/replays.json').length")
+          git commit -m "data: refresh $(date -u +%F) — ${N} replays"
+          git push
+
+      # Deploy is Vercel's git integration off the push above — there is no
+      # deploy step here to run "after", so this polls until production serves
+      # the count we just committed. A build still in flight is a WARNING (it
+      # serves yesterday's payload, a handful of records behind); a served count
+      # outside the collapse guard's own band is a FAILURE. The guard in
+      # parse.ts protects the repository; this protects what visitors get.
+      #
+      # Deliberately BEFORE "Flag due expiries": that step is designed to go red,
+      # and a red step stops the ones after it.
+      - name: Post-deploy smoke check
+        run: npm run verify:deployed
+
+      - name: Flag due expiries
+        # Deliberately LAST and deliberately failing (scripts/expiries.ts).
+        # The data has already been committed and pushed by the step above, so
+        # a red run never costs a refresh — it only makes the pending work
+        # impossible to miss. Two things can trip it: a Year-1 character's
+        # announced window opening (phoenix-cyclops, 2026-10-01), and the patch
+        # table going more than 21 days stale on a vendor that shipped twice in
+        # its first five days.
+        # Clear it by doing the work, NOT by deleting this step.
+        run: npx tsx scripts/expiries.ts --check

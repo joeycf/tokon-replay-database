@@ -25,7 +25,7 @@ import { execFileSync } from 'node:child_process';
 import { buildAliasMatcher, loadCharacters, stripLeaderboard } from './roster';
 import { emitGeneric } from './emit';
 import { buildPatchGroups, validatePatches } from './patches';
-import type { CharacterRecord, MatchVideo, PlayerRecord } from '../types/index';
+import type { MatchVideo, PlayerRecord } from '../types/index';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 

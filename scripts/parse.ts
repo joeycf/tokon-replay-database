@@ -10,8 +10,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { alignBench, readBench } from './bench';
-import { ACTIVE_CHANNELS, CHANNELS, CHANNEL_BY_ID } from './channels';
+import { ACTIVE_CHANNELS, CHANNELS } from './channels';
 import { applyOverrides, emitGeneric } from './emit';
+import { dueExpiries, expiryBlock } from './expiries';
 import { LAUNCH, SEASONS, seasonForDate } from './patches';
 import { buildAliasMatcher, loadCharacters, playerId, stripLeaderboard } from './roster';
 import type {
@@ -19,7 +20,6 @@ import type {
   CharProvenance,
   CharTier,
   ChannelKey,
-  CharacterRecord,
   MatchSide,
   MatchVideo,
   PlayerRecord,
@@ -247,7 +247,11 @@ async function main() {
   const benchQueue: BenchQueueItem[] = [];
   const residues = new Map<string, { n: number; ids: string[] }>();
   let decomposedOnly = 0;
-  const slotOrders: Record<SlotOrder, number> = { 'handle-first': 0, 'chars-first': 0, 'parallel-lists': 0 };
+  const slotOrders: Record<SlotOrder, number> = {
+    'handle-first': 0,
+    'chars-first': 0,
+    'parallel-lists': 0,
+  };
   const tierCount: Record<CharTier, number> = { title: 0, description: 0, footage: 0, review: 0 };
   const alignCount: Record<string, number> = {};
   let conflicts = 0;
@@ -353,7 +357,9 @@ async function main() {
         // "X vs Y" thumbnail-bait title on a general FGC channel.
         const bare = (sides ?? []).map(cleanHandle);
         const queueable =
-          bare.length === 2 && slots.every((s) => s === null) && bare.every((h) => h && h.length <= 40);
+          bare.length === 2 &&
+          slots.every((s) => s === null) &&
+          bare.every((h) => h && h.length <= 40);
         misses.push({
           id: v.id,
           channel: ch.id,
@@ -694,14 +700,25 @@ async function main() {
     lines.push('');
   }
 
+  // ── the soft severity of the self-expiring gates ──────────────────────────
+  // This path NEVER exits. A hard exit here would fail `npm run data:build` and
+  // stop the daily refresh entirely, which is strictly worse than the misfiling
+  // it warns about. The data gets written and pushed; the workflow's final step
+  // goes red afterwards so the pending work cannot be missed.
+  //
+  // The block lands at the TOP of report.md on purpose, and it is real content
+  // rather than a timestamp — so the cron's commit guard, which drops a
+  // report.md whose only diff is its "_Generated_" line, lets it through on the
+  // day it first appears even if nothing else changed.
+  const due = dueExpiries();
+
   // A residue string on 3+ records is a roster event, not noise.
   const bigResidue = [...residues].filter(([, e]) => e.n >= 3);
+  const actionRequired: string[] = [];
+  if (due.length) actionRequired.push(...expiryBlock(due));
   if (bigResidue.length) {
-    lines.splice(
-      2,
-      0,
-      '## ⚠ ACTION REQUIRED',
-      '',
+    actionRequired.push(
+      ...(due.length ? [] : ['## ⚠ ACTION REQUIRED', '']),
       `${bigResidue.length} unmatched character-slot string(s) appear on 3+ records:`,
       ...bigResidue.map(([t, e]) => `- \`${t}\` × ${e.n} (e.g. ${e.ids[0]})`),
       '',
@@ -710,6 +727,7 @@ async function main() {
       '',
     );
   }
+  if (actionRequired.length) lines.splice(2, 0, ...actionRequired);
 
   await writeFile(join(DATA, 'report.md'), lines.join('\n') + '\n', 'utf8');
 
@@ -724,6 +742,12 @@ async function main() {
   console.log(`  queues: review ${review.length} · bench ${benchQueue.length}`);
   if (bigResidue.length)
     console.log(`  ⚠ ACTION REQUIRED: ${bigResidue.length} residue string(s) on 3+ records`);
+  if (due.length) {
+    // Loud, but NOT fatal — see the note above the block. The workflow's final
+    // step is what turns this red, after the data is safely pushed.
+    console.log(`\n  ⚠ ${due.length} EXPIRY(S) DUE — written to report.md, not exiting here:`);
+    for (const d of due) console.log(`      ${d.id} (${d.kind}, due ${d.date})`);
+  }
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────

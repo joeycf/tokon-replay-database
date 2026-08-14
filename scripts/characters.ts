@@ -26,6 +26,7 @@ import { readFile, writeFile, access } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { dueExpiries } from './expiries';
 import type { CharacterRecord } from '../types/index';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -224,6 +225,18 @@ const contrast = (a: string, b: string) => {
 const SURFACE = '#101627';
 
 async function main() {
+  // ── the HARD severity of the self-expiring gates ─────────────────────────
+  // This is the manual roster run, so it exits. Nothing daily depends on it,
+  // and a due fighter is precisely the work this command exists to do — running
+  // it while a release is outstanding would write a roster that is already
+  // known to be incomplete.
+  const dueChars = dueExpiries().filter((d) => d.kind === 'unreleased-character');
+  if (dueChars.length) {
+    console.error(`✗ ${dueChars.length} roster expiry(s) are due — do them before rebuilding:\n`);
+    for (const d of dueChars) console.error(`  ${d.id} (due ${d.date})\n    ${d.action}\n`);
+    process.exit(1);
+  }
+
   const accents = await readAccents();
 
   // ── the SF6 contract: a roster id with no design token fails LOUD ──────────

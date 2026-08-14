@@ -15,6 +15,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  PATCHES,
   buildPatchGroups,
   patchForDate,
   patchWindows,
@@ -23,7 +24,6 @@ import {
   validateSeasons,
 } from './patches';
 import { buildStats, CHARACTERS_PER_SIDE, sort1 } from './stats';
-import { PATCHES } from './patches';
 import type { CharacterRecord, MatchVideo, PlayerRecord, VideoOverride } from '../types/index';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
