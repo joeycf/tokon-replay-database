@@ -117,3 +117,101 @@ plates. If the ensemble cannot read it, the planned escape hatch applies: render
 all 21 roster names in that face, dHash the rendered strip, and match over a
 closed set. That contingency is why the roster's alias normalisation has to be
 settled before any distance table is computed.
+
+---
+
+# Crop sweep — findings
+
+`npx tsx scripts/spike/sweep.ts --per-channel 2` then
+`npx tsx scripts/spike/ocr-probe.ts --frames 40`. Ten VODs, two per channel,
+~740 frames. All measurement is OCR-independent (a local-range filter over the
+top strip), because whether OCR works was the open question.
+
+| channel          |   n | upload |   band y0 |   band y1 | right anchor | letterbox | round 1 ≤2s | distinct plates L \| R |
+| ---------------- | --: | -----: | --------: | --------: | -----------: | --------: | ----------: | ---------------------- |
+| highLevelReplays |   2 |  1440p |     0.031 |     0.053 |        0.905 |      none |         2/2 | 2/3 \| 1/4             |
+| proReplays       |   2 |  1440p |     0.031 |     0.053 |        0.899 |      none |         2/2 | 3/3 \| 4/3             |
+| hadoukenReplays  |   2 |  1440p |     0.027 |     0.053 |        0.905 |      none |         2/2 | 4/2 \| 6/5             |
+| replaysHub       |   2 |  1440p |     0.030 |     0.053 |        0.902 |      none |         2/2 | 5/4 \| 3/4             |
+| fightingStationX |   2 |  1080p |     0.029 |     0.054 |        0.904 |      none |         1/2 | 3/6 \| 6/6             |
+| **spread**       |     |        | **0.006** | **0.001** |    **0.015** |         — |             |                        |
+
+## One box, not five
+
+The vertical band agrees to **0.006 of frame height — about 4px at 720p** — and
+the right-plate anchor to 0.015 (~19px). Nobody letterboxes. **One crop serves
+all five channels; the config does not need to key by `ChannelKey`.**
+
+Two caveats, stated because the numbers alone would overclaim:
+
+- The **left** ink-start spread is wide (0.054–0.108) and is NOT framing
+  variance. The run detector searches from x=0.02 and on some videos latches
+  onto the bench-portrait cluster that sits at x<0.10. The left plate should be
+  anchored at a fixed x with a generous width, exactly as the right one is
+  anchored at `xEnd`; the measured left edge is not trustworthy as an anchor.
+- **Uploads are 1440p on four channels and 1080p on the fifth.** Every frame is
+  fetched at 720p, so this is not a geometry difference — it is a sharpness one,
+  and it should show up as OCR confidence rather than as a crop change.
+
+## UI language
+
+**Latin on all ten VODs.** Reads came back `BLACK PANTHER`, `BLADE`,
+`STAR-LORD`, `SPIDER-MAN`, `MAGNETO`. No katakana nameplate was seen on any
+channel — note this is separate from player handles, one of which is Japanese
+(`シルクちゃん`) on a channel whose UI is English. The katakana path and its
+much tighter alias distances are not needed today; the finding is per-channel
+and should be re-checked when a channel is added.
+
+## Where the bench lives — and what this sweep may NOT conclude
+
+**Round 1 begins at t≤2s on 9 of 10 videos.** The uploaders trim the pre-match
+screens. So the correct statement is: **no text list of all eight is present in
+these uploads.** That is a fact about how these five channels edit, not about
+the game's UI — the character-select and loading screens may well show all eight
+as text and simply never survive the cut. Nothing here licenses a claim about
+what the game does.
+
+## Does the bench need pixels at all?
+
+Distinct nameplate images per side, clustered by perceptual hash of the glyph
+edge mask (threshold 18/64, the middle of a measured plateau: 8→13 clusters,
+12→10, **16→4, 20→4**, 24→3):
+
+- median **4.0** distinct plates per side
+- **17 of 20** sides showed ≥3 distinct fighters
+- **11 of 20** showed ≥4
+- worst case: 1
+
+Tag-cycling therefore exposes most of a team through the nameplate alone. The
+portrait tier is not the main event; it is the tail — and the tail is roughly
+3 sides in 20 where two or more fighters never entered.
+
+## The tesseract verdict: READABLE — no font-template hatch
+
+Scored on **HUD-bearing frames only**, 80 plates across all five channels, five
+tones × both polarities:
+
+- **39% exact** alias hit · **26%** within 2 edits · **65% combined**
+- **0%** returned nothing
+
+Per the pre-agreed rule this is _not_ the font-template trigger. The face is
+legible to tesseract, not merely to a human. 65% per frame is ample for a
+voting fold that requires ≥2 frames per character.
+
+**The first run of this probe said 38% and printed "OCR CANNOT READ THIS
+FACE."** It sampled frames by stride across every cached frame, including K.O.
+cards, round banners and the pre-match VS art — none of which contain a
+nameplate. Scoring silence on those as a miss measured the sampler, not the
+reader, and would have triggered days of font-template work on a face that
+reads fine. The plan's own rule — _score over HUD-bearing frames only_ — is what
+caught it, and the probe now takes its frame list from the sweep's `hudSecs`.
+
+Polarity note: the sibling negates before reading because its glyphs are
+near-white; this face is a mid-dark fill inside a bright outline, so both
+polarities are tried and both contribute reads.
+
+## Normalisation, settled
+
+Whitelist `A–Z . - space`, `norm()` stripping to the same class, and the
+`data/characters.json` alias keys now agree. The radius cap can be computed
+against these strings and not before.
