@@ -144,7 +144,7 @@ const ROSTER: RosterEntry[] = [
     id: 'green-goblin',
     name: 'Green Goblin',
     team: 'Knights of Doom',
-    aliases: ['green goblin', 'green-goblin', 'goblin'],
+    aliases: ['green goblin', 'green-goblin', 'g.goblin', 'g. goblin', 'goblin'],
   },
   { id: 'carnage', name: 'Carnage', team: 'Knights of Doom', aliases: ['carnage'] },
 
@@ -154,7 +154,10 @@ const ROSTER: RosterEntry[] = [
     name: 'Ghost Rider',
     team: 'Samurai Outriders',
     leader: true,
-    aliases: ['ghost rider', 'ghost-rider', 'ghostrider'],
+    // 'g.rider' surfaced through the residue gate on a real upload
+    // ("Magneto/G.Rider") — the abbreviation the uploader used, which no
+    // spelling of the full name covers. That is the gate's whole purpose.
+    aliases: ['ghost rider', 'ghost-rider', 'ghostrider', 'g.rider', 'g. rider'],
   },
   { id: 'blade', name: 'Blade', team: 'Samurai Outriders', aliases: ['blade'] },
   { id: 'loki', name: 'Loki', team: 'Samurai Outriders', aliases: ['loki'] },

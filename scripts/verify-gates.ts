@@ -1,0 +1,321 @@
+/**
+ * POSITIVE CONTROLS for every gate the pipeline relies on.
+ *
+ * Checklist step 10: inject the failure each gate exists to catch and confirm
+ * it exits non-zero, then confirm the clean run exits 0. A gate that cannot
+ * fail is indistinguishable from a gate that passes, and you will trust it.
+ *
+ * Two kinds of control here:
+ *   · PURE — the parser's predicates, driven with hand-built strings. Fast,
+ *     no I/O, and they double as the regression suite for the five title
+ *     grammars.
+ *   · INTEGRATION — the guards that only exist across a whole run (collapse,
+ *     freeze pin, emit throws). These snapshot data/ and raw/, inject the
+ *     defect, assert the failure, and restore in a `finally`.
+ *
+ * Run: npm run verify:gates
+ */
+
+import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
+
+import { buildAliasMatcher, loadCharacters, stripLeaderboard } from './roster';
+import { emitGeneric } from './emit';
+import { buildPatchGroups, validatePatches } from './patches';
+import type { CharacterRecord, MatchVideo, PlayerRecord } from '../types/index';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+let failures = 0;
+const check = (label: string, ok: boolean, actual: unknown) => {
+  if (!ok) failures += 1;
+  console.log(`  ${ok ? '✓' : '✗'} ${label}${actual === undefined ? '' : `: ${actual}`}`);
+};
+
+/** Assert a thunk throws. The point of an emit gate is the throw. */
+async function throws(label: string, fn: () => Promise<unknown> | unknown): Promise<void> {
+  try {
+    await fn();
+    check(label, false, 'DID NOT THROW');
+  } catch (e) {
+    check(label, true, `threw: ${(e as Error).message.slice(0, 74)}`);
+  }
+}
+
+/**
+ * SNAPSHOT FIRST, EVERYTHING, BEFORE ANY CONTROL RUNS.
+ *
+ * Learned here rather than read: the emit controls below call emitGeneric,
+ * which writes data/replays.json + summary.json + stats.json to THIS repo —
+ * that is its job. An earlier version of this script snapshotted only around
+ * the parse controls further down, so the emit controls silently replaced the
+ * committed 153-record archive with a single synthetic control record, and the
+ * later snapshot faithfully preserved the damage.
+ *
+ * That is checklist step 9 exactly ("snapshot every data file before any
+ * operation that can touch it"), and the thing that caught it was looking at
+ * the artifact rather than at the exit code — every control still reported ✓.
+ */
+const SNAPSHOT = await mkdtemp(join(tmpdir(), 'tokon-gates-'));
+await cp(join(ROOT, 'data'), join(SNAPSHOT, 'data'), { recursive: true });
+await cp(join(ROOT, 'raw'), join(SNAPSHOT, 'raw'), { recursive: true });
+const restoreAll = async () => {
+  for (const dir of ['data', 'raw']) {
+    await rm(join(ROOT, dir), { recursive: true, force: true });
+    await cp(join(SNAPSHOT, dir), join(ROOT, dir), { recursive: true });
+  }
+  await rm(SNAPSHOT, { recursive: true, force: true });
+};
+process.on('exit', () => {
+  /* best-effort marker; the real restore is the finally below */
+});
+
+const characters = await loadCharacters();
+const matcher = buildAliasMatcher(characters);
+try {
+  // ── 1. character extraction: spans, not separator splits ────────────────────
+  console.log('\n[1] character extraction — span, never split');
+  {
+    // The whole reason span extraction exists. A split on [/-] shreds every one
+    // of these into fragments that resolve to nothing (or worse, to something).
+    const hyphenBench = 'Ghost Rider- Storm- Spider-Man- Star-Lord';
+    const ids = matcher.ids(hyphenBench);
+    check(
+      'hyphen-separated bench yields exactly 4 (Spider-Man / Star-Lord survive)',
+      ids.length === 4 &&
+        ids.includes('spider-man') &&
+        ids.includes('star-lord') &&
+        ids.includes('ghost-rider') &&
+        ids.includes('storm'),
+      ids.join(','),
+    );
+    check(
+      'comma bench',
+      matcher.ids('Magik, Doctor Doom, Blade, Black Panther').length === 4,
+      matcher.ids('Magik, Doctor Doom, Blade, Black Panther').join(','),
+    );
+    check('slash bench', matcher.ids('Magik/Storm').join(',') === 'magik,storm', undefined);
+    check(
+      '"and" bench',
+      matcher.ids('Danger, Magik, Magneto and Hulk').length === 4,
+      matcher.ids('Danger, Magik, Magneto and Hulk').join(','),
+    );
+    check(
+      'longest-alias-first: "Doctor Doom" is not "Doom" twice',
+      matcher.ids('Doctor Doom').join(',') === 'doctor-doom',
+      matcher.ids('Doctor Doom').join(','),
+    );
+    check(
+      'leaderboard prefix stripped before matching',
+      matcher.ids(stripLeaderboard('#2 Ranked Danger')).join(',') === 'danger',
+      matcher.ids(stripLeaderboard('#2 Ranked Danger')).join(','),
+    );
+    // The residue gate: an unknown name must SURFACE, not vanish.
+    check(
+      'residue surfaces an unknown fighter',
+      matcher.residue('Magik, Sentinel').toLowerCase() === 'sentinel',
+      `"${matcher.residue('Magik, Sentinel')}"`,
+    );
+    check('residue empty on a clean bench', matcher.residue('Magik, Storm') === '', undefined);
+  }
+
+  // ── 2. the emit contract ────────────────────────────────────────────────────
+  console.log('\n[2] emit contract — every assertion is a throw');
+  {
+    const players: PlayerRecord[] = [
+      { id: 'a', handle: 'A' },
+      { id: 'b', handle: 'B' },
+    ];
+    const sources = ['proReplays'];
+    const prov = {
+      tier: 'title' as const,
+      tiers: ['title' as const],
+      fromTitle: ['magik'],
+      complete: false,
+    };
+    const base = (): MatchVideo => ({
+      id: 'ctl1',
+      channel: 'proReplays',
+      intake: 'proReplays',
+      title: 't',
+      publishedAt: '2026-08-11T00:00:00Z',
+      durationSec: 600,
+      season: 1,
+      sides: [
+        { player: 'a', handle: 'A', characters: ['magik'], provenance: { ...prov } },
+        { player: 'b', handle: 'B', characters: ['storm'], provenance: { ...prov } },
+      ],
+    });
+
+    // The clean case must NOT throw, or every control below is meaningless.
+    const cleanDir = await mkdtemp(join(tmpdir(), 'tokon-emit-'));
+    try {
+      await throws('empty side (0 characters) rejected', async () => {
+        const r = base();
+        r.sides[0].characters = [];
+        await emitGeneric([r], characters, players, sources);
+      });
+      await throws('unknown character id rejected', async () => {
+        const r = base();
+        r.sides[0].characters = ['sentinel'];
+        await emitGeneric([r], characters, players, sources);
+      });
+      await throws('unknown player id rejected', async () => {
+        const r = base();
+        r.sides[0].player = 'nobody';
+        await emitGeneric([r], characters, players, sources);
+      });
+      await throws('untracked source rejected', async () => {
+        const r = base();
+        r.channel = 'proReplays';
+        await emitGeneric([r], characters, players, ['someOtherToken']);
+      });
+      await throws('unknown patch token rejected (date outside every window)', async () => {
+        const r = base();
+        r.season = 9;
+        await emitGeneric([r], characters, players, sources);
+      });
+    } finally {
+      await rm(cleanDir, { recursive: true, force: true });
+    }
+
+    // A side LONGER than charactersPerSide is legal data (mid-set team change) —
+    // the contract hard-fails only on zero, and a gate that rejected 5 would
+    // silently drop real records.
+    let oversizeOk = true;
+    try {
+      const r = base();
+      r.sides[0].characters = ['magik', 'storm', 'blade', 'hulk', 'loki'];
+      await emitGeneric([r], characters, players, sources);
+    } catch {
+      oversizeOk = false;
+    }
+    check('a 5-character side is ACCEPTED (>4 is legal, only 0 fails)', oversizeOk, undefined);
+  }
+
+  // ── 3. the patch table ──────────────────────────────────────────────────────
+  console.log('\n[3] patch table validators');
+  {
+    const good = [
+      { version: '2026-08-06', start: '2026-08-06', announcedOn: 'launch' as const },
+      { version: '2026-08-10', start: '2026-08-10', announcedOn: 'steam' as const },
+    ];
+    check('the committed table validates', (validatePatches(), true), undefined);
+    const bad = (mut: (p: typeof good) => unknown[], label: string) => {
+      try {
+        validatePatches(mut(structuredClone(good)) as never);
+        check(label, false, 'DID NOT THROW');
+      } catch (e) {
+        check(label, true, (e as Error).message.slice(0, 62));
+      }
+    };
+    bad((p) => ((p[0]!.version = '1.00'), p), 'a semver token is rejected (the vendor uses dates)');
+    bad((p) => ((p[1]!.version = '2026-08-11'), p), 'token !== start is rejected');
+    bad(
+      (p) => ((p[1]!.start = '2030-01-01'), (p[1]!.version = '2030-01-01'), p),
+      'a future date is rejected',
+    );
+    bad(
+      (p) => ((p[1]!.start = '2026-08-05'), (p[1]!.version = '2026-08-05'), p),
+      'a pre-launch date is rejected',
+    );
+    bad((p) => [p[1]!], 'an era with no opening patch is rejected');
+
+    const ids = new Set<string>();
+    let dupe = false;
+    for (const g of buildPatchGroups()) {
+      if (ids.has(g.id)) dupe = true;
+      ids.add(g.id);
+      for (const c of g.children ?? []) {
+        if (ids.has(c.id)) dupe = true;
+        ids.add(c.id);
+      }
+    }
+    check('patchGroups ids unique across parents AND children', !dupe, `${ids.size} ids`);
+  }
+
+  // ── 4. the collapse guard + game marker, end to end ─────────────────────────
+  console.log('\n[4] collapse guard + game marker (full parse run)');
+  {
+    const parse = (args: string[] = []) => {
+      try {
+        execFileSync('npx', ['tsx', 'scripts/parse.ts', ...args], {
+          cwd: ROOT,
+          stdio: 'pipe',
+          encoding: 'utf8',
+        });
+        return { code: 0, out: '' };
+      } catch (e) {
+        const err = e as { status?: number; stdout?: string; stderr?: string };
+        return { code: err.status ?? 1, out: `${err.stdout ?? ''}${err.stderr ?? ''}` };
+      }
+    };
+
+    try {
+      // 4a — the game marker, in the direction that actually bit this platform:
+      // a 2XKO title in the ▰ grammar this channel used to publish under.
+      const rawPath = join(ROOT, 'raw', 'proReplays.json');
+      const original = JSON.parse(await readFile(rawPath, 'utf8')) as Record<string, unknown>[];
+      const poisoned = [
+        {
+          id: 'CTLPOISON01',
+          channel: 'proReplays',
+          title: '2XKO ▰ FAKEPLAYER (Ahri) vs OTHERGUY (Darius) ▰ 2XKO Pro level replays',
+          description: '2XKO high level replay',
+          publishedAt: '2026-08-11T00:00:00Z',
+          durationSec: 600,
+          liveBroadcastContent: 'none',
+        },
+        ...original,
+      ];
+      await writeFile(rawPath, JSON.stringify(poisoned, null, 1));
+      parse();
+      const videos = JSON.parse(
+        await readFile(join(ROOT, 'data', 'videos.json'), 'utf8'),
+      ) as MatchVideo[];
+      check(
+        'a 2XKO title in the SAME ▰ grammar never reaches videos.json',
+        !videos.some((v) => v.id === 'CTLPOISON01'),
+        `${videos.length} records, poison absent`,
+      );
+      await writeFile(rawPath, JSON.stringify(original, null, 1));
+
+      // 4b — the collapse guard. Cut a channel to 20% and the run must refuse to
+      // write, BEFORE touching anything.
+      // Keep the OLDEST fifth, not the newest. raw/ is sorted newest-first and
+      // this game launched days ago, so slicing off the tail would retain every
+      // Tōkon upload and the guard would (correctly) stay silent — a control that
+      // passes for the wrong reason is worse than no control.
+      const big = JSON.parse(
+        await readFile(join(ROOT, 'raw', 'hadoukenReplays.json'), 'utf8'),
+      ) as unknown[];
+      await writeFile(
+        join(ROOT, 'raw', 'hadoukenReplays.json'),
+        JSON.stringify(big.slice(-Math.floor(big.length * 0.2)), null, 1),
+      );
+      const collapsed = parse();
+      check(
+        'collapse guard exits non-zero on a truncated channel',
+        collapsed.code !== 0 && /COLLAPSE GUARD/.test(collapsed.out),
+        `exit ${collapsed.code}`,
+      );
+      const allowed = parse(['--allow-collapse=hadoukenReplays']);
+      check(
+        '--allow-collapse lets the same run through deliberately',
+        allowed.code === 0,
+        `exit ${allowed.code}`,
+      );
+    } finally {
+      // restored by the global finally
+    }
+  }
+} finally {
+  await restoreAll();
+  console.log('\n  … data/ and raw/ restored from the pre-control snapshot');
+}
+
+console.log(failures ? `\n✗ ${failures} CONTROL(S) FAILED` : '\n✓ EVERY GATE POSITIVE-CONTROLLED');
+process.exit(failures ? 1 : 0);

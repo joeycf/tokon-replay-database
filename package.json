@@ -30,7 +30,8 @@
     "data:extract": "tsx scripts/complete-characters.ts",
     "data:replay-dupes": "tsx scripts/replay-dupes.ts",
     "verify:deployed": "tsx scripts/verify-deployed.ts",
-    "test:e2e": "tsx scripts/e2e.ts"
+    "test:e2e": "tsx scripts/e2e.ts",
+    "verify:gates": "tsx scripts/verify-gates.ts"
   },
   "devDependencies": {
     "@fontsource/bangers": "^5.2.5",

@@ -125,17 +125,31 @@ function core(title: string): string | null {
   let s = title.normalize('NFC').replace(/\s+/g, ' ').trim();
   s = s.replace(BRACKET_TAIL_RE, '').replace(EMOJI_TAIL_RE, '').trim();
 
+  // The vs separator is the one thing every variant has; the parens are not.
+  // Anchoring on vs (widened to the parens when they exist) means a title that
+  // states NO characters still yields a core, which is what lets it reach the
+  // review queue as character-completion instead of being dropped as
+  // unparseable. Anchoring on the paren alone silently discarded those.
+  const vs = /\s+(?:vs\.?|versus)\s+/iu.exec(s);
+  if (!vs) return null;
   const firstParen = s.indexOf('(');
   const lastParen = s.lastIndexOf(')');
-  if (firstParen < 0 || lastParen < firstParen) return null;
+  const anchorStart = firstParen >= 0 && firstParen < vs.index ? firstParen : vs.index;
+  const anchorEnd = lastParen > vs.index ? lastParen : vs.index + vs[0].length;
 
-  const leadCut = s.lastIndexOf('▰', firstParen);
-  if (leadCut >= 0) s = s.slice(leadCut + 1);
+  // Cut the ▰ affixes RELATIVE TO THE ANCHOR rather than by counting them:
+  // everything up to the last ▰ preceding the sides, and everything from the
+  // first ▰ following them. That is what makes the suffix-only variant
+  // ("HANDLE (Char) vs HANDLE (Char) ▰ …") work with no special case, and it
+  // can never eat into a side segment.
+  let start = 0;
+  let end = s.length;
+  const lead = s.lastIndexOf('▰', anchorStart);
+  if (lead >= 0) start = lead + 1;
+  const trail = s.indexOf('▰', anchorEnd);
+  if (trail >= 0) end = trail;
 
-  const after = s.indexOf('▰', s.lastIndexOf(')'));
-  if (after >= 0) s = s.slice(0, after);
-
-  s = s.replace(EMOJI_TAIL_RE, '').trim();
+  s = s.slice(start, end).replace(EMOJI_TAIL_RE, '').trim();
   // A ▰ still inside the core means a mid-title accolade ("▰ Rank 1 NA ▰") we
   // have not modelled. Refuse rather than guess where the sides begin.
   return s.includes('▰') ? null : s;
@@ -155,6 +169,62 @@ function slot(segment: string): Slot | null | 'ambiguous' {
   const m = parens[0]!;
   const handle = (segment.slice(0, m.index) + segment.slice(m.index + m[0].length)).trim();
   return { handle, chars: m[1]!, order: m.index === 0 ? 'chars-first' : 'handle-first' };
+}
+
+/**
+ * The PARALLEL-LISTS grammar — Fighting Station X's, and the fifth variant.
+ *
+ *   "Star Lord vs Black Panther ▰ High Level Gameplay ▰ Cloud805 vs bleed ▰ Marvel Tokon…"
+ *    └─ characters ─┘                                   └─ handles ─┘
+ *
+ * Characters and players are stated in DIFFERENT ▰ segments, with no
+ * parentheses binding them. The paren parser cannot see it: both slots come
+ * back empty, and the naive reading queues the record as "characters unknown"
+ * while capturing "Star Lord" and "Black Panther" as the PLAYER handles. That
+ * is not a miss, it is wrong data — accepting one would mint a player page
+ * named after a fighter.
+ *
+ * Resolution: split on ▰, then classify each `X vs Y` segment by whether its
+ * sides resolve to roster ids. Exactly one segment must resolve on both sides
+ * (the characters) and exactly one must resolve on neither (the handles).
+ * Anything else is ambiguous and refused.
+ *
+ * ATTRIBUTION IS POSITIONAL HERE, AND THAT IS RECORDED. Every other grammar
+ * binds a handle to its characters inside one paren, so no assumption is
+ * needed; this one pairs two independent lists by index. The platform has
+ * measured title-order attribution wrong 11–38% of the time across three
+ * corpora, so these sides carry `slotOrder: 'parallel-lists'` in their
+ * provenance — visible in the report, and the population the extractor should
+ * verify first.
+ */
+function parallelLists(
+  title: string,
+  matcher: { ids(t: string): string[] },
+): { handles: [string, string]; chars: [string[], string[]] } | null {
+  const segments = title
+    .normalize('NFC')
+    .replace(BRACKET_TAIL_RE, '')
+    .split('▰')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (segments.length < 3) return null;
+
+  const charSegs: [string[], string[]][] = [];
+  const handleSegs: [string, string][] = [];
+  for (const seg of segments) {
+    const parts = seg.split(/\s+(?:vs\.?|versus)\s+/iu);
+    if (parts.length !== 2) continue;
+    const [a, b] = parts as [string, string];
+    const ia = matcher.ids(a);
+    const ib = matcher.ids(b);
+    if (ia.length && ib.length) charSegs.push([ia, ib]);
+    else if (!ia.length && !ib.length) {
+      const [ha, hb] = [cleanHandle(a), cleanHandle(b)];
+      if (ha && hb && ha.length <= 40 && hb.length <= 40) handleSegs.push([ha, hb]);
+    }
+  }
+  if (charSegs.length !== 1 || handleSegs.length !== 1) return null;
+  return { handles: handleSegs[0]!, chars: charSegs[0]! };
 }
 
 const cleanHandle = (h: string): string =>
@@ -177,7 +247,7 @@ async function main() {
   const benchQueue: BenchQueueItem[] = [];
   const residues = new Map<string, { n: number; ids: string[] }>();
   let decomposedOnly = 0;
-  const slotOrders: Record<SlotOrder, number> = { 'handle-first': 0, 'chars-first': 0 };
+  const slotOrders: Record<SlotOrder, number> = { 'handle-first': 0, 'chars-first': 0, 'parallel-lists': 0 };
   const tierCount: Record<CharTier, number> = { title: 0, description: 0, footage: 0, review: 0 };
   const alignCount: Record<string, number> = {};
   let conflicts = 0;
@@ -246,14 +316,20 @@ async function main() {
       }
 
       // ── structure ─────────────────────────────────────────────────────────
-      const c = core(title);
+      // The parallel-lists grammar is tried FIRST, because its titles also
+      // satisfy the paren parser's outer shape — and satisfying it there
+      // produces the wrong answer (fighter names read as player handles)
+      // rather than no answer.
+      const parallel = parallelLists(title, matcher);
+
+      const c = parallel ? null : core(title);
       const sides = c ? splitSides(c) : null;
-      if (!sides) {
+      if (!parallel && !sides) {
         misses.push({ id: v.id, channel: ch.id, title, reason: 'no-vs-title' });
         continue;
       }
-      const slots = sides.map(slot);
-      if (slots.some((s) => s === 'ambiguous')) {
+      const slots = sides ? sides.map(slot) : [];
+      if (!parallel && slots.some((s) => s === 'ambiguous')) {
         misses.push({ id: v.id, channel: ch.id, title, reason: 'slot-ambiguous' });
         review.push({
           id: v.id,
@@ -265,17 +341,45 @@ async function main() {
         });
         continue;
       }
-      if (slots.some((s) => s === null)) {
+      if (!parallel && slots.some((s) => s === null)) {
+        // Match-shaped footage that states NO characters — two clean handles
+        // either side of a vs, and nothing in parentheses. This is precisely
+        // what the extractor exists for, so it is queued for
+        // character-completion rather than dropped as a parse failure.
+        //
+        // Scoped tightly on purpose: it has already passed the game marker,
+        // the launch date floor and the not-a-match filter, and BOTH sides
+        // must clean to a plausible handle. A looser rule would queue every
+        // "X vs Y" thumbnail-bait title on a general FGC channel.
+        const bare = (sides ?? []).map(cleanHandle);
+        const queueable =
+          bare.length === 2 && slots.every((s) => s === null) && bare.every((h) => h && h.length <= 40);
         misses.push({
           id: v.id,
           channel: ch.id,
           title,
-          reason: 'no-vs-title',
+          reason: queueable ? 'char-unresolved' : 'no-vs-title',
           detail: 'no (chars) slot',
         });
+        if (queueable) {
+          review.push({
+            id: v.id,
+            kind: 'character-completion',
+            channel: ch.id,
+            title,
+            publishedAt: v.publishedAt,
+            durationSec: v.durationSec,
+            handles: [bare[0]!, bare[1]!],
+          });
+        }
         continue;
       }
-      const [s0, s1] = slots as [Slot, Slot];
+      const [s0, s1] = parallel
+        ? ([
+            { handle: parallel.handles[0], chars: '', order: 'parallel-lists' as SlotOrder },
+            { handle: parallel.handles[1], chars: '', order: 'parallel-lists' as SlotOrder },
+          ] as [Slot, Slot])
+        : (slots as [Slot, Slot]);
 
       const handles = [cleanHandle(s0.handle), cleanHandle(s1.handle)] as [string, string];
       if (handles.some((h) => !h || h.length > 40)) {
@@ -290,10 +394,12 @@ async function main() {
       }
 
       // ── characters: span extraction, never a separator split ──────────────
-      const titleChars = [s0, s1].map((s) => {
-        const stripped = stripLeaderboard(s.chars);
-        return { ids: matcher.ids(stripped), residue: matcher.residue(stripped) };
-      });
+      const titleChars = parallel
+        ? parallel.chars.map((ids) => ({ ids, residue: '' }))
+        : [s0, s1].map((s) => {
+            const stripped = stripLeaderboard(s.chars);
+            return { ids: matcher.ids(stripped), residue: matcher.residue(stripped) };
+          });
       if (titleChars.some((t) => t.ids.length === 0)) {
         misses.push({
           id: v.id,

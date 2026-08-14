@@ -82,7 +82,7 @@ export type DescAlign = 'handle' | 'character-subset' | 'ambiguous' | 'none';
  *  parser extracts the paren wherever it sits and takes the remainder as the
  *  handle, so it never has to CHOOSE an order. Recorded so a channel changing
  *  its grammar shows up as a shift in the mix instead of as silence. */
-export type SlotOrder = 'handle-first' | 'chars-first';
+export type SlotOrder = 'handle-first' | 'chars-first' | 'parallel-lists';
 
 /**
  * Per-side character provenance — the answer to "how did this record get its
