@@ -262,35 +262,62 @@ async function main() {
     process.exit(1);
   }
 
-  const records: CharacterRecord[] = ROSTER.map((r) => ({
-    id: r.id,
-    name: r.name,
-    imgPortrait: `/img/characters/${r.id}-portrait.webp`,
-    imgSplash: `/img/characters/${r.id}-splash.webp`,
-    accent: accents[r.id]!,
-    extra: {
-      aliases: r.aliases,
-      team: r.team,
-      ...(r.leader ? { role: 'Team leader' } : {}),
-      ...(r.unlockable ? { availability: 'Unlockable — clear Episode chapter 11' } : {}),
-    },
-  }));
+  const has = async (p: string): Promise<boolean> => {
+    try {
+      await access(join(ROOT, 'public', p));
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const records: CharacterRecord[] = [];
+  const missingPortrait: string[] = [];
+  let splashes = 0;
+  for (const r of ROSTER) {
+    const portrait = `/img/characters/${r.id}-portrait.webp`;
+    const splash = `/img/characters/${r.id}-splash.webp`;
+    if (!(await has(portrait))) missingPortrait.push(r.id);
+    // imgSplash is emitted ONLY when the file exists. The roster grid has an
+    // @error handler and degrades to an accent gradient, but the character
+    // page's hero <img> has none — a 404 there stretches a broken image across
+    // the page, which is strictly worse than the absent field, whose v-if
+    // guard falls back to the engine's stripe-and-accent treatment.
+    const hasSplash = await has(splash);
+    if (hasSplash) splashes += 1;
+    records.push({
+      id: r.id,
+      name: r.name,
+      imgPortrait: portrait,
+      ...(hasSplash ? { imgSplash: splash } : {}),
+      accent: accents[r.id]!,
+      extra: {
+        aliases: r.aliases,
+        team: r.team,
+        ...(r.leader ? { role: 'Team leader' } : {}),
+        ...(r.unlockable ? { availability: 'Unlockable — clear Episode chapter 11' } : {}),
+      },
+    });
+  }
+
+  // ── FAIL LOUD on a fighter with no portrait ───────────────────────────────
+  // Same contract as the accents above, and for the same reason: a roster entry
+  // that resolves to nothing should stop the build, not ship a gap. There is no
+  // excuse for one now — scripts/art.ts resolves art from the wiki manifest and
+  // scripts/art-tile.ts generates an on-brand tile for anything it cannot, so
+  // every id has a path to a real file.
+  if (missingPortrait.length) {
+    console.error(
+      `✗ ${missingPortrait.length} fighter(s) have no portrait: ${missingPortrait.join(', ')}\n\n` +
+        `  Resolve art before shipping the roster:\n` +
+        `    npx tsx scripts/art.ts --only=${missingPortrait.join(',')}   (wiki manifest)\n` +
+        `    npx tsx scripts/art-tile.ts --only=${missingPortrait.join(',')}  (generated fallback)\n` +
+        `  A new DLC fighter lands here first — that is the check working, not a bug.`,
+    );
+    process.exit(1);
+  }
 
   await writeFile(OUT, `${JSON.stringify(records, null, 2)}\n`);
-
-  // Art is reported, not enforced: the roster must be buildable before the art
-  // pipeline exists. scripts/e2e.ts is where a missing portrait becomes a
-  // failure, because that is the point at which it would actually reach a user.
-  const absent: string[] = [];
-  for (const rec of records) {
-    for (const p of [rec.imgPortrait, rec.imgSplash!]) {
-      try {
-        await access(join(ROOT, 'public', p));
-      } catch {
-        absent.push(p);
-      }
-    }
-  }
 
   const teams = new Map<string, number>();
   for (const r of ROSTER) teams.set(r.team, (teams.get(r.team) ?? 0) + 1);
@@ -302,9 +329,12 @@ async function main() {
     `  accents: ${records.length}/${records.length} present, all >=4.5:1 on ${SURFACE}` +
       `  ·  worst ${Math.min(...records.map((r) => contrast(r.accent, SURFACE))).toFixed(2)}:1`,
   );
-  if (absent.length) {
-    console.log(`  ⚠ ${absent.length} art file(s) not yet present — see scripts/art.ts`);
-  }
+  console.log(
+    `  art: ${records.length}/${records.length} portraits, ${splashes}/${records.length} splashes` +
+      (splashes < records.length
+        ? ` (${records.length - splashes} fighter(s) ship no splash — field omitted, hero degrades cleanly)`
+        : ''),
+  );
 }
 
 await main();
