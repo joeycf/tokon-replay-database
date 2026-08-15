@@ -70,7 +70,14 @@
   --char-storm: #BFD9E8;              /* white hair / lightning — pale storm-silver (chroma-split from primary) · 12.3:1 */
   --char-magik: #B650F2;              /* Soulsword sorcery violet · 4.6:1 */
   --char-wolverine: #FFD23B;          /* classic suit yellow · 12.5:1 */
-  --char-danger-x: #2ED2C8;           /* Shi’ar chrome teal (fighter “Danger”; -x suffix avoids --color-danger clash) · 9.6:1 */
+  --char-danger: #2ED2C8;             /* Shi’ar chrome teal (the X-Men fighter “Danger”) · 9.6:1 */
+  /* NOTE (build, 2026-08-13): was --char-danger-x. The stated reason for the
+     -x suffix — avoiding a “--color-danger clash” — does not hold: they are
+     distinct custom-property names and never collide, and the engine injects
+     accents as --accent-<id>, not --char-<id>, so there is no second collision
+     either. The suffix would have become a permanent public URL
+     (/fighters/danger-x) and an id that disagreed with its own display name.
+     Renamed; the fighter id is `danger`. */
 
   /* Knights of Doom */
   --char-doctor-doom: #23C29E;        /* Latverian viridian; team leader · 8.0:1 */
@@ -84,7 +91,18 @@
   --char-loki: #1FB47D;               /* deep asgardian emerald; dH 9° + dL from --color-success · 6.8:1 */
   --char-deadpool: #DE4E79;           /* merc rose-wine — red arc ladder, dH 11° from star-lord & peni · 4.7:1 */
 
-  /* Unaffiliated — hidden unlockables (no team tone band; leader-tier L per method note) */
+  /* ---- Unaffiliated — hidden unlockables ---------------------------------
+     (no team tone band; leader-tier L per method note)
+
+     Why the handoff does not have him: Champion is not on the announced
+     20-fighter roster. He is a hidden unlockable — clear chapter 11 of any
+     one Episode scenario and he becomes playable, including online. Sony,
+     Marvel and Arc System Works have never announced him; his existence is
+     confirmed by publisher-authored achievement strings ("Clear the Champion
+     Course in All-Star Arena") and his playability by the in-game unlock
+     message. He is the 7th most-used fighter in the launch corpus, appearing
+     in 15 of 105 parseable matches, so shipping 20 accents would have failed
+     ~15% of the archive loud on every run. */
   --char-champion: #EC51C9;         /* cosmic gladiator magenta — skin is the anchor; gold armor ceded (warm arc 3-deep + spent: ΔL≥.12 below iron-man breaks AA at ≤4.0:1, above lands on wolverine L .62). Tightest: magneto Δ17.1° + chroma split S .80/.65; peni-parker Δ17.1° hue-only · 5.7:1 */
 }
 

@@ -15,9 +15,11 @@
  *    mirrors the same block, so config and data cannot drift, and
  *    A ROSTER ID WITH NO TOKEN FAILS THIS SCRIPT LOUD rather than shipping an
  *    unstyled fighter. Never invent an accent here — get it from Claude Design.
- *    (The one exception is documented in the token file itself: --char-champion
- *    is PROVISIONAL, derived by the handoff's own method because Champion is a
- *    hidden fighter the brief did not know existed. It is owed a real token.)
+ *    (--char-champion took the long way round: the brief did not know the hidden
+ *    21st fighter existed, so the accent was derived by the handoff's own method
+ *    and shipped flagged until a design session confirmed it. It did — same hex,
+ *    independently — and the flag is gone. The token file keeps the reason he
+ *    was missing as history.)
  *
  * Run: npm run data:characters   (only when the roster changes — never in cron)
  */

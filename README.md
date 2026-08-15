@@ -94,11 +94,11 @@ most-used fighter in the launch corpus. No Sony/Marvel/ASW page announces him;
 publisher-authored achievement strings confirm he exists. Shipping the announced
 20 would have hard-failed ~15% of the archive on every run.
 
-His accent is **PROVISIONAL** — derived by the design handoff's own 4-step
-method with the arithmetic inline, and owed a real Claude Design token. Every
-other accent comes from `design/handoff/tokens.css`, and **a roster id with no
-token fails `scripts/characters.ts` loud** rather than shipping an unstyled
-fighter.
+His accent was derived by the design handoff's own 4-step method, shipped
+flagged, and has since been **confirmed by a design session at the same hex**
+(`#EC51C9`). Every accent comes from `design/handoff/tokens.css`, and **a roster
+id with no token fails `scripts/characters.ts` loud** rather than shipping an
+unstyled fighter.
 
 ## Patches are dates, because the vendor publishes no version
 

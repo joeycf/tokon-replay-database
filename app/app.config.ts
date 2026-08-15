@@ -113,8 +113,9 @@ export default defineAppConfig({
       blade: '#6fa4b8',
       loki: '#1fb47d',
       deadpool: '#de4e79',
-      // Unaffiliated — the hidden 21st fighter. PROVISIONAL accent; see the
-      // derivation in design/handoff/tokens.css.
+      // Unaffiliated — the hidden 21st fighter, absent from the design brief.
+      // Derived by the handoff's own method, then confirmed by a design session
+      // at the same hex; see design/handoff/tokens.css for why he was missing.
       champion: '#ec51c9',
     },
     // Order matters: SourceBadge styles by index (0 = filled primary,
