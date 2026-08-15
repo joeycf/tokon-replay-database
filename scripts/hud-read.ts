@@ -431,10 +431,27 @@ export const BURST_INDEP = 0.5;
  *  windows, so this is the window's own frame spacing plus slack. */
 export const BURST_GAP = 3;
 
-/** Prudence margin for unseen footage, not a filter for observed ones. Fitted
- *  from Tōkon's own threshold curve; the siblings' 0.90 stands only if that
- *  curve turns out degenerate. */
-export const AUTO_ACCEPT = 0.9;
+/** Prudence margin for unseen footage, not a filter for observed ones.
+ *
+ *  FITTED, AND THE SIBLINGS' 0.90 DOES NOT SURVIVE. Tōkon's curve over 82
+ *  ground-truth sides (scripts/spike/accuracy.ts) is degenerate — member
+ *  precision is 99.5% at 0.01 and 100.0% from 0.75 up, and never falls again:
+ *
+ *      thresh   accepted   precision   both-exact   coverage
+ *      0.01      38/41       99.5%       17.1%       92.7%
+ *      0.75      30/41      100.0%       16.7%       73.2%
+ *      0.90      14/41      100.0%        0.0%       34.1%
+ *
+ *  Precision is already carried by MEMBER_MIN, which gates every member before
+ *  `min` ever sees it, so the threshold buys nothing above 0.75 and costs 39
+ *  points of coverage to reach 0.90.
+ *
+ *  Worse, it ANTI-SELECTS FOR COMPLETENESS. Both-sides-exact goes 17.1% → 0.0%
+ *  as the threshold rises, because a side read at confidence 1.00 is typically a
+ *  side with ONE member witnessed many times, and a one-member union is never
+ *  right about a four-fighter bench. Raising the gate does not buy caution here;
+ *  it selects for under-reading. 0.75 is the last point that is free. */
+export const AUTO_ACCEPT = 0.75;
 
 /** Below this saturation, the side has not stopped discovering new fighters and
  *  a denser sample is worth paying for. */
