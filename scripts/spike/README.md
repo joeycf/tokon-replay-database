@@ -215,3 +215,88 @@ polarities are tried and both contribute reads.
 Whitelist `A–Z . - space`, `norm()` stripping to the same class, and the
 `data/characters.json` alias keys now agree. The radius cap can be computed
 against these strings and not before.
+
+---
+
+# The reader, built and scored
+
+## What ships
+
+Anchor derived from the clean right edge (`leftX0 = 1 − rightX1`), a
+canonical-21 plate roster with per-key decoding radii, end-trimmed matching, a
+noisy-OR fold over bursts, and attribution anchored on the title-known fighter.
+Constants: `Q0 0.55 · DECAY 0.8 · MEMBER_MIN 0.60 · BURST_INDEP 0.5 ·
+AUTO_ACCEPT 0.75`.
+
+## Scored over 82 free ground-truth sides
+
+|                    |                                                 value |
+| ------------------ | ----------------------------------------------------: |
+| member precision   |                     **99.5%** (100% at the 0.75 gate) |
+| recall             |                                                 63.4% |
+| side-exact         |                         15.9% · both-sides-exact 7.3% |
+| attribution        | **41/41 decided, 41/41 correct**, median \|votes\| 54 |
+| `titleOk` failures |                                              **0/41** |
+| union size         |        1:15 · 2:21 · 3:32 · 4:14 sides — median **3** |
+
+Records enter the queue knowing **1 of 4** and leave with a median of **3 of 4**.
+The single invented member in the corpus sits at confidence 0.69, under the gate.
+
+## The finding: 36% of a bench never takes point
+
+Of 328 bench slots, 202 were found, 8 were seen and dropped as thin, and **118
+never appear on a nameplate at all**. Mean saturation is 0.936 on sides reaching
+four and 0.915 on sides short of four — statistically identical, so short sides
+are not starved readers. **Descriptions state the team SELECTED; nameplates state
+who took POINT**, and a bench member can assist all set without holding point.
+Denser sampling recovers 2.4% and nothing more, which is why the sampler stopped
+at 12 bursts.
+
+That is what `/dev/source-review` exists to confirm: it asks a human for both
+labels off one frame, blind, and compares point against the reader and bench
+against the description.
+
+## The threshold curve is degenerate, so 0.90 does not survive
+
+|   thresh | accepted |  precision | both-exact |  coverage |
+| -------: | -------: | ---------: | ---------: | --------: |
+|     0.60 |    41/41 |      99.5% |      15.9% |      100% |
+| **0.75** |    32/41 | **100.0%** |      15.6% | **78.0%** |
+|     0.90 |    16/41 |     100.0% |   **0.0%** |     39.0% |
+
+Precision never falls — `MEMBER_MIN` already carries it. And the gate
+**anti-selects for completeness**: both-exact goes to 0.0% at 0.90, because a
+side at confidence 1.00 is usually one member witnessed many times, and a
+one-member union is never right about a four-fighter bench.
+
+## The corner portrait clusters were being read as nameplates
+
+Four sides across three videos returned nothing from 59–71 HUD frames each.
+`run()` takes the longest ink run, and Tōkon's four-icon bench-portrait diamond
+sits in each top corner inside the nameplate band — so a short name loses to it.
+"DANGER" beat the portraits; "CARNAGE" lost. Since production derives
+`leftX0 = 1 − rightX1`, one plate's error then destroyed the other.
+
+Dumping every run rather than the winner showed the right nameplate is
+right-aligned at a near-constant 0.8977, with the cluster a separate run from
+~0.911. Bound at 0.91. Two attempts measurement rejected first, both of which
+looked right:
+
+- a bound at 0.94, mid-gap — a wide bound **clips** the cluster instead of
+  excluding it, and a clipped cluster still won on length (0.9383–0.9398).
+- rejecting runs that touch a window boundary — `COL_GAP` merges the nameplate
+  with the health bar, so real names touch the inner edge routinely; the
+  detector fell through to health-bar segments (`rightX1` → 0.61).
+
+Result: `rightX1` spans 0.8953–0.9094 across 48 videos, previously to 0.9898.
+Sides with no legible read **3 → 0**; legible plates **80.1% → 84.0%**;
+attribution 40/41 → **41/41**; `titleOk` failures 3 → **0**.
+
+The planned **symmetry gate is not shipped, because measuring it disproved it**.
+It flagged five videos whose `rightX1` was healthy and whose `leftX0` was merely
+portrait-contaminated — whose derived geometry was already correct — because the
+left cluster abuts its name with no usable gap, so the left measurement is not an
+independent opinion. A gate that fires on good input teaches you to ignore it.
+Shipped instead: a trust band on the quantity production uses, `rightX1 ∈
+[0.88, 0.92]`, read off a 0.058-wide measured gap and positively controlled with
+the three real pre-fix values.
