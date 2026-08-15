@@ -28,6 +28,8 @@
     "data:patch-check": "tsx scripts/patch-check.ts",
     "data:expiries": "tsx scripts/expiries.ts --check",
     "data:extract": "tsx scripts/complete-characters.ts",
+    "data:labels": "tsx scripts/spike/snapshot-labels.ts",
+    "test:fold": "tsx scripts/spike/fold-cases.ts",
     "data:replay-dupes": "tsx scripts/replay-dupes.ts",
     "verify:deployed": "tsx scripts/verify-deployed.ts",
     "test:e2e": "tsx scripts/e2e.ts",
