@@ -199,6 +199,9 @@ export interface CharacterRecord {
 /** Per-video manual corrections (data/overrides.json). A hand verdict beats
  *  every automatic tier. */
 export type VideoOverride = Partial<Pick<MatchVideo, 'season' | 'sides' | 'channel'>> & {
+  /** Free-text provenance note. JSON has no comment syntax and this file is
+   *  read by humans as often as by code, so an entry says how it got there. */
+  '//'?: string;
   exclude?: boolean;
   /** Who resolved this. 'extractor' marks a machine resolution, which only
    *  happens at or above auto-accept AND on a decided side.
