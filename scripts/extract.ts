@@ -14,6 +14,7 @@ import type { createWorker } from 'tesseract.js';
 
 import { CACHE, framesOf, grabBursts, pruneClips } from './hud-frames';
 import {
+  geometryOk,
   grey,
   measure,
   platesOf,
@@ -133,8 +134,14 @@ export async function readCached(
 ): Promise<VideoRead> {
   const files = framesOf(id);
   const { hud, geom } = await hudFramesOf(files);
-  if (!geom) return { id, left: [], right: [], hud: 0, frames: files.length, geom: null };
-  const boxes = platesOf(geom, 'symmetric');
+  // UNTRUSTED GEOMETRY IS NOT A READ. Reading through a box that is somewhere
+  // else produces confident silence, which is indistinguishable from a fighter
+  // who never took point — and that is exactly how three videos spent a whole
+  // scoring run looking like a recall problem instead of a crop problem.
+  if (!geometryOk(geom)) {
+    return { id, left: [], right: [], hud: hud.length, frames: files.length, geom };
+  }
+  const boxes = platesOf(geom!, 'symmetric');
   const left: FrameRead[] = [];
   const right: FrameRead[] = [];
   for (const { file, sec } of hud) {

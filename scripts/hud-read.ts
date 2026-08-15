@@ -33,6 +33,63 @@ const ROW_X1 = 0.26;
 const COL_INK_MIN = 0.22;
 const COL_GAP = 10; // px gap tolerated inside one run (inter-word space)
 
+/** The column scan is bounded to exclude the CORNER BENCH-PORTRAIT CLUSTERS.
+ *
+ *  Tōkon draws a four-icon diamond cluster of the side's bench in each top
+ *  corner, inside the same band as the nameplate. `run()` returns the LONGEST
+ *  ink run in its window, and that cluster is dense hard-edged art — so whenever
+ *  a fighter's name is short the cluster outruns it and becomes "the nameplate".
+ *  Three ground-truth videos read NOTHING across 59-71 HUD frames because of it,
+ *  and since the production anchor derives leftX0 = 1 - rightX1, one plate's
+ *  error destroyed the other too.
+ *
+ *  THE RIGHT NAMEPLATE IS RIGHT-ALIGNED AT A FIXED FRACTION. Dumping every run
+ *  rather than the winner shows the name ending at 0.8977 over and over, with
+ *  the cluster a SEPARATE run starting ~0.911. So the bound goes just past the
+ *  name, not into the gap between the two clusters:
+ *
+ *      name run ends      0.8969 .. 0.9148   (48 videos)
+ *      cluster run starts 0.9109 .. 0.9234   (observed)
+ *
+ *  0.91 excludes the cluster while keeping every observed name. A wider bound
+ *  does not work: at 0.94 the cluster is merely CLIPPED rather than excluded,
+ *  and a clipped cluster still won the longest-run test on three videos
+ *  (measured rightX1 0.9383-0.9398, i.e. pressed flat against the bound).
+ *
+ *  Rejecting runs that touch a window boundary was tried and is worse: COL_GAP
+ *  merges the nameplate with the health bar beside it, so real names touch the
+ *  inner edge routinely and the detector fell through to health-bar segments
+ *  (rightX1 collapsed to 0.61, leftX0 rose to 0.39). Reverted.
+ *
+ *  The LEFT bound is cosmetic — production reads only `rightX1` and derives the
+ *  left anchor from it. The left cluster ABUTS its name with no usable gap, so
+ *  the left run is the two merged and pins to whatever the window start is. That
+ *  is also why there is no symmetry gate below: a check needs two independent
+ *  opinions and the left one is not independent. */
+const NAME_X_MIN = 0.085;
+const NAME_X_MAX = 0.91;
+
+/** Trust band on the measured right anchor.
+ *
+ *  A SANITY GATE NEEDS A MEASURED GAP, NOT A PLAUSIBLE RULE. The obvious check
+ *  — "leftX0 and 1-rightX1 should agree" — was tried and rejected: it flagged
+ *  five videos whose rightX1 was perfectly healthy and whose leftX0 was merely
+ *  portrait-contaminated, i.e. whose derived geometry was already correct. A
+ *  gate that fires on good input teaches you to ignore it.
+ *
+ *  This one keys on the quantity production actually uses. Across 48 cached
+ *  videos the real anchor sits in 0.8969-0.9148; the three failures sat at
+ *  0.9727-0.9898, a 0.058-wide gap away. [0.88, 0.92] holds every real
+ *  measurement with room and excludes every failure seen so far. Outside it the
+ *  geometry is not trusted and the video routes to review rather than being read
+ *  through a box that is somewhere else. */
+export const RIGHT_ANCHOR_MIN = 0.88;
+export const RIGHT_ANCHOR_MAX = 0.92;
+
+/** Is this video's measured geometry trustworthy enough to read through? */
+export const geometryOk = (g: PlateGeom | null): boolean =>
+  g !== null && g.rightX1 >= RIGHT_ANCHOR_MIN && g.rightX1 <= RIGHT_ANCHOR_MAX;
+
 /** Plate width as a frame fraction — generous enough for CAPTAIN AMERICA. */
 export const PLATE_W = 0.145;
 /** Vertical slack around the measured band, so a descender is not clipped. */
@@ -121,8 +178,10 @@ export function measure(d: Buffer, W: number, H: number): FrameMeasure {
   const by1 = y0 + best[1];
 
   const run = (xa: number, xb: number) => {
+    const lo = Math.round(W * xa);
+    const hi = Math.ceil(W * xb) - 1;
     const cols: [number, number][] = [];
-    for (let x = Math.round(W * xa); x < W * xb; x++) {
+    for (let x = lo; x <= hi; x++) {
       let b = 0;
       for (let y = by0; y <= by1; y++) if (rng(x, y) > RANGE_MIN) b++;
       cols.push([x, b / (by1 - by0 + 1)]);
@@ -145,8 +204,8 @@ export function measure(d: Buffer, W: number, H: number): FrameMeasure {
     return runs.sort((a, b) => b[1] - b[0] - (a[1] - a[0]))[0]!;
   };
 
-  const l = run(0.02, 0.46);
-  const r = run(0.54, 0.99);
+  const l = run(NAME_X_MIN, 0.46);
+  const r = run(0.54, NAME_X_MAX);
   if (!l || !r) return { hud: false, letterbox: lb };
   return {
     hud: true,

@@ -20,6 +20,7 @@
 import {
   BURST_INDEP,
   foldSide,
+  geometryOk,
   MEMBER_MIN,
   resolveSide,
   titleOk,
@@ -279,6 +280,24 @@ console.log('\n8. titleOk — the per-record positive control');
     'union MISSING the title fighter fails — reader or attribution is wrong',
   );
   check(!titleOk([], ['storm']), 'an empty union cannot satisfy the control');
+}
+
+// ── 9. the geometry trust band, positively controlled ───────────────────────
+console.log('\n9. geometryOk — a gate that cannot fail is indistinguishable from one that passes');
+{
+  const g = (rightX1: number) => ({ bandY0: 0.03, bandY1: 0.053, leftX0: 0.1, rightX1 });
+  check(geometryOk(g(0.8977)), 'the modal real anchor passes', 'rightX1 0.8977');
+  check(geometryOk(g(0.8953)), 'the lowest observed real anchor passes', 'rightX1 0.8953');
+  check(geometryOk(g(0.9094)), 'the highest observed real anchor passes', 'rightX1 0.9094');
+  // THE CONTROL. Every one of the 48 cached videos sits inside the band after
+  // the window fix, so on this corpus the gate never fires — which is exactly
+  // the state where a broken gate and a working one look identical. These are
+  // the three measurements that actually failed, fed back in.
+  check(!geometryOk(g(0.9727)), 'u9BACdqvTqw’s pre-fix anchor is REJECTED', 'rightX1 0.9727');
+  check(!geometryOk(g(0.9828)), 'TdUH0obiI3Q’s pre-fix anchor is REJECTED', 'rightX1 0.9828');
+  check(!geometryOk(g(0.9898)), 'WA9jEF9ddt4’s pre-fix anchor is REJECTED', 'rightX1 0.9898');
+  check(!geometryOk(g(0.61)), 'a health-bar segment mistaken for the plate is REJECTED');
+  check(!geometryOk(null), 'a video with no measurable band is REJECTED');
 }
 
 console.log(`\n${fail === 0 ? '✔' : '✖'} ${pass} passed, ${fail} failed\n`);

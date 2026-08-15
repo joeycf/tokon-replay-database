@@ -51,6 +51,11 @@ import type { MatchVideo } from '../../types/index';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
 const REFOLD = argv.includes('--refold');
+/** Re-OCR every video even if it is already in the store. Needed whenever the
+ *  GEOMETRY changes — `--refold` only re-runs the fold over reads that were
+ *  taken through the old crop, which would score the old boxes with the new
+ *  arithmetic and report a number that describes neither. */
+const REREAD = argv.includes('--reread');
 const LIMIT = Number(argv[argv.indexOf('--limit') + 1]) || Infinity;
 const STORE = join(CACHE, 'extracted.json');
 
@@ -75,7 +80,7 @@ if (!REFOLD) {
   });
   console.log(`reading ${truth.length} ground-truth videos\n`);
   for (const [i, v] of truth.entries()) {
-    if (stored[v.id]?.hud) {
+    if (!REREAD && stored[v.id]?.hud) {
       console.log(`  [${i + 1}/${truth.length}] ${v.id} — cached (${stored[v.id]!.hud} HUD)`);
       continue;
     }
