@@ -245,6 +245,43 @@ export function samplePlan(durationSec: number, n = 12): number[] {
   );
 }
 
+/** Window starts for the BURST plan — the sampler the reader actually uses.
+ *
+ *  THE FOLD CANNOT FIX A SAMPLING PROBLEM, and this is a sampling problem. In a
+ *  1v1 game a side's character is constant, so twelve singletons spread across
+ *  the runtime see it twelve times. Here the plate cycles: a side fields four
+ *  fighters, and the fourth — smallest share of point time — has to be caught
+ *  twice before the fold will believe it. Twelve singletons cannot do that at
+ *  any fold, however the arithmetic is arranged.
+ *
+ *  The fix is free. `grabWindow` costs ONE range request per window regardless
+ *  of how many frames are cut from it, so twelve 6-second windows at 1 fps cost
+ *  exactly what twelve singletons cost — twelve requests — and return 72 frames
+ *  instead of 12. Same politeness, same pacing, six times the evidence.
+ *
+ *  Bursts also make within-burst adjacency meaningful again, since a tag lasts
+ *  longer than a second. The fold still gives run-length zero weight; the point
+ *  is that a measurement could now earn it back. */
+export function burstPlan(durationSec: number, windows = 12): number[] {
+  const lo = 0.06;
+  const hi = 0.9;
+  return Array.from({ length: windows }, (_, i) =>
+    Math.round(durationSec * (lo + ((hi - lo) * i) / Math.max(1, windows - 1))),
+  );
+}
+
+/** Pull the burst plan for one video. Idempotent and additive: `grabWindow`
+ *  skips a window whose frames are all cached, and `framesOf` reads the
+ *  directory, so a denser second pass folds together with the first. */
+export async function grabBursts(
+  id: string,
+  durationSec: number,
+  windows = 12,
+  windowSec = 6,
+): Promise<void> {
+  for (const s of burstPlan(durationSec, windows)) await grabWindow(id, s, windowSec, 1);
+}
+
 /** The recon plan: three windows, ~14 requests, ~102 frames.
  *
  *  Sections A and B exist because UNIFORM SAMPLING CANNOT FIND A VS SCREEN. A
