@@ -151,19 +151,26 @@ if (humanBlank.length) {
 // ── 2. headroom on rejected plates ──────────────────────────────────────────
 const rejected = js.filter((j) => j.stratum !== 'no-hud' && j.reader === null);
 const recoverable = rejected.filter((j) => j.human !== null);
-console.log('\n── headroom: of plates the reader REJECTED, how many are readable? ──\n');
+console.log('\n── of plates the reader REJECTED, how many can a HUMAN read? ────────\n');
 console.log(`  ${recoverable.length}/${rejected.length}   ${ci(recoverable.length, rejected.length)}`);
+console.log(
+  '  HUMAN-READABLE IS NOT MACHINE-RECOVERABLE, and this line was mislabelled\n' +
+    '  "headroom" until the sweep said otherwise. A person reads the plate in the\n' +
+    '  whole frame; the reader gets a 145px crop and tesseract returns nothing\n' +
+    '  usable on most of these — 21 of 110 silent, the rest mostly 4+ edits from\n' +
+    '  the true name. scripts/spike/matcher-sweep.ts fitted every looser accept\n' +
+    '  rule against these same labels and NONE recovers a plate: `radius OR\n' +
+    '  margin>=3` accepts the identical set, and margin>=2 accepts fewer while\n' +
+    '  introducing a wrong answer. Per-frame crops scored worse than the shipped\n' +
+    '  per-video median too. This is an OCR ceiling on this face, not a gate.',
+);
 if (recoverable.length) {
   const byName = new Map<string, number>();
   for (const j of recoverable) byName.set(j.human!, (byName.get(j.human!) ?? 0) + 1);
-  console.log('  names the reader is losing:');
+  console.log('\n  names in the unread set (a flat spread means the face, not an alias gap):');
   for (const [id, n] of [...byName].sort((a, b) => b[1] - a[1])) {
     console.log(`    ${(names.get(id) ?? id).padEnd(18)} ${n}`);
   }
-  console.log(
-    '  A name concentrated here is an alias gap or a radius-cap bind, both cheap.\n' +
-      '  A flat spread is the face itself, which is not.',
-  );
 }
 
 // ── 3. the HUD gate, positively controlled by the same pass ─────────────────
