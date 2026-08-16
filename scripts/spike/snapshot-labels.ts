@@ -31,82 +31,97 @@ import { fileURLToPath } from 'node:url';
 import { CACHE } from '../hud-frames';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');
-const LABELS = join(ROOT, 'data/labels.json');
-const SNAPSHOT = join(CACHE, 'ground-truth.json');
+
+/** Both label files, each snapshotted beside the other. `labels.json` holds the
+ *  bench readings (four fighters per side, from the corner icons);
+ *  `plate-labels.json` holds the per-frame nameplate readings. They are
+ *  different observations of different things and neither is derivable from the
+ *  other, so both are protected. */
+const FILES = [
+  { data: join(ROOT, 'data/labels.json'), snap: join(CACHE, 'ground-truth.json') },
+  { data: join(ROOT, 'data/plate-labels.json'), snap: join(CACHE, 'ground-truth-plates.json') },
+];
 
 const checkOnly = process.argv.includes('--check');
 const restore = process.argv.includes('--restore');
 
-interface Label {
-  point: [string[], string[]];
-  bench: [string[], string[]];
-  leftIsFirst: boolean | null;
-  at: string;
-}
+const read = (p: string): Record<string, unknown> =>
+  existsSync(p) ? (JSON.parse(readFileSync(p, 'utf8')) as Record<string, unknown>) : {};
 
-const read = (p: string): Record<string, Label> =>
-  existsSync(p) ? (JSON.parse(readFileSync(p, 'utf8')) as Record<string, Label>) : {};
-
-/** Identity of a label, order-insensitive within each list: [ed, elena] and
- *  [elena, ed] are the same claim, because the stored order is presentational
- *  and only the SET is being asserted. `leftIsFirst` IS part of the identity —
- *  it is a separate observation about screen position, not presentation. */
-const key = (l: Label): string =>
-  [
-    l.bench.map((s) => [...s].sort().join('+')).join('|'),
-    l.point.map((s) => [...s].sort().join('+')).join('|'),
-    String(l.leftIsFirst),
-  ].join(' :: ');
+/** Identity of one label, order-insensitive INSIDE each list but not across
+ *  fields. A bench of [ed, elena] and [elena, ed] is the same claim, because the
+ *  stored order is presentational and only the SET is asserted. Everything else
+ *  — which plate, which side — is a distinct observation and part of the
+ *  identity. Sorting the JSON keys gives both properties without the shape of
+ *  either label file being hard-coded here, so a new field cannot silently fall
+ *  outside the comparison. */
+const key = (l: unknown): string =>
+  JSON.stringify(l, (_k, v: unknown) =>
+    Array.isArray(v) && v.every((x) => typeof x === 'string')
+      ? [...(v as string[])].sort()
+      : v && typeof v === 'object' && !Array.isArray(v)
+        ? Object.fromEntries(
+            Object.entries(v as Record<string, unknown>)
+              .filter(([k2]) => k2 !== 'at')
+              .sort(([a], [b]) => a.localeCompare(b)),
+          )
+        : v,
+  );
 
 const write = (p: string, v: unknown, indent: number) =>
   writeFileSync(p, `${JSON.stringify(v, null, indent)}\n`, 'utf8');
 
-const labels = read(LABELS);
-const snapshot = read(SNAPSHOT);
+let anyStale = false;
+for (const { data, snap } of FILES) {
+  const name = data.split('/').slice(-2).join('/');
+  const labels = read(data);
+  const snapshot = read(snap);
 
-if (restore) {
-  // Iterates the SNAPSHOT, so it can never invent an id the snapshot does not
-  // know, and skips no-ops so an unchanged entry does not churn the file.
-  let put = 0;
-  for (const [id, l] of Object.entries(snapshot)) {
-    if (labels[id] && key(labels[id]!) === key(l)) continue;
-    labels[id] = { ...labels[id], ...l };
-    put++;
+  if (restore) {
+    // Iterates the SNAPSHOT, so it can never invent an id the snapshot does not
+    // know, and skips no-ops so an unchanged entry does not churn the file.
+    let put = 0;
+    for (const [id, l] of Object.entries(snapshot)) {
+      if (labels[id] && key(labels[id]) === key(l)) continue;
+      labels[id] = l;
+      put++;
+    }
+    if (put) write(data, labels, 2);
+    console.log(`\u2714 ${name}: restored ${put} (${Object.keys(snapshot).length} in snapshot)`);
+    continue;
   }
-  if (put) write(LABELS, labels, 2);
+
+  const fresh: string[] = [];
+  const changed: string[] = [];
+  for (const [id, l] of Object.entries(labels)) {
+    const prev = snapshot[id];
+    if (prev === undefined) fresh.push(id);
+    else if (key(prev) !== key(l)) changed.push(id);
+    else continue;
+    snapshot[id] = l;
+  }
+
   console.log(
-    `✔ restored ${put} label(s) into data/labels.json (${Object.keys(snapshot).length} in snapshot)`,
+    `${name}: ${Object.keys(snapshot).length} labelled \u00b7 +${fresh.length} new \u00b7 ${changed.length} revised`,
   );
-  process.exit(0);
-}
 
-const fresh: string[] = [];
-const changed: string[] = [];
-for (const [id, l] of Object.entries(labels)) {
-  const prev = snapshot[id];
-  if (!prev) fresh.push(id);
-  else if (key(prev) !== key(l)) changed.push(id);
-  else continue;
-  snapshot[id] = l;
-}
+  if (checkOnly) {
+    if (fresh.length || changed.length) {
+      anyStale = true;
+      console.error(
+        `\u2716 unsnapshotted labels in ${name} \u2014 run without --check\n` +
+          `  new: ${fresh.join(', ') || '\u2014'}\n  revised: ${changed.join(', ') || '\u2014'}`,
+      );
+    }
+    continue;
+  }
 
-console.log(
-  `ground truth: ${Object.keys(snapshot).length} labelled · +${fresh.length} new · ${changed.length} revised`,
-);
+  mkdirSync(CACHE, { recursive: true });
+  write(snap, snapshot, 1);
+  if (fresh.length) console.log(`  new: ${fresh.join(', ')}`);
+}
 
 if (checkOnly) {
-  if (fresh.length || changed.length) {
-    console.error(
-      '✖ unsnapshotted labels in data/labels.json — run without --check\n' +
-        `  new: ${fresh.join(', ') || '—'}\n  revised: ${changed.join(', ') || '—'}`,
-    );
-    process.exit(1);
-  }
-  console.log('✔ snapshot is current');
-  process.exit(0);
+  if (anyStale) process.exit(1);
+  console.log('\u2714 snapshots are current');
 }
-
-mkdirSync(CACHE, { recursive: true });
-write(SNAPSHOT, snapshot, 1);
-console.log(`✔ ${SNAPSHOT}`);
-if (fresh.length) console.log(`  new: ${fresh.join(', ')}`);

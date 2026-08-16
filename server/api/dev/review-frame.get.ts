@@ -11,7 +11,7 @@
  * how a dev tool becomes an arbitrary-file-read.
  */
 
-import { createReadStream, existsSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const ID_RE = /^[A-Za-z0-9_-]{6,20}$/;
@@ -20,8 +20,28 @@ export default defineEventHandler((event) => {
   if (!import.meta.dev) throw createError({ statusCode: 404 });
 
   const q = getQuery(event);
-  const id = String(q.id ?? '');
-  const sec = Number(q.sec);
+  let id = String(q.id ?? '');
+  let sec = Number(q.sec);
+
+  // ADDRESSING BY SAMPLE INDEX IS THE POINT, not a convenience. If the page
+  // requested frames by video id, that id would sit in the DOM and in the
+  // network tab, and a labeller could look the video up and read its title —
+  // which is exactly how the previous pass got contaminated. The index resolves
+  // here, server-side, so the page never learns what it is looking at.
+  if (q.sample !== undefined) {
+    const i = Number(q.sample);
+    const p = join(process.cwd(), 'cache/tokon/plate-sample.json');
+    if (!existsSync(p)) throw createError({ statusCode: 503, statusMessage: 'no sample' });
+    const { sample } = JSON.parse(readFileSync(p, 'utf8')) as {
+      sample: { videoId: string; sec: number }[];
+    };
+    if (!Number.isInteger(i) || i < 0 || i >= sample.length) {
+      throw createError({ statusCode: 400, statusMessage: 'bad sample index' });
+    }
+    id = sample[i]!.videoId;
+    sec = sample[i]!.sec;
+  }
+
   if (!ID_RE.test(id)) throw createError({ statusCode: 400, statusMessage: 'bad id' });
   if (!Number.isInteger(sec) || sec < 0 || sec > 86_400) {
     throw createError({ statusCode: 400, statusMessage: 'bad sec' });

@@ -29,6 +29,8 @@
     "data:expiries": "tsx scripts/expiries.ts --check",
     "data:extract": "tsx scripts/complete-characters.ts",
     "data:labels": "tsx scripts/spike/snapshot-labels.ts",
+    "data:plate-sample": "tsx scripts/spike/build-plate-sample.ts",
+    "data:plate-accuracy": "tsx scripts/spike/plate-accuracy.ts",
     "test:fold": "tsx scripts/spike/fold-cases.ts",
     "data:replay-dupes": "tsx scripts/replay-dupes.ts",
     "verify:deployed": "tsx scripts/verify-deployed.ts",
