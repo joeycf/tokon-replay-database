@@ -76,7 +76,8 @@ interface RawPlate {
   human: string | null;
 }
 
-let raws: RawPlate[] = existsSync(RAW) && !REREAD ? (JSON.parse(readFileSync(RAW, 'utf8')) as RawPlate[]) : [];
+const raws: RawPlate[] =
+  existsSync(RAW) && !REREAD ? (JSON.parse(readFileSync(RAW, 'utf8')) as RawPlate[]) : [];
 
 if (!raws.length) {
   const worker = await createWorker('eng', undefined, { logger: () => {} });
