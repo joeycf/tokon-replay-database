@@ -129,6 +129,45 @@ function letterbox(d: Buffer, W: number, H: number) {
   return { top: top / H, bottom: bot / H };
 }
 
+/** Minimum span, in rows, of the band the nameplate occupies. */
+export const BAND_MIN_SPAN = 8;
+
+/**
+ * The TOPMOST band tall enough to be the nameplate, or null.
+ *
+ * Topmost, not densest: the nameplate is always the first text below the frame
+ * top, while the densest band is the player-handle row plus the health-bar
+ * segments under it, which wins whenever the fighter's name is short. Picking by
+ * density silently measured the wrong row on one channel and read as framing
+ * variance.
+ *
+ * ONE THRESHOLD, AND IT KEEPS SCANNING. The first version accepted a band at a
+ * span of 6, `break`, and then rejected it for spanning under 8 — so any frame
+ * whose topmost band was 6 or 7 rows was discarded outright and the real
+ * nameplate below it was never reached. Measured on ZKFk4K20cG4/26: the topmost
+ * band is seven rows of faint 0.10-0.15 ink at the very top of the frame, the
+ * actual nameplate sits at rows 18-34 with ink of 0.46, and the frame was
+ * dropped with SPIDER-MAN and GREEN GOBLIN plainly rendered in it.
+ *
+ * Using the stricter of the two constants keeps this STRICTLY ADDITIVE: a frame
+ * that passed before had a first-span-6 band that also spanned 8, so this finds
+ * the same band first. Only rejected frames can become admitted — verified
+ * across the corpus, not assumed.
+ *
+ * Exported so the gate can be driven by a synthetic profile rather than only by
+ * whatever the corpus happens to contain (scripts/spike/fold-cases.ts).
+ */
+export function bandOf(rows: number[]): [number, number] | null {
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i]! < ROW_INK_MIN) continue;
+    let j = i;
+    while (j + 1 < rows.length && rows[j + 1]! >= ROW_INK_MIN) j++;
+    if (j - i >= BAND_MIN_SPAN) return [i, j];
+    i = j;
+  }
+  return null;
+}
+
 /** Locate the nameplate band and both ink runs. `hud: false` means this frame
  *  carries no nameplate at all — a K.O. card, a round banner, a replay cut. */
 export function measure(d: Buffer, W: number, H: number): FrameMeasure {
@@ -157,23 +196,8 @@ export function measure(d: Buffer, W: number, H: number): FrameMeasure {
     }
     rows.push(b / t);
   }
-  // TOPMOST qualifying band, not the densest. The nameplate is always the first
-  // text below the frame top; the densest band is the player-handle row plus the
-  // health-bar segments beneath it, which wins whenever the fighter's name is
-  // short. Picking by density silently measured the wrong row on one channel and
-  // read as framing variance.
-  let best: [number, number] | null = null;
-  for (let i = 0; i < rows.length; i++) {
-    if (rows[i]! < ROW_INK_MIN) continue;
-    let j = i;
-    while (j + 1 < rows.length && rows[j + 1]! >= ROW_INK_MIN) j++;
-    if (j - i >= 6) {
-      best = [i, j];
-      break;
-    }
-    i = j;
-  }
-  if (!best || best[1] - best[0] < 8) return { hud: false, letterbox: lb };
+  const best = bandOf(rows);
+  if (!best) return { hud: false, letterbox: lb };
   const by0 = y0 + best[0];
   const by1 = y0 + best[1];
 

@@ -77,7 +77,7 @@ const channelOf = new Map(videos.map((v) => [v.id, v.intake]));
 // ── population weights, from the full extraction ────────────────────────────
 const store = JSON.parse(readFileSync(join(CACHE, 'extracted.json'), 'utf8')) as Record<
   string,
-  { hud: number; left: { id: string | null }[]; right: { id: string | null }[] }
+  { hud: number; left: { sec: number; id: string | null }[]; right: { sec: number; id: string | null }[] }
 >;
 let popResolved = 0;
 let popRejected = 0;
@@ -123,15 +123,44 @@ interface Judgement {
   reader: string | null;
   human: string | null;
 }
+// THE READER'S ANSWER IS READ LIVE, NOT FROM THE SAMPLE.
+// `plate-sample.json` snapshots `readerLeft`/`readerRight` at build time so the
+// strata can be drawn, and those go stale the moment the reader changes — which
+// is exactly when this script is being run to check whether the change was safe.
+// Scoring a new reader against its predecessor's answers would report that
+// nothing moved, however much had. The sample's copy is kept only as a fallback
+// for a frame the current extraction has no row for.
+const live = new Map<string, { left: string | null; right: string | null }>();
+for (const [vid, v] of Object.entries(store)) {
+  const right = new Map(v.right.map((r) => [r.sec, r.id]));
+  for (const l of v.left) {
+    live.set(`${vid}/${l.sec}`, { left: l.id, right: right.get(l.sec) ?? null });
+  }
+}
+
 const js: Judgement[] = [];
 let labelledFrames = 0;
+let movedIn = 0;
 for (const e of sample) {
-  const l = labels[`${e.videoId}/${e.sec}`];
+  const key = `${e.videoId}/${e.sec}`;
+  const l = labels[key];
   if (!l) continue;
   labelledFrames++;
   const ch = channelOf.get(e.videoId) ?? '?';
-  js.push({ channel: ch, stratum: e.stratum, side: 'L', reader: e.readerLeft, human: l.left });
-  js.push({ channel: ch, stratum: e.stratum, side: 'R', reader: e.readerRight, human: l.right });
+  const now = live.get(key);
+  // A frame the gate used to discard and now reads is no longer a `no-hud`
+  // control — it has become a real judgement and is scored as one.
+  const stratum = e.stratum === 'no-hud' && now ? 'admitted-since' : e.stratum;
+  if (stratum === 'admitted-since') movedIn++;
+  const rl = now ? now.left : e.readerLeft;
+  const rr = now ? now.right : e.readerRight;
+  js.push({ channel: ch, stratum, side: 'L', reader: rl, human: l.left });
+  js.push({ channel: ch, stratum, side: 'R', reader: rr, human: l.right });
+}
+if (movedIn) {
+  console.log(
+    `  note: ${movedIn} frame(s) the gate used to discard are now read — scored as judgements, not as gate controls\n`,
+  );
 }
 
 console.log(`plate accuracy — ${labelledFrames}/${sample.length} frames labelled, ${js.length} plate judgements\n`);

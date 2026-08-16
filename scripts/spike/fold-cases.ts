@@ -18,6 +18,7 @@
  */
 
 import {
+  bandOf,
   BURST_INDEP,
   foldSide,
   geometryOk,
@@ -298,6 +299,32 @@ console.log('\n9. geometryOk — a gate that cannot fail is indistinguishable fr
   check(!geometryOk(g(0.9898)), 'WA9jEF9ddt4’s pre-fix anchor is REJECTED', 'rightX1 0.9898');
   check(!geometryOk(g(0.61)), 'a health-bar segment mistaken for the plate is REJECTED');
   check(!geometryOk(null), 'a video with no measurable band is REJECTED');
+}
+
+// ── 10. the HUD row-band gate ───────────────────────────────────────────────
+console.log('\n10. bandOf — the topmost band TALL ENOUGH, not merely the topmost');
+{
+  const flat = (n: number, v: number) => Array<number>(n).fill(v);
+  // THE REGRESSION, as a profile. A short faint band at the very top of the
+  // frame followed by the real nameplate. The first version accepted a span of
+  // 6, broke out, then rejected the result for spanning under 8 — so this frame
+  // was discarded and the 0.46-ink band below it never looked at. Measured on
+  // ZKFk4K20cG4/26 with SPIDER-MAN and GREEN GOBLIN plainly on screen.
+  const profile = [...flat(7, 0.13), 0.02, ...flat(20, 0.45), 0.0, ...flat(30, 0.05)];
+  const b = bandOf(profile);
+  check(b !== null, 'a frame whose FIRST band is too short is not discarded', `band ${JSON.stringify(b)}`);
+  check(b?.[0] === 8, 'it selects the nameplate band, not the faint one above it', `starts at ${b?.[0]} (want 8)`);
+
+  // Still topmost, not densest: given two bands that both qualify, the higher
+  // one wins even though the lower is denser — the nameplate sits above the
+  // handle row and the health bars.
+  const two = [...flat(12, 0.2), 0.0, ...flat(20, 0.9)];
+  check(bandOf(two)?.[0] === 0, 'of two qualifying bands the TOPMOST still wins');
+
+  // And it must still be able to say no.
+  check(bandOf(flat(40, 0.0)) === null, 'a blank frame yields no band');
+  check(bandOf([...flat(7, 0.5), ...flat(30, 0.0)]) === null, 'a band too short to be a nameplate yields none');
+  check(bandOf([]) === null, 'an empty profile yields no band');
 }
 
 console.log(`\n${fail === 0 ? '✔' : '✖'} ${pass} passed, ${fail} failed\n`);
