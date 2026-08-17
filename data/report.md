@@ -1,48 +1,48 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-16T08:04:24.431Z_
+_Generated 2026-08-17T08:26:52.693Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 38 | 38 | 100.0% |
+| highLevelReplays | 42 | 42 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 738 | 41 | 5.6% |
-| replaysHub | 60 | 56 | 93.3% |
-| fightingStationX | 2561 | 46 | 1.8% |
-| **total** | | **194** | |
+| hadoukenReplays | 739 | 42 | 5.7% |
+| replaysHub | 66 | 62 | 93.9% |
+| fightingStationX | 2575 | 49 | 1.9% |
+| **total** | | **208** | |
 
 ## Character provenance
 
-How every one of the 388 sides got its characters.
+How every one of the 416 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 288 | 74.2% |
-| description | 100 | 25.8% |
+| title | 308 | 74.0% |
+| description | 108 | 26.0% |
 | footage | 0 | 0.0% |
 | review | 0 | 0.0% |
 
-- complete (4/4): **90/388** (23.2%)
-- bench alignment: handle 90 · character-subset 14 · ambiguous 3
-- title slot order: handle-first 279 · chars-first 41 · parallel-lists 68
+- complete (4/4): **98/416** (23.6%)
+- bench alignment: handle 100 · character-subset 14 · ambiguous 3
+- title slot order: handle-first 300 · chars-first 42 · parallel-lists 74
 - tier conflicts (queued for review): 0
 - decomposed-Ō titles seen: 0
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **149**
+- bench queue (published, incomplete): **159**
 
 ## Misses
 
 | reason | count |
 | --- | ---: |
 | other-game | 1419 |
-| not-tokon | 1066 |
+| not-tokon | 1070 |
 | pre-launch | 663 |
-| not-a-match | 60 |
+| not-a-match | 67 |
 | short-duration | 6 |
 | no-vs-title | 2 |
 | char-unresolved | 1 |
