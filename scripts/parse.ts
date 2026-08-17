@@ -613,6 +613,29 @@ async function main() {
   records.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
   const withOverrides = applyOverrides(records, overrides);
 
+  // THE PROVENANCE TALLY IS RECOMPUTED FROM THE FINAL RECORDS.
+  //
+  // It used to be accumulated as each record was built, which is BEFORE
+  // applyOverrides runs — so a tier could exist throughout the corpus and be
+  // absent from the report entirely. Measured the first time the extractor
+  // wrote at scale: 168 sides landed at `footage`, and the report said the tier
+  // had none, splitting them back across `title` and `description` as they had
+  // been before the override replaced them. `complete` was wrong the same way,
+  // reading 98 where the truth was 131, because the 33 sides the extraction
+  // filled to four were counted in their pre-override state.
+  //
+  // A report that cannot see a whole tier is worse than no report: it is the
+  // artifact a human consults to learn how the corpus was sourced, and it was
+  // confidently describing a world that no longer existed.
+  for (const k of Object.keys(tierCount) as CharTier[]) tierCount[k] = 0;
+  completeSides = 0;
+  for (const r of withOverrides) {
+    for (const s of r.sides) {
+      tierCount[s.provenance.tier] += 1;
+      if (s.provenance.complete) completeSides += 1;
+    }
+  }
+
   const playerMap = new Map<string, PlayerRecord>();
   for (const r of withOverrides) {
     for (const s of r.sides) {
