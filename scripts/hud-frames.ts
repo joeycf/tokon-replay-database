@@ -133,18 +133,30 @@ export function framesOf(id: string): string[] {
  *  not sixty. Returns the absolute seconds actually written.
  *
  *  Idempotent: a window whose frames are all present performs no request. */
+export interface GrabOpts {
+  /** Ceiling passed to yt-dlp's format selector. Defaults to 720, which is what
+   *  the nameplate reader was built and measured on. */
+  maxHeight?: number;
+  /** Where to write frames. Defaults to the shared cache. A caller pulling a
+   *  DIFFERENT resolution must pass its own directory: the frame filename is the
+   *  absolute second and nothing else, so two resolutions in one directory would
+   *  silently overwrite each other and leave a cache nobody can interpret. */
+  framesDir?: string;
+}
+
 export async function grabWindow(
   id: string,
   startSec: number,
   durSec: number,
   fps: number,
+  opts: GrabOpts = {},
 ): Promise<number[]> {
   const start = Math.max(0, Math.floor(startSec));
   const step = 1 / fps;
   const want = Array.from({ length: Math.floor(durSec * fps) }, (_, i) =>
     Math.round(start + i * step),
   );
-  const dir = join(FRAMES, id);
+  const dir = join(opts.framesDir ?? FRAMES, id);
   if (want.every((s) => existsSync(join(dir, `${stamp(s)}.png`)))) return want;
 
   preflightCookies();
@@ -164,7 +176,7 @@ export async function grabWindow(
       '--download-sections',
       `*${start}-${start + Math.ceil(durSec)}`,
       '-f',
-      'bv*[height<=720]/bv*',
+      `bv*[height<=${opts.maxHeight ?? 720}]/bv*`,
       '-o',
       `${clipStem}.%(ext)s`,
       `https://www.youtube.com/watch?v=${id}`,

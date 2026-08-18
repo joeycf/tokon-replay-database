@@ -252,7 +252,7 @@ async function main() {
     'chars-first': 0,
     'parallel-lists': 0,
   };
-  const tierCount: Record<CharTier, number> = { title: 0, description: 0, footage: 0, review: 0 };
+  const tierCount: Record<CharTier, number> = { title: 0, description: 0, footage: 0, human: 0, review: 0 };
   const alignCount: Record<string, number> = {};
   let conflicts = 0;
   let completeSides = 0;
@@ -683,7 +683,7 @@ async function main() {
   lines.push('## Character provenance', '');
   lines.push(`How every one of the ${sideTotal} sides got its characters.`, '');
   lines.push('| tier | sides | share |', '| --- | ---: | ---: |');
-  for (const t of ['title', 'description', 'footage', 'review'] as CharTier[]) {
+  for (const t of ['title', 'description', 'footage', 'human', 'review'] as CharTier[]) {
     lines.push(
       `| ${t} | ${tierCount[t]} | ${sideTotal ? ((tierCount[t] / sideTotal) * 100).toFixed(1) : '0.0'}% |`,
     );

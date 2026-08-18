@@ -227,7 +227,7 @@ function testSubstrate(): void {
   );
   const tiers = new Set(videos.flatMap((v) => v.sides.map((s) => s.provenance.tier)));
   expect(
-    [...tiers].every((t) => ['title', 'description', 'footage', 'review'].includes(t)),
+    [...tiers].every((t) => ['title', 'description', 'footage', 'human', 'review'].includes(t)),
     `every provenance tier is in the union (${[...tiers].sort().join(', ')})`,
   );
 

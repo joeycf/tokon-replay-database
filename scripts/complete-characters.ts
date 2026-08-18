@@ -22,14 +22,14 @@
  * Run: npm run data:extract [-- --limit N] [--dry]
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { createWorker } from 'tesseract.js';
 
-import { readCached, readVideo } from './extract';
-import { grabBursts, pruneClips } from './hud-frames';
+import { readCached, readVideo, type VideoRead } from './extract';
+import { CACHE, grabBursts, pruneClips } from './hud-frames';
 import {
   AUTO_ACCEPT,
   foldSide,
@@ -53,6 +53,38 @@ const queue = read<BenchQueueItem[]>('bench-queue.json').slice(0, LIMIT);
 const videos = new Map(read<MatchVideo[]>('videos.json').map((v) => [v.id, v]));
 const overrides = read<Record<string, VideoOverride>>('overrides.json');
 const roster = buildPlateRoster(await loadCharacters());
+
+/**
+ * Per-video reads are PERSISTED, not discarded.
+ *
+ * This loop already computes a full `VideoRead` per video — every frame's plate,
+ * its edit distance and its ensemble votes — and used to throw all of it away the
+ * moment the fold had run. That cost more than it looked like:
+ *
+ *   · A side that read NOTHING left no trace, so "four sides read zero across
+ *     59-71 HUD frames" could be observed once and then never reproduced. A record
+ *     with `geom` set and empty reads is a REJECTED CROP; one with `hud: 0` is a
+ *     video carrying no nameplate at all. Undistinguishable without the store,
+ *     obvious with it.
+ *   · The reads are also LABELS. Each resolved frame names the fighter on point at
+ *     that second, which is the free training signal the portrait tier's templates
+ *     and its team-minus-point candidate sets are built from. Discarding them meant
+ *     re-OCRing footage already on disk to recover something already known.
+ *
+ * Same store `scripts/spike/read-cached.ts` owns, same incremental write, so the
+ * two paths accumulate into one file rather than disagreeing. It lives in the
+ * gitignored frame cache and is written even under `--dry`: it records work that
+ * was genuinely performed, and `--dry`'s promise is about `data/`, not about
+ * throwing away evidence.
+ */
+const STORE = join(CACHE, 'extracted.json');
+const reads: Record<string, VideoRead> = existsSync(STORE)
+  ? (JSON.parse(readFileSync(STORE, 'utf8')) as Record<string, VideoRead>)
+  : {};
+const persist = (id: string, r: VideoRead): void => {
+  reads[id] = r;
+  writeFileSync(STORE, JSON.stringify(reads, null, 1));
+};
 
 const worker = await createWorker('eng', undefined, { logger: () => {} });
 await worker.setParameters({
@@ -88,6 +120,9 @@ for (const [i, item] of queue.entries()) {
     right = foldSide(r.right);
     resampled = true;
   }
+  // AFTER any re-sample, so the store holds the densest read of this video rather
+  // than a first pass that a second pass has already superseded.
+  persist(item.id, r);
 
   const known = v.sides.map((s) => s.provenance.fromTitle[0] ?? '') as [string, string];
   const side = resolveSide(r.left, r.right, known);

@@ -70,7 +70,18 @@ export interface RawVideoRecord {
 }
 
 /** Which stage produced a side's characters. Ordered weakest → strongest. */
-export type CharTier = 'title' | 'description' | 'footage' | 'review';
+/**
+ * `human` sits above every automatic tier and is the tier this game ends on.
+ *
+ * The portrait reader was built, measured and STOPPED: with 189 hand-labelled
+ * crops — the strongest input it could ever get — a fighter's own bench icon
+ * varied by 20-24 bits across matches while different fighters differed by only
+ * 26-29, a margin of ~6 bits on a 64-bit hash. The bust reader gets ~16, which is
+ * why that one works. No accept radius separates classes that overlap that much,
+ * and 1080p moved none of it. So the bench's assist-only third is read by a
+ * person, and the machine's job is to pre-sort for them.
+ */
+export type CharTier = 'title' | 'description' | 'footage' | 'human' | 'review';
 
 /** How the description's two sides were matched to the title's two sides.
  *  NEVER positional: hadoukenReplays reverses its second title slot on 27 of 34
@@ -111,6 +122,13 @@ export interface CharProvenance {
   fromDescription?: string[];
   /** Ids read from FOOTAGE for this side. */
   fromFootage?: string[];
+  /** Ids a PERSON read off the HUD's bench-portrait cluster.
+   *
+   *  Authoritative over every automatic tier, including the description: 4 of 189
+   *  hand-read slots named a fighter absent from BOTH of a record's described
+   *  benches, and the pixels win. So a human read REPLACES a side's list rather
+   *  than merging into it. */
+  fromHuman?: string[];
   /** How the description was aligned to THIS side. */
   descAlign?: DescAlign;
   /** Which slot order this side's title segment used. */
