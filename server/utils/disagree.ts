@@ -1,0 +1,136 @@
+/**
+ * Where a human read and an automatic tier disagree.
+ *
+ * Two populations, and it matters that they are different:
+ *
+ * CROSS-TIER, over the sides drained at /dev/bench-review. A `human` side whose
+ * `fromTitle`, `fromDescription` or `fromFootage` names a fighter the reader did
+ * NOT see. Currently zero across 227 sides — which is a result, not an empty page.
+ * It is partly structural: the bench queue only ever held INCOMPLETE sides, so
+ * none of them carried a four-name description to contradict in the first place.
+ * It stays watched because every side drained from here on can break it.
+ *
+ * OFF-BENCH, over the template-labelling pass in data/portrait-labels.json. Those
+ * sides had a full described bench, and four labels named a fighter absent from
+ * BOTH of a record's benches. `types/index.ts` blesses sides of more than four as
+ * mid-set team changes, so these are plausibly real roster swaps the uploader never
+ * wrote down — a judgement about footage, which is why they get a page rather than
+ * a rule.
+ */
+
+export interface CrossTier {
+  video: string;
+  sideIndex: number;
+  tier: string;
+  claimed: string[];
+  human: string[];
+  missing: string[];
+}
+
+export interface OffBench {
+  key: string;
+  video: string;
+  sec: number;
+  side: 'L' | 'R';
+  cell: string;
+  /** the fighter the labeller read in this diamond */
+  read: string;
+  /** the record side the screen side belongs to, via the plate's point fighter */
+  sideIndex: number;
+  point: string;
+  benches: string[][];
+  /** already appended to the record as a team change */
+  applied: boolean;
+}
+
+interface SideRec {
+  characters: string[];
+  provenance: {
+    fromTitle?: string[];
+    fromDescription?: string[];
+    fromFootage?: string[];
+    fromHuman?: string[];
+  };
+}
+interface FrameRead {
+  sec: number;
+  id: string | null;
+  dist: number;
+}
+
+export function crossTier(): { rows: CrossTier[]; scanned: number } {
+  const videos = readJson<{ id: string; sides: SideRec[] }[]>('data/videos.json', []);
+  const rows: CrossTier[] = [];
+  let scanned = 0;
+  for (const v of videos) {
+    v.sides.forEach((s, k) => {
+      const p = s.provenance;
+      if (!p.fromHuman) return;
+      scanned++;
+      const seen = new Set(p.fromHuman);
+      for (const [tier, claimed] of [
+        ['title', p.fromTitle],
+        ['description', p.fromDescription],
+        ['footage', p.fromFootage],
+      ] as [string, string[] | undefined][]) {
+        const missing = (claimed ?? []).filter((c) => !seen.has(c));
+        if (missing.length) {
+          rows.push({
+            video: v.id,
+            sideIndex: k,
+            tier,
+            claimed: claimed ?? [],
+            human: p.fromHuman!,
+            missing,
+          });
+        }
+      }
+    });
+  }
+  return { rows, scanned };
+}
+
+export function offBench(): OffBench[] {
+  const labels = readJson<Record<string, { char: string }>>('data/portrait-labels.json', {});
+  const videos = readJson<{ id: string; sides: SideRec[] }[]>('data/videos.json', []);
+  const extracted = readJson<Record<string, { left: FrameRead[]; right: FrameRead[] }>>(
+    'cache/tokon/extracted.json',
+    {},
+  );
+  const byId = new Map(videos.map((v) => [v.id, v]));
+
+  const out: OffBench[] = [];
+  for (const [key, val] of Object.entries(labels)) {
+    const [video, secStr, side, cell] = key.split('/');
+    if (!video || !secStr || (side !== 'L' && side !== 'R') || !cell) continue;
+    const v = byId.get(video);
+    const e = extracted[video];
+    if (!v || !e || v.sides.length !== 2) continue;
+    const benches = v.sides.map((s) => s.provenance.fromDescription ?? []);
+    // only sides with a FULL described bench can be contradicted by it
+    if (!benches.every((b) => b.length === 4)) continue;
+    if (benches.some((b) => b.includes(val.char))) continue;
+
+    const sec = Number(secStr);
+    const read = (side === 'L' ? e.left : e.right).find((r) => r.sec === sec);
+    if (!read?.id) continue;
+    const owning = benches
+      .map((b, k) => ({ k, hit: b.includes(read.id!) }))
+      .filter((x) => x.hit);
+    if (owning.length !== 1) continue;
+    const sideIndex = owning[0]!.k;
+    out.push({
+      key,
+      video,
+      sec,
+      side,
+      cell,
+      read: val.char,
+      sideIndex,
+      point: read.id,
+      benches,
+      applied: (v.sides[sideIndex]!.characters ?? []).includes(val.char),
+    });
+  }
+  return out.sort((a, b) => a.key.localeCompare(b.key));
+}

@@ -33,6 +33,15 @@ const Z = 4;
 const WIN_W = 0.16;
 const WIN_H = 0.24;
 
+/** The player-handle strip, measured from a labelled frame: the handle sits under
+ *  the health bar at roughly x 0.152-0.207, y 0.104-0.128 on the LEFT, mirrored on
+ *  the right. Bounds are generous around that.
+ *
+ *  It is served SEPARATELY rather than by widening the cluster crop, because the
+ *  cluster is the thing being read and halving its scale to fit a name in would
+ *  trade the task for the label. */
+const STRIP = { x0: 0.1, x1: 0.32, y0: 0.07, y1: 0.22 };
+
 export default defineEventHandler(async (event) => {
   if (!import.meta.dev) throw createError({ statusCode: 404 });
 
@@ -76,6 +85,26 @@ export default defineEventHandler(async (event) => {
   const meta = await sharp(file).metadata();
   const W = meta.width!;
   const H = meta.height!;
+
+  // handle strip: no annotation, just the name, upscaled enough to read
+  if (String(q.strip ?? '') === '1') {
+    const sx0 = w.side === 'L' ? STRIP.x0 : 1 - STRIP.x1;
+    const sw = Math.round(W * (STRIP.x1 - STRIP.x0));
+    const strip = await sharp(file)
+      .extract({
+        left: Math.round(W * sx0),
+        top: Math.round(H * STRIP.y0),
+        width: sw,
+        height: Math.round(H * (STRIP.y1 - STRIP.y0)),
+      })
+      .resize({ width: sw * 3, kernel: 'nearest' })
+      .png()
+      .toBuffer();
+    setHeader(event, 'content-type', 'image/png');
+    setHeader(event, 'cache-control', 'private, max-age=3600');
+    return strip;
+  }
+
   const cw = Math.round(W * WIN_W);
   const chh = Math.round(H * WIN_H);
   const left = w.side === 'L' ? 0 : W - cw;

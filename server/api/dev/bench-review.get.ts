@@ -32,7 +32,8 @@ export default defineEventHandler(() => {
   >('data/overrides.json', {});
 
   const items = work.map((w, i) => {
-    const prov = overrides[w.video]?.sides?.[w.sideIndex]?.provenance;
+    const prov =
+      w.sideIndex === null ? undefined : overrides[w.video]?.sides?.[w.sideIndex]?.provenance;
     const saved = prov?.fromHuman ?? null;
     return {
       /** exact per-frame picks when they were recorded; older saves derive them */
@@ -53,7 +54,12 @@ export default defineEventHandler(() => {
       video: w.video,
       secs: w.secs,
       side: w.side,
-      points: w.points.map((p) => ({ id: p, name: nameOf.get(p) ?? p })),
+      // null where the plate read nothing at that second — the page asks the
+      // reviewer for the bust as a fourth pick instead of assuming one
+      points: w.points.map((p) => (p === null ? null : { id: p, name: nameOf.get(p) ?? p })),
+      handles: w.handles,
+      needs: w.needs,
+      sideIndex: w.sideIndex,
       known: w.known.map((k) => ({ id: k, name: nameOf.get(k) ?? k })),
       saved,
       done: Array.isArray(saved) && saved.length > 0,

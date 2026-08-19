@@ -25,15 +25,16 @@
         <div v-for="(f, fi) in [0, 1]" :key="f" class="panel">
           <p class="head">
             frame {{ fi === 0 ? 'A' : 'B' }} ·
-            <span class="pt">on point {{ cur.points[fi]!.name }}</span>
+            <span v-if="cur.points[fi]" class="pt">on point {{ cur.points[fi]!.name }}</span>
+            <span v-else class="warn">the plate read nothing — read the bust too</span>
           </p>
           <img
             class="crop"
             :src="`/api/dev/portrait-crop?pool=bench&video=${cur.video}&side=${cur.side}&frame=${fi}`"
             :alt="`side ${cursor + 1} frame ${fi}`"
           >
-          <div v-for="(letter, k) in LETTERS" :key="letter" class="slot">
-            <span class="letter">{{ letter }}</span>
+          <div v-for="(letter, k) in slotsFor(fi)" :key="letter" class="slot">
+            <span class="letter" :class="{ bust: letter === '◆' }">{{ letter }}</span>
             <select v-model="picks[fi]![k]" class="sel">
               <option value="">— pick —</option>
               <option v-for="r in roster" :key="r.id" :value="r.id">{{ r.name }}</option>
@@ -42,6 +43,29 @@
         </div>
 
         <div class="actions">
+          <!-- The plate could not say which player this screen side is, so the
+               handle under the health bar is the evidence and the reviewer reads
+               it. Never inferred from title order: one uploader reverses its
+               second title slot on 27 of 34 videos. -->
+          <div v-if="cur.needs.side" class="attrib">
+            <p class="warn">Which player is this side?</p>
+            <img
+              class="strip"
+              :src="`/api/dev/portrait-crop?pool=bench&video=${cur.video}&side=${cur.side}&frame=0&strip=1`"
+              alt="player handle"
+            >
+            <div class="acts">
+              <button
+                v-for="(h, hi) in cur.handles"
+                :key="hi"
+                class="who"
+                :class="{ on: sideIndex === hi }"
+                @click="sideIndex = hi"
+              >
+                {{ h }}
+              </button>
+            </div>
+          </div>
           <p v-if="cur.known.length" class="dim">
             already known: {{ cur.known.map((k) => k.name).join(', ') }}
           </p>
@@ -97,7 +121,10 @@ interface Item {
   video: string;
   secs: number[];
   side: 'L' | 'R';
-  points: { id: string; name: string }[];
+  points: ({ id: string; name: string } | null)[];
+  handles: [string, string];
+  needs: { side: boolean; point: boolean };
+  sideIndex: number | null;
   known: { id: string; name: string }[];
   saved: string[] | null;
   savedPicks: { a: string[]; b: string[]; forced?: boolean } | null;
@@ -106,7 +133,14 @@ interface Item {
 
 const cursor = ref(0);
 const busy = ref(false);
+const sideIndex = ref<number | null>(null);
 const disagree = ref<{ a: string[]; b: string[] } | null>(null);
+
+/** Three diamonds when the plate named the point fighter; the bust as a fourth
+ *  when it did not. `◆` is the bust so the row cannot be mistaken for a diamond. */
+function slotsFor(fi: number): string[] {
+  return cur.value?.points[fi] ? [...LETTERS] : ['◆', ...LETTERS];
+}
 const picks = ref<string[][]>([
   ['', '', ''],
   ['', '', ''],
@@ -124,7 +158,16 @@ const total = computed(() => data.value?.total ?? 0);
 const done = computed(() => data.value?.done ?? 0);
 const roster = computed(() => data.value?.roster ?? []);
 const cur = computed(() => items.value[cursor.value]);
-const ready = computed(() => picks.value.every((row) => row.every(Boolean)));
+const ready = computed(() => {
+  const it = cur.value;
+  if (!it) return false;
+  if (it.needs.side && sideIndex.value === null) return false;
+  return [0, 1].every((fi) => {
+    const want = slotsFor(fi).length;
+    const row = picks.value[fi] ?? [];
+    return row.length >= want && row.slice(0, want).every(Boolean);
+  });
+});
 
 /**
  * Reopening a finished side shows what was read, not a blank form.
@@ -143,9 +186,10 @@ function loadPicks(): void {
   const it = cur.value;
   disagree.value = null;
   const blank = (): string[][] => [
-    ['', '', ''],
-    ['', '', ''],
+    new Array<string>(slotsFor(0).length).fill(''),
+    new Array<string>(slotsFor(1).length).fill(''),
   ];
+  sideIndex.value = it?.sideIndex ?? null;
   if (!it) {
     picks.value = blank();
     restored.value = null;
@@ -182,8 +226,9 @@ async function save(force: boolean): Promise<void> {
         body: {
           video: cur.value!.video,
           side: cur.value!.side,
-          a: picks.value[0],
-          b: picks.value[1],
+          sideIndex: sideIndex.value,
+          a: picks.value[0]!.slice(0, slotsFor(0).length),
+          b: picks.value[1]!.slice(0, slotsFor(1).length),
           force,
         },
       },
@@ -288,6 +333,34 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   font-weight: 700;
   color: #00e5ff;
   width: 1.2rem;
+}
+.letter.bust {
+  color: #ff9d2e;
+}
+.attrib {
+  margin-bottom: 1rem;
+}
+.strip {
+  image-rendering: pixelated;
+  width: 100%;
+  max-width: 22rem;
+  border-radius: 4px;
+  margin: 0.3rem 0;
+}
+.who {
+  font: inherit;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #3a4055;
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.who.on {
+  background: #00e5ff;
+  border-color: #00e5ff;
+  color: #04121a;
+  font-weight: 600;
 }
 .sel {
   font: inherit;

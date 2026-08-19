@@ -2267,3 +2267,54 @@ if (DUMP) {
 }
 
 export {};
+
+/**
+ * PART 3'S GATING MEASUREMENT: is the player's HANDLE legible?
+ *
+ * 62 bench records are stuck, and not for want of footage — all of them have
+ * persisted reads. They are stuck on ATTRIBUTION: which screen side belongs to
+ * which player in the record. The title anchor cannot say, because every one of
+ * those 62 titles names at most one fighter per side; 26 side-slots matched BOTH
+ * title sides and 16 matched neither.
+ *
+ * The HUD draws each player's handle under their nameplate, so a person could
+ * attribute by reading it — IF it survives a 720p YouTube encode at the size it is
+ * drawn. That is a measurement, not an assumption, and it decides whether the
+ * remaining queue is reviewable at all. Dumps a wide top crop for videos drawn from
+ * the actually-stuck set, rather than from whatever read cleanly.
+ */
+if (process.argv.includes('--handle')) {
+  mkdirSync(OUT, { recursive: true });
+  const queue = JSON.parse(readFileSync(join(ROOT, 'data/bench-queue.json'), 'utf8')) as {
+    id: string;
+  }[];
+  const vids = JSON.parse(readFileSync(join(ROOT, 'data/videos.json'), 'utf8')) as {
+    id: string;
+    sides: { handle: string; provenance: { fromTitle: string[] } }[];
+  }[];
+  const byId = new Map(vids.map((v) => [v.id, v]));
+  let n = 0;
+  for (const q of queue) {
+    if (n >= 3) break;
+    const e = extracted[q.id];
+    const v = byId.get(q.id);
+    if (!e?.geom || !v) continue;
+    const hit = e.left.find((r) => r.id && r.dist === 0);
+    if (!hit) continue;
+    const f = frameFile(q.id, hit.sec);
+    const m = await sharp(f).metadata();
+    const W = m.width!;
+    const H = m.height!;
+    // wide enough to carry the nameplate AND the handle row beneath it
+    await sharp(f)
+      .extract({ left: 0, top: 0, width: Math.round(W * 0.34), height: Math.round(H * 0.16) })
+      .resize({ width: Math.round(W * 0.34) * 4, kernel: 'nearest' })
+      .png()
+      .toFile(join(OUT, `handle-${n}.png`));
+    console.log(
+      `  handle-${n}.png  ${q.id} @${hit.sec}s  ·  record handles: ${v.sides.map((s) => s.handle).join('  vs  ')}`,
+    );
+    n++;
+  }
+  console.log('');
+}

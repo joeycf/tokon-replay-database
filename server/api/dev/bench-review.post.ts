@@ -25,6 +25,8 @@ interface Body {
   /** identity of the side, as handed out by the GET — NOT a list position */
   video?: unknown;
   side?: unknown;
+  /** which record side this screen side is, when the plate could not say */
+  sideIndex?: unknown;
   i?: unknown;
   a?: unknown;
   b?: unknown;
@@ -57,10 +59,24 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // WHICH RECORD SIDE. The plate supplies it when a title-known fighter appears on
+  // exactly one side; otherwise the reviewer reads the player's handle off the HUD
+  // and says. Never guessed from title ORDER — one uploader reverses its second
+  // slot on 27 of 34 uploads.
+  const sideIndex = w.sideIndex ?? Number(body.sideIndex);
+  if (sideIndex !== 0 && sideIndex !== 1) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'this side could not be attributed automatically — say which player it is',
+    });
+  }
+
   const roster = new Set(readJson<{ id: string }[]>('data/characters.json', []).map((c) => c.id));
-  const trio = (raw: unknown, which: string): string[] => {
-    if (!Array.isArray(raw) || raw.length !== 3) {
-      throw createError({ statusCode: 400, statusMessage: `${which}: expected three fighters` });
+  // three picks when the plate named the point fighter, four when it did not and
+  // the bust is read by the same person reading the diamonds
+  const picks = (raw: unknown, which: string, want: number): string[] => {
+    if (!Array.isArray(raw) || raw.length !== want) {
+      throw createError({ statusCode: 400, statusMessage: `${which}: expected ${want} fighters` });
     }
     const ids = raw.map(String);
     for (const id of ids) {
@@ -70,10 +86,11 @@ export default defineEventHandler(async (event) => {
     }
     return ids;
   };
-  const a = trio(body.a, 'frame A');
-  const b = trio(body.b, 'frame B');
+  const a = picks(body.a, 'frame A', w.points[0] ? 3 : 4);
+  const b = picks(body.b, 'frame B', w.points[1] ? 3 : 4);
 
-  const setOf = (point: string, three: string[]) => [...new Set([point, ...three])].sort().join(',');
+  const setOf = (point: string | null, rest: string[]) =>
+    [...new Set([...(point ? [point] : []), ...rest])].sort().join(',');
   const setA = setOf(w.points[0], a);
   const setB = setOf(w.points[1], b);
   if (setA !== setB && body.force !== true) {
@@ -86,8 +103,8 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  // point first: they held the plate at the moment the frame was taken
-  const characters = [...new Set([w.points[0], ...a])];
+  // point first when known: they held the plate at the moment the frame was taken
+  const characters = [...new Set([...(w.points[0] ? [w.points[0]] : []), ...a])];
 
   const path = join(process.cwd(), 'data/overrides.json');
   const overrides = readJson<Record<string, { sides?: SideRec[]; [k: string]: unknown }>>(
@@ -102,7 +119,7 @@ export default defineEventHandler(async (event) => {
   const existing = overrides[w.video] ?? {};
   const baseSides = (existing.sides ?? v.sides) as SideRec[];
   const sides = baseSides.map((s, k) =>
-    k !== w.sideIndex
+    k !== sideIndex
       ? s
       : {
           ...s,

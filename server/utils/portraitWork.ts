@@ -130,24 +130,49 @@ export const labelKey = (w: WorkItem, cell: string): string =>
  */
 export interface BenchItem {
   video: string;
-  /** which record side this screen side belongs to — where the override is written */
-  sideIndex: number;
+  /** which record side this screen side belongs to, or NULL when the plate could
+   *  not attribute it and a person has to say */
+  sideIndex: number | null;
   side: 'L' | 'R';
   /** two seconds from different bursts */
   secs: [number, number];
-  /** the plate's point fighter at each of those seconds */
-  points: [string, string];
-  /** what the record already knows for this side */
+  /** the plate's point fighter at each second, or null where it read nothing */
+  points: [string | null, string | null];
+  /** what the record already knows for this side (empty when unattributed) */
   known: string[];
+  /** both players' handles, in record order — what a person attributes BY */
+  handles: [string, string];
+  /** what the plate could not supply, so the page knows what to ask for */
+  needs: { side: boolean; point: boolean };
 }
 
+/**
+ * RELAXED SECOND PASS: the plate is an anchor, not a gatekeeper.
+ *
+ * The strict pass below requires two exact plate reads AND exactly one title match
+ * to attribute a screen side to a record side. That is right when it works, and it
+ * stopped working: of the 62 records still incomplete, every one carries a title
+ * naming at most one fighter per side, so 26 side-slots matched BOTH record sides
+ * and 16 matched neither, while another 40 had fewer than two exact reads. Zero
+ * reached the page. The queue was not short of footage — all 62 already have
+ * persisted reads — it was short of an ANCHOR.
+ *
+ * A person does not need one. The HUD draws each player's handle under their
+ * nameplate and it survives the encode legibly — measured on two channels,
+ * "Hikari" and "ROCK-MF" both plainly readable at 4x — so the reviewer can say
+ * which side they are looking at. Where the plate also failed to name a point
+ * fighter, they read the bust too: four picks instead of three.
+ *
+ * `needs` says which of those the page must ask for, so a side the plate CAN
+ * attribute keeps its cheaper three-pick flow untouched.
+ */
 export function buildBenchList(): BenchItem[] {
   const extracted = readJson<Record<string, Extracted>>('cache/tokon/extracted.json', {});
   const queue = readJson<{ id: string }[]>('data/bench-queue.json', []);
   const videos = readJson<
     {
       id: string;
-      sides: { characters: string[]; provenance: { fromTitle: string[] } }[];
+      sides: { characters: string[]; handle: string; provenance: { fromTitle: string[] } }[];
     }[]
   >('data/videos.json', []);
   const byId = new Map(videos.map((v) => [v.id, v]));
@@ -160,40 +185,62 @@ export function buildBenchList(): BenchItem[] {
     if (!v || !e?.geom || v.sides.length !== 2) continue;
     if (!existsSync(join(process.cwd(), 'cache/tokon/frames', id))) continue;
 
+    const handles = v.sides.map((s) => s.handle) as [string, string];
+    // A second where EITHER plate resolved is a second where the HUD was legible.
+    // Preferring those matters for sides the plate could not read at all: their
+    // frames are often mid-super, the wash that defeated the OCR also bleaches the
+    // handle, and a reviewer would be handed the one frame least worth showing.
+    const cleanSecs = [...new Set([...e.left, ...e.right].filter((r) => r.id && r.dist === 0).map((r) => r.sec))].sort(
+      (a, b) => a - b,
+    );
+    const anySecs = [...new Set([...e.left, ...e.right].map((r) => r.sec))].sort((a, b) => a - b);
+    const hudSecs = cleanSecs.length >= 2 ? cleanSecs : anySecs;
+
     for (const side of ['L', 'R'] as const) {
       const reads = (side === 'L' ? e.left : e.right).filter((r) => r.id && r.dist === 0);
-      if (reads.length < 2) continue;
-      // ATTRIBUTION COMES FROM THE TITLE-KNOWN FIGHTER, never from title order —
-      // one uploader reverses its second title slot on 27 of 34 videos, so
-      // assuming order would compound one error with another.
+      // ATTRIBUTION PREFERS THE TITLE-KNOWN FIGHTER, never title order — one
+      // uploader reverses its second title slot on 27 of 34 videos, so assuming
+      // order would compound one error with another.
       const owning = v.sides
         .map((s, k) => ({ k, hit: reads.some((r) => s.provenance.fromTitle.includes(r.id!)) }))
         .filter((x) => x.hit);
-      if (owning.length !== 1) continue; // ambiguous or mirror — routes to review
-      const sideIndex = owning[0]!.k;
-      if (v.sides[sideIndex]!.characters.length >= 4) continue; // already complete
+      const sideIndex = owning.length === 1 ? owning[0]!.k : null;
+      // a side the plate CAN place, and which is already done, is not work
+      if (sideIndex !== null && v.sides[sideIndex]!.characters.length >= 4) continue;
+      // when it cannot place the side, both of the record's sides must still have
+      // something missing, or there is nothing here to fill
+      if (sideIndex === null && v.sides.every((s) => s.characters.length >= 4)) continue;
 
-      // two frames as far apart as the reads allow, so they are different bursts
-      const first = reads[0]!;
-      const last = [...reads].reverse().find((r) => r.sec - first.sec > 30) ?? reads[reads.length - 1]!;
-      if (last.sec === first.sec) continue;
-      const frames = [first, last] as const;
+      // two frames as far apart as available, so they are different bursts. Fall
+      // back to any HUD frame when the plate resolved nothing: a person can read a
+      // cluster the OCR could not.
+      const pool = reads.length >= 2 ? reads.map((r) => r.sec) : hudSecs;
+      if (pool.length < 2) continue;
+      const firstSec = pool[0]!;
+      const lastSec = [...pool].reverse().find((sec) => sec - firstSec > 30) ?? pool[pool.length - 1]!;
+      if (lastSec === firstSec) continue;
+      const secs = [firstSec, lastSec] as [number, number];
       if (
-        !frames.every((r) =>
+        !secs.every((sec) =>
           existsSync(
-            join(process.cwd(), 'cache/tokon/frames', id, `${String(r.sec).padStart(6, '0')}.png`),
+            join(process.cwd(), 'cache/tokon/frames', id, `${String(sec).padStart(6, '0')}.png`),
           ),
         )
       ) {
         continue;
       }
+      const pointAt = (sec: number): string | null =>
+        (side === 'L' ? e.left : e.right).find((r) => r.sec === sec && r.dist === 0)?.id ?? null;
+      const points: [string | null, string | null] = [pointAt(secs[0]), pointAt(secs[1])];
       out.push({
         video: id,
         sideIndex,
         side,
-        secs: [first.sec, last.sec],
-        points: [first.id!, last.id!],
-        known: v.sides[sideIndex]!.characters,
+        secs,
+        points,
+        known: sideIndex === null ? [] : v.sides[sideIndex]!.characters,
+        handles,
+        needs: { side: sideIndex === null, point: points[0] === null || points[1] === null },
       });
     }
   }
