@@ -9620,13 +9620,17 @@
           "spider-man",
           "black-panther",
           "magik",
-          "green-goblin"
+          "green-goblin",
+          "danger",
+          "iron-man"
         ],
         "provenance": {
-          "tier": "description",
+          "tier": "human",
           "tiers": [
             "title",
-            "description"
+            "description",
+            "human",
+            "human"
           ],
           "fromTitle": [
             "spider-man",
@@ -9640,7 +9644,16 @@
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": true
+          "complete": true,
+          "fromHuman": [
+            "spider-man",
+            "black-panther",
+            "magik",
+            "green-goblin",
+            "danger",
+            "iron-man"
+          ],
+          "teamChange": true
         }
       },
       {

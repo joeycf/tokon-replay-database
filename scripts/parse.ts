@@ -733,6 +733,20 @@ async function main() {
     `- complete (4/4): **${completeSides}/${sideTotal}** ` +
       `(${sideTotal ? ((completeSides / sideTotal) * 100).toFixed(1) : '0.0'}%)`,
   );
+  // OVERSIZE SIDES ARE REPORTED, NOT ONLY COUNTED ON A CONSOLE.
+  //
+  // A side of more than four is a legitimate mid-set team change, and emit excludes
+  // it from any pairing surface so C(n,2) cannot fabricate pairs that were never
+  // played. An exclusion nobody can see in the artifact they consult is
+  // indistinguishable from data quietly going missing — the same argument that put
+  // the provenance tally in this file.
+  const oversizeSides = withOverrides.reduce(
+    (n, r) => n + r.sides.filter((s) => s.characters.length > 4).length,
+    0,
+  );
+  lines.push(
+    `- oversize (>4, mid-set team change): **${oversizeSides}** — counted in usage, excluded from pairing`,
+  );
   lines.push(`- bench alignment: ${fmtTally(alignCount) || '—'}`);
   lines.push(`- title slot order: ${fmtTally(slotOrders)}`);
   lines.push(`- tier conflicts (queued for review): ${conflicts}`);

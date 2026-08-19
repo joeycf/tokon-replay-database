@@ -26,6 +26,8 @@ import { join } from 'node:path';
 interface Body {
   key?: unknown;
   verdict?: unknown;
+  /** for `reassign`: the fighter actually in that diamond */
+  char?: unknown;
 }
 interface SideRec {
   characters: string[];
@@ -38,12 +40,34 @@ export default defineEventHandler(async (event) => {
   const body = (await readBody(event)) as Body;
   const key = String(body.key ?? '');
   const verdict = String(body.verdict ?? '');
-  if (verdict !== 'team-change' && verdict !== 'misread') {
+  if (verdict !== 'team-change' && verdict !== 'misread' && verdict !== 'reassign') {
     throw createError({ statusCode: 400, statusMessage: `unknown verdict "${verdict}"` });
   }
   const item = offBench().find((o) => o.key === key);
   if (!item) {
     throw createError({ statusCode: 409, statusMessage: 'that reading is no longer off-bench — refresh' });
+  }
+
+  // REASSIGN corrects rather than deletes. `misread` throws the reading away, which
+  // is right when the labeller saw something that was not there — but when the
+  // diamond plainly holds a DIFFERENT fighter, deleting loses a true observation to
+  // avoid recording a wrong one. The correction keeps it.
+  if (verdict === 'reassign') {
+    const char = String(body.char ?? '');
+    const roster = readJson<{ id: string }[]>('data/characters.json', []);
+    if (!roster.some((c) => c.id === char)) {
+      throw createError({ statusCode: 400, statusMessage: `unknown fighter id "${char}"` });
+    }
+    const labels = readJson<Record<string, Record<string, unknown>>>('data/portrait-labels.json', {});
+    const prev = labels[key];
+    if (!prev) throw createError({ statusCode: 409, statusMessage: 'label is gone — refresh' });
+    labels[key] = { ...prev, char, reassignedFrom: prev.char, at: new Date().toISOString().slice(0, 10) };
+    writeFileSync(
+      join(process.cwd(), 'data/portrait-labels.json'),
+      `${JSON.stringify(labels, null, 2)}\n`,
+      'utf8',
+    );
+    return { ok: true, verdict, char };
   }
 
   if (verdict === 'misread') {

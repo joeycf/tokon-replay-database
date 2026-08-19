@@ -17,6 +17,7 @@ export default defineEventHandler(() => {
   const ob = offBench();
 
   return {
+    roster: [...roster].sort((a, b) => a.name.localeCompare(b.name)),
     crossTier: {
       scanned: ct.scanned,
       rows: ct.rows.map((r) => ({

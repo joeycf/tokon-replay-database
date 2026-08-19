@@ -12814,5 +12814,84 @@
       }
     ],
     "resolvedBy": "human"
+  },
+  "b-uUDQSdAjc": {
+    "//": "mid-set team change read from footage [2026-08-19]",
+    "sides": [
+      {
+        "player": "senshii",
+        "handle": "Senshii",
+        "characters": [
+          "spider-man",
+          "black-panther",
+          "magik",
+          "green-goblin",
+          "danger",
+          "iron-man"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "description",
+            "human",
+            "human"
+          ],
+          "fromTitle": [
+            "spider-man",
+            "black-panther"
+          ],
+          "fromDescription": [
+            "spider-man",
+            "black-panther",
+            "magik",
+            "green-goblin"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "spider-man",
+            "black-panther",
+            "magik",
+            "green-goblin",
+            "danger",
+            "iron-man"
+          ],
+          "teamChange": true
+        }
+      },
+      {
+        "player": "acnologia",
+        "handle": "ACNOLOGIA",
+        "characters": [
+          "carnage",
+          "magik",
+          "black-panther",
+          "blade"
+        ],
+        "provenance": {
+          "tier": "description",
+          "tiers": [
+            "title",
+            "description"
+          ],
+          "fromTitle": [
+            "carnage",
+            "magik"
+          ],
+          "fromDescription": [
+            "carnage",
+            "magik",
+            "black-panther",
+            "blade"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      }
+    ],
+    "resolvedBy": "human"
   }
 }

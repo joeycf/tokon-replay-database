@@ -29,6 +29,12 @@ import {
   cellLuma,
 } from '../../../scripts/portrait-read';
 
+interface FR {
+  sec: number;
+  id: string | null;
+  dist: number;
+}
+
 const Z = 4;
 const WIN_W = 0.16;
 const WIN_H = 0.24;
@@ -45,9 +51,40 @@ const STRIP = { x0: 0.1, x1: 0.32, y0: 0.07, y1: 0.22 };
 export default defineEventHandler(async (event) => {
   if (!import.meta.dev) throw createError({ statusCode: 404 });
 
-  // `pool=bench` serves the DRAIN worklist, which carries two frames per side;
-  // `frame` selects between them. Default stays the template worklist.
   const q = getQuery(event);
+
+  // DIRECT ADDRESSING: an explicit video + second + side, rendered whatever
+  // worklist it does or does not belong to.
+  //
+  // Added because the disagreements page asked a person to judge a reading and
+  // then showed them "crop unavailable" — those records are description-derived
+  // and complete, so they are not in the bench worklist the crop endpoint was
+  // resolving through. A review surface that withholds the evidence is worse than
+  // no review surface: it invites a verdict with nothing behind it.
+  const direct = String(q.video ?? '') !== '' && q.sec !== undefined;
+  if (direct) {
+    const id = String(q.video);
+    const sec = Number(q.sec);
+    const side = String(q.side) === 'R' ? 'R' : 'L';
+    // both arrive from a query string and both become a path, so both are checked
+    if (!/^[A-Za-z0-9_-]{6,20}$/.test(id)) {
+      throw createError({ statusCode: 400, statusMessage: 'bad video id' });
+    }
+    if (!Number.isInteger(sec) || sec < 0 || sec > 86_400) {
+      throw createError({ statusCode: 400, statusMessage: 'bad second' });
+    }
+    // The plate's answer for this exact second is part of the evidence, so the
+    // crop is labelled with it rather than saying "point unread" at a frame where
+    // the point fighter is perfectly well known.
+    const store = readJson<Record<string, { left: FR[]; right: FR[] }>>(
+      'cache/tokon/extracted.json',
+      {},
+    );
+    const e = store[id];
+    const point =
+      (side === 'L' ? e?.left : e?.right)?.find((r) => r.sec === sec && r.dist === 0)?.id ?? null;
+    return await render(event, id, sec, side, point, String(q.strip ?? '') === '1');
+  }
   const bench = String(q.pool ?? '') === 'bench';
   const list = bench ? buildBenchList() : buildWorkList();
   const byIdentity = bench && String(q.video ?? '') !== '';
@@ -61,7 +98,7 @@ export default defineEventHandler(async (event) => {
   }
   const fi = Number(q.frame ?? 0) === 1 ? 1 : 0;
   const item = list[byIdentity ? 0 : i]!;
-  const w = bench
+  const w0 = bench
     ? (() => {
         // resolve by identity when the caller supplies it; the index is only a
         // fallback, because the bench list grows whenever a fetch persists a read
@@ -74,6 +111,18 @@ export default defineEventHandler(async (event) => {
         return { video: b.video, sec: b.secs[fi], side: b.side, point: b.points[fi] };
       })()
     : (item as import('../../utils/portraitWork').WorkItem);
+  return await render(event, w0.video, w0.sec, w0.side, w0.point, String(q.strip ?? '') === '1');
+});
+
+async function render(
+  event: Parameters<Parameters<typeof defineEventHandler>[0]>[0],
+  video: string,
+  sec: number,
+  side: 'L' | 'R',
+  point: string | null,
+  strip: boolean,
+) {
+  const w = { video, sec, side, point };
   const file = join(
     process.cwd(),
     'cache/tokon/frames',
@@ -87,10 +136,10 @@ export default defineEventHandler(async (event) => {
   const H = meta.height!;
 
   // handle strip: no annotation, just the name, upscaled enough to read
-  if (String(q.strip ?? '') === '1') {
+  if (strip) {
     const sx0 = w.side === 'L' ? STRIP.x0 : 1 - STRIP.x1;
     const sw = Math.round(W * (STRIP.x1 - STRIP.x0));
-    const strip = await sharp(file)
+    const out = await sharp(file)
       .extract({
         left: Math.round(W * sx0),
         top: Math.round(H * STRIP.y0),
@@ -102,7 +151,7 @@ export default defineEventHandler(async (event) => {
       .toBuffer();
     setHeader(event, 'content-type', 'image/png');
     setHeader(event, 'cache-control', 'private, max-age=3600');
-    return strip;
+    return out;
   }
 
   const cw = Math.round(W * WIN_W);
@@ -145,7 +194,7 @@ export default defineEventHandler(async (event) => {
       `<polygon points="${x},${y - d} ${x + d},${y} ${x},${y + d} ${x - d},${y}" ` +
         `fill="none" stroke="#FF9D2E" stroke-width="2" stroke-dasharray="6 4"/>`,
       `<text x="${x + d + 8}" y="${y + 4}" font-family="monospace" font-size="15" fill="#FF9D2E">` +
-        `point: ${w.point}</text>`,
+        `${w.point ? `point: ${w.point}` : 'point unread'}</text>`,
     );
   }
   const svg = Buffer.from(
@@ -156,4 +205,4 @@ export default defineEventHandler(async (event) => {
   setHeader(event, 'content-type', 'image/png');
   setHeader(event, 'cache-control', 'private, max-age=3600');
   return out;
-});
+}

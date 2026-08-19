@@ -46,12 +46,16 @@
           <article v-for="o in off" :key="o.key" class="item">
             <img
               class="crop"
-              :src="`/api/dev/portrait-crop?pool=bench&video=${o.video}&side=${o.side}&frame=0`"
+              :src="`/api/dev/portrait-crop?video=${o.video}&sec=${o.sec}&side=${o.side}`"
               :alt="o.key"
               @error="onCropError"
             >
             <div class="detail">
               <p class="mono dim">{{ o.key }}</p>
+              <p class="dim">
+                The cyan diamonds are what was read; the dashed box is the point
+                fighter. <strong>{{ o.cell }}</strong> is the one in question.
+              </p>
               <p>read <strong class="hot">{{ o.readName }}</strong> in the
                 <strong>{{ o.cell }}</strong> diamond · on point {{ o.pointName }}</p>
               <p class="dim">
@@ -63,10 +67,18 @@
               <p v-if="o.applied" class="ok">already appended to side {{ o.sideIndex + 1 }}</p>
               <div v-else class="acts">
                 <button class="act keep" :disabled="busy" @click="decide(o.key, 'team-change')">
-                  team change — append to side {{ o.sideIndex + 1 }}
+                  the read is right — append to side {{ o.sideIndex + 1 }}
                 </button>
+                <select
+                  class="sel"
+                  :disabled="busy"
+                  @change="reassign(o.key, ($event.target as HTMLSelectElement).value)"
+                >
+                  <option value="">it is actually…</option>
+                  <option v-for="r in roster" :key="r.id" :value="r.id">{{ r.name }}</option>
+                </select>
                 <button class="act drop" :disabled="busy" @click="decide(o.key, 'misread')">
-                  misread — drop the label
+                  nothing readable — drop it
                 </button>
               </div>
             </div>
@@ -97,6 +109,7 @@ interface Cross {
 interface Off {
   key: string;
   video: string;
+  sec: number;
   side: 'L' | 'R';
   cell: string;
   readName: string;
@@ -110,11 +123,27 @@ const busy = ref(false);
 const { data, pending, error, refresh } = await useFetch<{
   crossTier: { scanned: number; rows: Cross[] };
   offBench: Off[];
+  roster: { id: string; name: string }[];
 }>('/api/dev/disagreements');
 
 const crossRows = computed(() => data.value?.crossTier.rows ?? []);
 const scanned = computed(() => data.value?.crossTier.scanned ?? 0);
 const off = computed(() => data.value?.offBench ?? []);
+const roster = computed(() => data.value?.roster ?? []);
+
+async function reassign(key: string, char: string): Promise<void> {
+  if (!char) return;
+  busy.value = true;
+  try {
+    await $fetch('/api/dev/disagreements', {
+      method: 'POST',
+      body: { key, verdict: 'reassign', char },
+    });
+    await refresh();
+  } finally {
+    busy.value = false;
+  }
+}
 
 async function decide(key: string, verdict: 'team-change' | 'misread'): Promise<void> {
   busy.value = true;
@@ -126,15 +155,16 @@ async function decide(key: string, verdict: 'team-change' | 'misread'): Promise<
   }
 }
 
-// The crop endpoint serves the bench worklist, which these description-derived
-// records are not in. Say so rather than leaving a broken-image icon, which is how
-// the last endpoint mismatch presented itself.
+// The crop is addressed directly by video + second now, so the only way here is a
+// frame that has actually been evicted from the cache. Worth saying plainly,
+// because a verdict cast without the evidence is the thing this page exists to
+// prevent.
 function onCropError(e: Event): void {
   const el = e.target as HTMLImageElement;
   el.replaceWith(
     Object.assign(document.createElement('p'), {
-      className: 'dim',
-      textContent: 'crop unavailable — this record is not in the bench worklist',
+      className: 'warn',
+      textContent: 'frame is gone from the cache — do not judge this one blind',
     }),
   );
 }
@@ -240,5 +270,17 @@ h2 {
 .act:disabled {
   opacity: 0.4;
   cursor: default;
+}
+.sel {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #3a4055;
+  background: #12151f;
+  color: #e8ecf5;
+  border-radius: 4px;
+}
+.sel option {
+  background: #12151f;
+  color: #e8ecf5;
 }
 </style>
