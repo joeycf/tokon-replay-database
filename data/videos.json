@@ -1345,19 +1345,42 @@
         "player": "hulkmash",
         "handle": "HULKMASH",
         "characters": [
-          "hulk"
+          "hulk",
+          "storm",
+          "deadpool",
+          "spider-man"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "human",
           "tiers": [
-            "title"
+            "title",
+            "human"
           ],
           "fromTitle": [
             "hulk"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": true,
+          "fromHuman": [
+            "hulk",
+            "storm",
+            "deadpool",
+            "spider-man"
+          ],
+          "humanPicks": {
+            "a": [
+              "storm",
+              "deadpool",
+              "spider-man"
+            ],
+            "b": [
+              "storm",
+              "hulk",
+              "spider-man"
+            ],
+            "forced": false
+          }
         }
       }
     ]
@@ -9413,23 +9436,46 @@
         "player": "thermidor",
         "handle": "Thermidor",
         "characters": [
-          "hulk"
+          "hulk",
+          "doctor-doom",
+          "blade",
+          "magik"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "hulk"
           ],
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "hulk"
           ],
-          "confidence": 1
+          "confidence": 1,
+          "fromHuman": [
+            "hulk",
+            "doctor-doom",
+            "blade",
+            "magik"
+          ],
+          "humanPicks": {
+            "a": [
+              "doctor-doom",
+              "blade",
+              "magik"
+            ],
+            "b": [
+              "doctor-doom",
+              "blade",
+              "magik"
+            ],
+            "forced": false
+          }
         }
       },
       {
@@ -14636,24 +14682,46 @@
         "handle": "King Jon",
         "characters": [
           "spider-man",
-          "magik"
+          "magik",
+          "iron-man",
+          "wolverine"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "spider-man"
           ],
           "slotOrder": "parallel-lists",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "spider-man",
             "magik"
           ],
-          "confidence": 0.999
+          "confidence": 0.999,
+          "fromHuman": [
+            "spider-man",
+            "magik",
+            "iron-man",
+            "wolverine"
+          ],
+          "humanPicks": {
+            "a": [
+              "magik",
+              "iron-man",
+              "wolverine"
+            ],
+            "b": [
+              "spider-man",
+              "iron-man",
+              "wolverine"
+            ],
+            "forced": false
+          }
         }
       },
       {

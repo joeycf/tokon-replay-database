@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-19T03:31:12.613Z_
+_Generated 2026-08-19T03:38:11.177Z_
 
 ## Coverage
 
@@ -19,13 +19,13 @@ How every one of the 456 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 62 | 13.6% |
+| title | 61 | 13.4% |
 | description | 114 | 25.0% |
-| footage | 56 | 12.3% |
-| human | 224 | 49.1% |
+| footage | 54 | 11.8% |
+| human | 227 | 49.8% |
 | review | 0 | 0.0% |
 
-- complete (4/4): **371/456** (81.4%)
+- complete (4/4): **374/456** (82.0%)
 - bench alignment: handle 115 · character-subset 14 · ambiguous 3
 - title slot order: handle-first 338 · chars-first 44 · parallel-lists 74
 - tier conflicts (queued for review): 0
@@ -34,7 +34,7 @@ How every one of the 456 sides got its characters.
 ## Queues
 
 - review queue (never published): **4** — character-completion 4
-- bench queue (published, incomplete): **65**
+- bench queue (published, incomplete): **62**
 
 ## Misses
 

@@ -9,50 +9,50 @@
   },
   "characterUsage": {
     "black-panther": 91,
-    "blade": 164,
+    "blade": 165,
     "captain-america": 25,
     "carnage": 114,
     "champion": 53,
     "danger": 15,
-    "deadpool": 52,
-    "doctor-doom": 83,
+    "deadpool": 53,
+    "doctor-doom": 84,
     "ghost-rider": 47,
     "green-goblin": 73,
     "hulk": 57,
-    "iron-man": 41,
+    "iron-man": 42,
     "loki": 72,
-    "magik": 171,
+    "magik": 172,
     "magneto": 163,
     "ms-marvel": 28,
     "peni-parker": 15,
-    "spider-man": 162,
+    "spider-man": 163,
     "star-lord": 64,
-    "storm": 68,
-    "wolverine": 37
+    "storm": 69,
+    "wolverine": 38
   },
   "byPatchUsage": {
     "S1": {
       "black-panther": 91,
-      "blade": 164,
+      "blade": 165,
       "captain-america": 25,
       "carnage": 114,
       "champion": 53,
       "danger": 15,
-      "deadpool": 52,
-      "doctor-doom": 83,
+      "deadpool": 53,
+      "doctor-doom": 84,
       "ghost-rider": 47,
       "green-goblin": 73,
       "hulk": 57,
-      "iron-man": 41,
+      "iron-man": 42,
       "loki": 72,
-      "magik": 171,
+      "magik": 172,
       "magneto": 163,
       "ms-marvel": 28,
       "peni-parker": 15,
-      "spider-man": 162,
+      "spider-man": 163,
       "star-lord": 64,
-      "storm": 68,
-      "wolverine": 37
+      "storm": 69,
+      "wolverine": 38
     }
   },
   "playerCharacters": {
@@ -528,7 +528,10 @@
       "storm": 1
     },
     "hulkmash": {
-      "hulk": 1
+      "deadpool": 1,
+      "hulk": 1,
+      "spider-man": 1,
+      "storm": 1
     },
     "humblegenius": {
       "spider-man": 1
@@ -665,10 +668,12 @@
     "king-jon": {
       "carnage": 1,
       "doctor-doom": 1,
+      "iron-man": 1,
       "loki": 1,
       "magik": 1,
       "spider-man": 1,
-      "star-lord": 1
+      "star-lord": 1,
+      "wolverine": 1
     },
     "kingafrica": {
       "captain-america": 3,
@@ -1148,7 +1153,10 @@
       "magik": 1
     },
     "thermidor": {
-      "hulk": 1
+      "blade": 1,
+      "doctor-doom": 1,
+      "hulk": 1,
+      "magik": 1
     },
     "tht1d00d": {
       "deadpool": 1,
