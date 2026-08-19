@@ -22,6 +22,9 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 interface Body {
+  /** identity of the side, as handed out by the GET — NOT a list position */
+  video?: unknown;
+  side?: unknown;
   i?: unknown;
   a?: unknown;
   b?: unknown;
@@ -37,11 +40,22 @@ export default defineEventHandler(async (event) => {
 
   const body = (await readBody(event)) as Body;
   const work = buildBenchList();
-  const i = Number(body.i);
-  if (!Number.isInteger(i) || i < 0 || i >= work.length) {
-    throw createError({ statusCode: 400, statusMessage: `worklist index out of range: ${String(body.i)}` });
+  // RESOLVE BY IDENTITY. The worklist is derived from extracted.json and grows
+  // while a fetch runs, so a position captured when the page rendered can name a
+  // different side by the time the save arrives — measured live, a list loaded at
+  // 160 sides answered a save against 192. An index is accepted only as a legacy
+  // fallback when no identity was sent.
+  const wantVideo = String(body.video ?? '');
+  const wantSide = String(body.side ?? '');
+  const w = wantVideo
+    ? work.find((x) => x.video === wantVideo && x.side === wantSide)
+    : work[Number(body.i)];
+  if (!w) {
+    throw createError({
+      statusCode: 409,
+      statusMessage: 'that side is no longer in the bench queue — refresh the page',
+    });
   }
-  const w = work[i]!;
 
   const roster = new Set(readJson<{ id: string }[]>('data/characters.json', []).map((c) => c.id));
   const trio = (raw: unknown, which: string): string[] => {
@@ -98,6 +112,15 @@ export default defineEventHandler(async (event) => {
             tier: 'human',
             tiers: [...(s.provenance.tiers ?? []), 'human'],
             fromHuman: characters,
+            /** WHAT WAS PICKED, per frame, beside WHAT WAS CONCLUDED.
+             *
+             *  `fromHuman` is the answer; this is the evidence for it. Frame A's
+             *  reading is recoverable from the answer alone — it is the characters
+             *  minus that frame's point fighter — but which cell held whom, and
+             *  what the second frame showed when a save was FORCED past a
+             *  disagreement, are not. Recording them lets a side be reopened and
+             *  seen exactly as it was read. */
+            humanPicks: { a, b, forced: setA !== setB },
             complete: characters.length >= 4,
             forced: setA !== setB ? true : undefined,
           },

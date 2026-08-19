@@ -40,16 +40,28 @@ export default defineEventHandler(async (event) => {
   // `frame` selects between them. Default stays the template worklist.
   const q = getQuery(event);
   const bench = String(q.pool ?? '') === 'bench';
-  const i = Number(q.i);
   const list = bench ? buildBenchList() : buildWorkList();
-  if (!Number.isInteger(i) || i < 0 || i >= list.length) {
+  const byIdentity = bench && String(q.video ?? '') !== '';
+  const i = Number(q.i);
+  // The index is only meaningful when the caller did NOT send an identity. It is
+  // validated here rather than unconditionally, because the bench page stopped
+  // sending one the moment addressing moved to {video, side} — and validating a
+  // parameter nobody sends turns every crop into a 400.
+  if (!byIdentity && (!Number.isInteger(i) || i < 0 || i >= list.length)) {
     throw createError({ statusCode: 400, statusMessage: 'bad worklist index' });
   }
   const fi = Number(q.frame ?? 0) === 1 ? 1 : 0;
-  const item = list[i]!;
+  const item = list[byIdentity ? 0 : i]!;
   const w = bench
     ? (() => {
-        const b = item as import('../../utils/portraitWork').BenchItem;
+        // resolve by identity when the caller supplies it; the index is only a
+        // fallback, because the bench list grows whenever a fetch persists a read
+        const b = (String(q.video ?? '')
+          ? (list as import('../../utils/portraitWork').BenchItem[]).find(
+              (x) => x.video === String(q.video) && x.side === String(q.side),
+            )
+          : (item as import('../../utils/portraitWork').BenchItem)) ?? null;
+        if (!b) throw createError({ statusCode: 404, statusMessage: 'side no longer in the queue' });
         return { video: b.video, sec: b.secs[fi], side: b.side, point: b.points[fi] };
       })()
     : (item as import('../../utils/portraitWork').WorkItem);

@@ -19,7 +19,20 @@
  * 1-of-4 the record had, `Side.characters` is 1..N by contract, and the record
  * simply stays in the bench queue for a later, denser pass.
  *
- * Run: npm run data:extract [-- --limit N] [--dry]
+ * Run: npm run data:extract [-- --limit N] [--dry] [--uncached]
+ *
+ * `--uncached` restricts the worklist to records with NO frames on disk. The pass
+ * is otherwise idempotent but not cheap: `grabWindow` skips a cached window without
+ * a request, yet `readCached` still re-OCRs every frame it finds, so a full run
+ * re-reads footage that was already read. When the goal is to make NEW records
+ * readable, that work is pure waste.
+ *
+ * `--dry` matters more than it looks when a person is labelling at the same time.
+ * Both this script and /dev/bench-review read-modify-write the whole of
+ * data/overrides.json, so two concurrent writers would race and one would lose. In
+ * dry mode the reads are still persisted — which is all the labelling UI needs, since
+ * it wants the frames and the point fighter, not a resolution — while overrides.json
+ * is left alone entirely.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -47,9 +60,22 @@ const DATA = join(ROOT, 'data');
 const argv = process.argv.slice(2);
 const LIMIT = Number(argv[argv.indexOf('--limit') + 1]) || Infinity;
 const DRY = argv.includes('--dry');
+const UNCACHED = argv.includes('--uncached');
 
 const read = <T>(p: string): T => JSON.parse(readFileSync(join(DATA, p), 'utf8')) as T;
-const queue = read<BenchQueueItem[]>('bench-queue.json').slice(0, LIMIT);
+const STORE_PATH = join(CACHE, 'extracted.json');
+const allQueue = read<BenchQueueItem[]>('bench-queue.json');
+// KEY ON THE PERSISTED READ, NOT ON THE FRAMES DIRECTORY. "Has a frames dir" is
+// not the same as "has been fetched": an interrupted run leaves a directory with
+// some of its windows, and filtering on the directory would skip that record
+// forever. A persisted read with trusted geometry is the actual precondition for
+// both the fold and the labelling UI, so that is what gets tested.
+const persisted = existsSync(STORE_PATH)
+  ? (JSON.parse(readFileSync(STORE_PATH, 'utf8')) as Record<string, { geom: unknown }>)
+  : {};
+const queue = (
+  UNCACHED ? allQueue.filter((q) => !persisted[q.id]?.geom) : allQueue
+).slice(0, LIMIT);
 const videos = new Map(read<MatchVideo[]>('videos.json').map((v) => [v.id, v]));
 const overrides = read<Record<string, VideoOverride>>('overrides.json');
 const roster = buildPlateRoster(await loadCharacters());
@@ -77,13 +103,12 @@ const roster = buildPlateRoster(await loadCharacters());
  * was genuinely performed, and `--dry`'s promise is about `data/`, not about
  * throwing away evidence.
  */
-const STORE = join(CACHE, 'extracted.json');
-const reads: Record<string, VideoRead> = existsSync(STORE)
-  ? (JSON.parse(readFileSync(STORE, 'utf8')) as Record<string, VideoRead>)
+const reads: Record<string, VideoRead> = existsSync(STORE_PATH)
+  ? (JSON.parse(readFileSync(STORE_PATH, 'utf8')) as Record<string, VideoRead>)
   : {};
 const persist = (id: string, r: VideoRead): void => {
   reads[id] = r;
-  writeFileSync(STORE, JSON.stringify(reads, null, 1));
+  writeFileSync(STORE_PATH, JSON.stringify(reads, null, 1));
 };
 
 const worker = await createWorker('eng', undefined, { logger: () => {} });
@@ -92,7 +117,11 @@ await worker.setParameters({
   tessedit_pageseg_mode: '7' as never,
 });
 
-console.log(`bench queue: ${queue.length} record(s)${DRY ? '  [dry run]' : ''}\n`);
+console.log(
+  `bench queue: ${queue.length} record(s)` +
+    `${UNCACHED ? ` of ${allQueue.length} (no persisted read yet)` : ''}` +
+    `${DRY ? '  [dry run — reads persisted, overrides.json untouched]' : ''}\n`,
+);
 
 let resolved = 0;
 let deferred = 0;

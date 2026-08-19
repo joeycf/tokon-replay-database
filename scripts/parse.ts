@@ -245,6 +245,11 @@ async function main() {
   const misses: Miss[] = [];
   const review: ReviewQueueItem[] = [];
   const benchQueue: BenchQueueItem[] = [];
+  /** static per-record fields the post-override queue rebuild needs */
+  const byIdForQueue = new Map<
+    string,
+    { channel: ChannelKey; title: string; publishedAt: string; durationSec: number }
+  >();
   const residues = new Map<string, { n: number; ids: string[] }>();
   let decomposedOnly = 0;
   const slotOrders: Record<SlotOrder, number> = {
@@ -522,6 +527,15 @@ async function main() {
       // queue: a 2-of-4 side is true partial data the contract blesses, not a
       // guess withheld from the site. See types/index.ts BenchQueueItem.
       const known = [built[0]!.characters.length, built[1]!.characters.length] as [number, number];
+      // Pushed unconditionally: this pass only supplies the static fields (title,
+      // channel, duration). Whether a record actually BELONGS in the queue is
+      // decided after overrides are applied, below.
+      byIdForQueue.set(v.id, {
+        channel: ch.id,
+        title,
+        publishedAt: v.publishedAt,
+        durationSec: v.durationSec,
+      });
       if (known[0] < 4 || known[1] < 4) {
         benchQueue.push({
           id: v.id,
@@ -634,6 +648,32 @@ async function main() {
       tierCount[s.provenance.tier] += 1;
       if (s.provenance.complete) completeSides += 1;
     }
+  }
+
+  // THE BENCH QUEUE IS REBUILT FROM THE FINAL RECORDS, FOR THE SAME REASON.
+  //
+  // The tally above was fixed once and the queue beside it was left accumulating
+  // during record construction, which is before any override is applied — so it
+  // listed work that had already been done. Measured when a person hand-read 224
+  // sides: the queue still advertised 171 records when only 65 were genuinely
+  // incomplete, so 106 of them were finished. A worklist that hands out completed
+  // work is worse than a long one; it spends the scarcest thing here, which is
+  // somebody's attention.
+  benchQueue.length = 0;
+  for (const r of withOverrides) {
+    const known = [r.sides[0]!.characters.length, r.sides[1]!.characters.length] as [number, number];
+    if (known[0] >= 4 && known[1] >= 4) continue;
+    const src = byIdForQueue.get(r.id);
+    if (!src) continue;
+    benchQueue.push({
+      id: r.id,
+      channel: src.channel,
+      title: src.title,
+      publishedAt: src.publishedAt,
+      durationSec: src.durationSec,
+      known,
+      tiers: [r.sides[0]!.provenance.tier, r.sides[1]!.provenance.tier],
+    });
   }
 
   const playerMap = new Map<string, PlayerRecord>();

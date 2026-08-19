@@ -29,7 +29,7 @@
           </p>
           <img
             class="crop"
-            :src="`/api/dev/portrait-crop?pool=bench&i=${cursor}&frame=${fi}`"
+            :src="`/api/dev/portrait-crop?pool=bench&video=${cur.video}&side=${cur.side}&frame=${fi}`"
             :alt="`side ${cursor + 1} frame ${fi}`"
           >
           <div v-for="(letter, k) in LETTERS" :key="letter" class="slot">
@@ -45,6 +45,16 @@
           <p v-if="cur.known.length" class="dim">
             already known: {{ cur.known.map((k) => k.name).join(', ') }}
           </p>
+          <p v-if="restored === 'exact'" class="restored">
+            saved earlier — showing exactly what you picked
+          </p>
+          <p v-else-if="restored === 'derived'" class="restored">
+            saved earlier — fighters are exact; frame B's A/B/C order is
+            reconstructed, since that save predates recording it
+          </p>
+          <p v-if="cur.savedPicks?.forced" class="warn">
+            this one was saved with <em>use frame A anyway</em>
+          </p>
           <p v-if="disagree" class="warn">
             The two frames read different benches.<br >
             A: {{ disagree.a.join(', ') }}<br >
@@ -52,7 +62,7 @@
             <button class="force" @click="save(true)">use frame A anyway</button>
           </p>
           <button class="save" :disabled="!ready || busy" @click="save(false)">
-            {{ busy ? 'saving…' : 'save side' }}
+            {{ busy ? 'saving…' : cur.done ? 're-save side' : 'save side' }}
           </button>
           <p class="dim note">
             A person's read REPLACES this side — it does not merge with the
@@ -84,10 +94,13 @@ const LETTERS = ['A', 'B', 'C'] as const;
 
 interface Item {
   i: number;
+  video: string;
+  secs: number[];
   side: 'L' | 'R';
   points: { id: string; name: string }[];
   known: { id: string; name: string }[];
   saved: string[] | null;
+  savedPicks: { a: string[]; b: string[]; forced?: boolean } | null;
   done: boolean;
 }
 
@@ -113,13 +126,50 @@ const roster = computed(() => data.value?.roster ?? []);
 const cur = computed(() => items.value[cursor.value]);
 const ready = computed(() => picks.value.every((row) => row.every(Boolean)));
 
-watch(cursor, () => {
-  picks.value = [
+/**
+ * Reopening a finished side shows what was read, not a blank form.
+ *
+ * Saves made from now on carry their per-frame picks verbatim. Earlier ones do
+ * not, and frame A is still exact for them: `characters` is stored as
+ * [point, ...frame A's picks] in the order they were entered, so removing the
+ * point fighter recovers the row. Frame B's SET is equally certain — the save was
+ * only accepted because both frames agreed on the bench — but which cell held whom
+ * was never written down, so it is reconstructed and labelled as such rather than
+ * presented as a faithful record.
+ */
+const restored = ref<'exact' | 'derived' | null>(null);
+
+function loadPicks(): void {
+  const it = cur.value;
+  disagree.value = null;
+  const blank = (): string[][] => [
     ['', '', ''],
     ['', '', ''],
   ];
-  disagree.value = null;
-});
+  if (!it) {
+    picks.value = blank();
+    restored.value = null;
+    return;
+  }
+  if (it.savedPicks) {
+    picks.value = [[...it.savedPicks.a], [...it.savedPicks.b]];
+    restored.value = 'exact';
+    return;
+  }
+  if (it.saved?.length) {
+    const three = (point: string): string[] => {
+      const rest = it.saved!.filter((c) => c !== point);
+      return [rest[0] ?? '', rest[1] ?? '', rest[2] ?? ''];
+    };
+    picks.value = [three(it.points[0]!.id), three(it.points[1]!.id)];
+    restored.value = 'derived';
+    return;
+  }
+  picks.value = blank();
+  restored.value = null;
+}
+watch(cursor, loadPicks);
+watch(items, loadPicks, { immediate: true });
 
 async function save(force: boolean): Promise<void> {
   if (!ready.value || busy.value) return;
@@ -127,7 +177,16 @@ async function save(force: boolean): Promise<void> {
   try {
     const r = await $fetch<{ ok: boolean; disagree?: boolean; a?: string[]; b?: string[] }>(
       '/api/dev/bench-review',
-      { method: 'POST', body: { i: cursor.value, a: picks.value[0], b: picks.value[1], force } },
+      {
+        method: 'POST',
+        body: {
+          video: cur.value!.video,
+          side: cur.value!.side,
+          a: picks.value[0],
+          b: picks.value[1],
+          force,
+        },
+      },
     );
     if (r.ok) {
       disagree.value = null;
@@ -234,10 +293,22 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   font: inherit;
   padding: 0.3rem 0.5rem;
   border: 1px solid #3a4055;
-  background: transparent;
-  color: inherit;
+  /* The popup list is drawn by the OS, and it does NOT inherit the page's colours
+     — a transparent background there resolves against the widget's own light
+     surface while the text keeps the dark theme's pale colour, which is why the
+     names were unreadable. Both ends are stated explicitly. */
+  background: #12151f;
+  color: #e8ecf5;
   border-radius: 4px;
   min-width: 12rem;
+}
+.sel option {
+  background: #12151f;
+  color: #e8ecf5;
+}
+.sel option:checked {
+  background: #00e5ff;
+  color: #04121a;
 }
 .actions {
   flex: 1 1 16rem;
@@ -269,6 +340,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 }
 .note {
   margin-top: 1rem;
+  max-width: 26rem;
+}
+.restored {
+  color: #35c46b;
+  font-size: 0.85rem;
   max-width: 26rem;
 }
 </style>
