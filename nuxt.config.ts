@@ -40,7 +40,7 @@ export default defineNuxtConfig({
   //
   // v0.7.0 is the floor for this app, not a preference: it is the release that
   // widened GameConfig.charactersPerSide to accept 4.
-  extends: [process.env.ENGINE_PATH || ['github:joeycf/replay-engine#v0.7.0', { install: true }]],
+  extends: [process.env.ENGINE_PATH || ['github:joeycf/replay-engine#v0.7.1', { install: true }]],
 
   compatibilityDate: '2025-07-01',
 
