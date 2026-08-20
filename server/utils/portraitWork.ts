@@ -144,6 +144,12 @@ export interface BenchItem {
   handles: [string, string];
   /** what the plate could not supply, so the page knows what to ask for */
   needs: { side: boolean; point: boolean };
+  /** every cached second for this video, so a reviewer stuck on a cinematic or a
+   *  super flash can step to a frame that shows the cluster */
+  allSecs: number[];
+  /** complete, yet missing the fighter its own title names — the free positive
+   *  control failing, so the side is WRONG rather than done */
+  recheck: boolean;
 }
 
 /**
@@ -177,6 +183,19 @@ export function buildBenchList(): BenchItem[] {
   >('data/videos.json', []);
   const byId = new Map(videos.map((v) => [v.id, v]));
   const queued = new Set(queue.map((q) => q.id));
+  // THE BENCH QUEUE LISTS INCOMPLETE RECORDS, WHICH IS NOT THE SAME AS RECORDS
+  // NEEDING WORK. A side can be complete and still fail `fromTitle ⊆ characters`,
+  // and such a side is wrong rather than finished — but its record leaves the queue
+  // the moment it fills up, so the tool that produced the error offered no way to
+  // correct it.
+  for (const v of videos) {
+    if (v.sides.length !== 2) continue;
+    const broken = v.sides.some(
+      (s) =>
+        s.characters.length >= 4 && !s.provenance.fromTitle.every((t) => s.characters.includes(t)),
+    );
+    if (broken) queued.add(v.id);
+  }
 
   const out: BenchItem[] = [];
   for (const id of [...queued].sort()) {
@@ -196,20 +215,39 @@ export function buildBenchList(): BenchItem[] {
     const anySecs = [...new Set([...e.left, ...e.right].map((r) => r.sec))].sort((a, b) => a - b);
     const hudSecs = cleanSecs.length >= 2 ? cleanSecs : anySecs;
 
+    // ATTRIBUTION IS DEDUCIBLE FROM THE OTHER SIDE. A record has exactly two
+    // players, so once the plate places one screen side the other follows by
+    // elimination — no reading required, and no chance to get it wrong.
+    //
+    // Omitting this cost real work. On gT7bLwW8hK4 the plate read doctor-doom on the
+    // LEFT, which fixes KING JON there and therefore SAIKKA on the right. The page
+    // asked anyway; the same wrong answer came back four times, and every save
+    // landed on the player who was already accounted for.
+    const placed: Record<'L' | 'R', number | null> = { L: null, R: null };
+    for (const sd of ['L', 'R'] as const) {
+      const rs = (sd === 'L' ? e.left : e.right).filter((r) => r.id && r.dist === 0);
+      const own = v.sides
+        .map((s, k) => ({ k, hit: rs.some((r) => s.provenance.fromTitle.includes(r.id!)) }))
+        .filter((x) => x.hit);
+      placed[sd] = own.length === 1 ? own[0]!.k : null;
+    }
+    if (placed.L === null && placed.R !== null) placed.L = 1 - placed.R;
+    else if (placed.R === null && placed.L !== null) placed.R = 1 - placed.L;
+
     for (const side of ['L', 'R'] as const) {
       const reads = (side === 'L' ? e.left : e.right).filter((r) => r.id && r.dist === 0);
       // ATTRIBUTION PREFERS THE TITLE-KNOWN FIGHTER, never title order — one
       // uploader reverses its second title slot on 27 of 34 videos, so assuming
       // order would compound one error with another.
-      const owning = v.sides
-        .map((s, k) => ({ k, hit: reads.some((r) => s.provenance.fromTitle.includes(r.id!)) }))
-        .filter((x) => x.hit);
-      const sideIndex = owning.length === 1 ? owning[0]!.k : null;
-      // a side the plate CAN place, and which is already done, is not work
-      if (sideIndex !== null && v.sides[sideIndex]!.characters.length >= 4) continue;
-      // when it cannot place the side, both of the record's sides must still have
-      // something missing, or there is nothing here to fill
-      if (sideIndex === null && v.sides.every((s) => s.characters.length >= 4)) continue;
+      const sideIndex = placed[side];
+      const settled = (s: { characters: string[]; provenance: { fromTitle: string[] } }) =>
+        s.characters.length >= 4 && s.provenance.fromTitle.every((t) => s.characters.includes(t));
+      if (sideIndex !== null && settled(v.sides[sideIndex]!)) continue;
+      if (sideIndex === null && v.sides.every(settled)) continue;
+      const recheck =
+        sideIndex !== null &&
+        v.sides[sideIndex]!.characters.length >= 4 &&
+        !settled(v.sides[sideIndex]!);
 
       // two frames as far apart as available, so they are different bursts. Fall
       // back to any HUD frame when the plate resolved nothing: a person can read a
@@ -237,8 +275,10 @@ export function buildBenchList(): BenchItem[] {
         sideIndex,
         side,
         secs,
+        allSecs: anySecs,
         points,
         known: sideIndex === null ? [] : v.sides[sideIndex]!.characters,
+        recheck,
         handles,
         needs: { side: sideIndex === null, point: points[0] === null || points[1] === null },
       });

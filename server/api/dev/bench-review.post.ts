@@ -31,6 +31,10 @@ interface Body {
   a?: unknown;
   b?: unknown;
   force?: unknown;
+  /** the two frames disagree because the TEAM CHANGED — keep both readings */
+  union?: unknown;
+  /** the title names a fighter the footage never showed — keep BOTH */
+  keepTitled?: unknown;
 }
 interface SideRec {
   characters: string[];
@@ -89,10 +93,25 @@ export default defineEventHandler(async (event) => {
   const a = picks(body.a, 'frame A', w.points[0] ? 3 : 4);
   const b = picks(body.b, 'frame B', w.points[1] ? 3 : 4);
 
-  const setOf = (point: string | null, rest: string[]) =>
-    [...new Set([...(point ? [point] : []), ...rest])].sort().join(',');
+  const membersOf = (point: string | null, rest: string[]) => [
+    ...new Set([...(point ? [point] : []), ...rest]),
+  ];
+  const setOf = (point: string | null, rest: string[]) => membersOf(point, rest).sort().join(',');
   const setA = setOf(w.points[0], a);
   const setB = setOf(w.points[1], b);
+
+  // A MID-SET TEAM CHANGE IS NOT A CONFLICT TO BE RESOLVED — it is two true
+  // readings of a side that really did field more than four fighters. Forcing one
+  // frame would discard an observation as good as the one it keeps, and the
+  // contract already counts sides of more than four: legal, counted in usage,
+  // excluded from pairing so C(n,2) cannot fabricate pairs never played.
+  if (setA !== setB && body.union === true) {
+    const characters = [
+      ...new Set([...membersOf(w.points[0], a), ...membersOf(w.points[1], b)]),
+    ];
+    return writeSide(w, sideIndex, characters, { teamChange: true });
+  }
+
   if (setA !== setB && body.force !== true) {
     return {
       ok: false,
@@ -106,6 +125,58 @@ export default defineEventHandler(async (event) => {
   // point first when known: they held the plate at the moment the frame was taken
   const characters = [...new Set([...(w.points[0] ? [w.points[0]] : []), ...a])];
 
+  // THE FREE POSITIVE CONTROL, CHECKED AT THE POINT OF ENTRY.
+  //
+  // The title names a fighter that side demonstrably played, so a read omitting it
+  // is a misread or a mis-attribution. That check already exists at the emit gate,
+  // where it correctly refused to publish — but it fired at BUILD time, hours after
+  // the reading, on a side that had by then dropped out of the worklist. Catching
+  // it here costs nothing and tells the reviewer while the frames are still on
+  // screen. `force` remains available, because a genuine mid-set change can drop a
+  // fighter the title named.
+  const vids = readJson<{ id: string; sides: { provenance: { fromTitle: string[] } }[] }[]>(
+    'data/videos.json',
+    [],
+  );
+  const titled = vids.find((x) => x.id === w.video)?.sides[sideIndex]?.provenance.fromTitle ?? [];
+  const missingTitled = titled.filter((t) => !characters.includes(t));
+
+  // KEEPING BOTH IS USUALLY RIGHT, AND FORCING USUALLY IS NOT.
+  //
+  // The uploader's title is evidence the player used that fighter; the frames are
+  // evidence of who was on the bench when they were sampled. When those disagree
+  // the ordinary cause is a mid-set team change, and BOTH observations are true —
+  // so the side had more than four over the set, which the contract already counts
+  // and excludes from pairing. Forcing would drop a fighter the title witnesses,
+  // which discards a true observation to make a check pass.
+  if (missingTitled.length && body.keepTitled === true) {
+    return writeSide(w, sideIndex, [...characters, ...missingTitled], {
+      teamChange: true,
+      humanPicks: { a, b, forced: false },
+    });
+  }
+
+  if (missingTitled.length && body.force !== true) {
+    return {
+      ok: false,
+      titleMissing: missingTitled,
+      message:
+        `the title names ${missingTitled.join(', ')} on this side, and the reading does not ` +
+        'include them — check the attribution first; if it is right, keep both',
+    };
+  }
+  return writeSide(w, sideIndex, characters, {
+    forced: setA !== setB ? true : undefined,
+    humanPicks: { a, b, forced: setA !== setB },
+  });
+});
+
+function writeSide(
+  w: import('../../utils/portraitWork').BenchItem,
+  sideIndex: number,
+  characters: string[],
+  extra: Record<string, unknown>,
+) {
   const path = join(process.cwd(), 'data/overrides.json');
   const overrides = readJson<Record<string, { sides?: SideRec[]; [k: string]: unknown }>>(
     'data/overrides.json',
@@ -129,17 +200,16 @@ export default defineEventHandler(async (event) => {
             tier: 'human',
             tiers: [...(s.provenance.tiers ?? []), 'human'],
             fromHuman: characters,
-            /** WHAT WAS PICKED, per frame, beside WHAT WAS CONCLUDED.
+            /** WHICH SCREEN SIDE THIS READ CAME FROM.
              *
-             *  `fromHuman` is the answer; this is the evidence for it. Frame A's
-             *  reading is recoverable from the answer alone — it is the characters
-             *  minus that frame's point fighter — but which cell held whom, and
-             *  what the second frame showed when a save was FORCED past a
-             *  disagreement, are not. Recording them lets a side be reopened and
-             *  seen exactly as it was read. */
-            humanPicks: { a, b, forced: setA !== setB },
+             *  The plate cannot always say which record side a screen side is, and
+             *  when a person supplies that instead, nothing else records the link.
+             *  Without it the page cannot tell a saved side from an unsaved one —
+             *  every tick stayed grey while the writes landed perfectly, which is
+             *  worse than not writing: it invites the same work to be done twice. */
+            humanScreenSide: w.side,
             complete: characters.length >= 4,
-            forced: setA !== setB ? true : undefined,
+            ...extra,
           },
         },
   );
@@ -152,4 +222,4 @@ export default defineEventHandler(async (event) => {
   };
   writeFileSync(path, `${JSON.stringify(overrides, null, 2)}\n`, 'utf8');
   return { ok: true, characters, complete: characters.length >= 4 };
-});
+}

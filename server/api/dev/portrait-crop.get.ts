@@ -39,14 +39,23 @@ const Z = 4;
 const WIN_W = 0.16;
 const WIN_H = 0.24;
 
-/** The player-handle strip, measured from a labelled frame: the handle sits under
- *  the health bar at roughly x 0.152-0.207, y 0.104-0.128 on the LEFT, mirrored on
- *  the right. Bounds are generous around that.
+/** THE WHOLE CORNER QUADRANT, not a band measured off one video.
  *
- *  It is served SEPARATELY rather than by widening the cluster crop, because the
- *  cluster is the thing being read and halving its scale to fit a name in would
- *  trade the task for the label. */
-const STRIP = { x0: 0.1, x1: 0.32, y0: 0.07, y1: 0.22 };
+ *  The first version cropped a narrow strip where the handle sat in a labelled
+ *  frame — under the health bar, x 0.152-0.207, y 0.104-0.128. That is where it is
+ *  in SOME uploads. Observed since: "Hikari" under the health bar, "ROCK-MF" and
+ *  "PUNKDAGOD" inside a red banner lower down, and channels whose own overlay moves
+ *  it again. A band tuned to one layout returns gameplay for the others, which is
+ *  exactly what a reviewer trying to attribute a side does not need.
+ *
+ *  So the crop is the side's whole top quadrant and the person finds the name
+ *  wherever this uploader put it. It is served separately from the cluster crop
+ *  because the cluster is the thing being read, and shrinking it to fit a name in
+ *  would trade the task for the label. */
+const STRIP = { x0: 0.0, x1: 0.5, y0: 0.0, y1: 0.3 };
+/** Lower zoom than the cluster: this crop is 4x the width and only has to be
+ *  readable, not pixel-inspectable. */
+const STRIP_Z = 2;
 
 export default defineEventHandler(async (event) => {
   if (!import.meta.dev) throw createError({ statusCode: 404 });
@@ -146,7 +155,7 @@ async function render(
         width: sw,
         height: Math.round(H * (STRIP.y1 - STRIP.y0)),
       })
-      .resize({ width: sw * 3, kernel: 'nearest' })
+      .resize({ width: sw * STRIP_Z, kernel: 'nearest' })
       .png()
       .toBuffer();
     setHeader(event, 'content-type', 'image/png');

@@ -24,6 +24,7 @@ export default defineEventHandler(() => {
         sides?: {
           provenance?: {
             fromHuman?: string[];
+            humanScreenSide?: 'L' | 'R';
             humanPicks?: { a: string[]; b: string[]; forced?: boolean };
           };
         }[];
@@ -31,9 +32,19 @@ export default defineEventHandler(() => {
     >
   >('data/overrides.json', {});
 
+
   const items = work.map((w, i) => {
-    const prov =
-      w.sideIndex === null ? undefined : overrides[w.video]?.sides?.[w.sideIndex]?.provenance;
+    // Match the saved side by the SCREEN side it was read from. Falling back to
+    // the record-side index only works when the plate could attribute it, which is
+    // exactly the case that did not need help.
+    const ovSides = overrides[w.video]?.sides ?? [];
+    let prov = ovSides.find((s) => s.provenance?.humanScreenSide === w.side)?.provenance;
+    if (!prov && w.sideIndex !== null) prov = ovSides[w.sideIndex]?.provenance;
+    // NO "any human side on this video" FALLBACK. One was tried and it reported
+    // 37 of 50 sides drained when three had been: nearly every one of these records
+    // already has its OTHER side hand-read from the earlier pass, and matching on
+    // the video alone claimed that work as this side's. A false green is worse than
+    // a false grey — grey costs a second look, green costs the side entirely.
     const saved = prov?.fromHuman ?? null;
     return {
       /** exact per-frame picks when they were recorded; older saves derive them */
@@ -59,7 +70,9 @@ export default defineEventHandler(() => {
       points: w.points.map((p) => (p === null ? null : { id: p, name: nameOf.get(p) ?? p })),
       handles: w.handles,
       needs: w.needs,
+      recheck: w.recheck,
       sideIndex: w.sideIndex,
+      allSecs: w.allSecs,
       known: w.known.map((k) => ({ id: k, name: nameOf.get(k) ?? k })),
       saved,
       done: Array.isArray(saved) && saved.length > 0,

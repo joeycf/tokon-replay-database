@@ -30,9 +30,17 @@
           </p>
           <img
             class="crop"
-            :src="`/api/dev/portrait-crop?pool=bench&video=${cur.video}&side=${cur.side}&frame=${fi}`"
+            :src="`/api/dev/portrait-crop?video=${cur.video}&sec=${secOf(fi)}&side=${cur.side}`"
             :alt="`side ${cursor + 1} frame ${fi}`"
           >
+          <!-- A sampled frame can land on a cinematic or a super flash where the
+               cluster is not drawn at all. Stepping costs nothing: every one of
+               these seconds is already on disk. -->
+          <p class="stepper">
+            <button class="step" @click="stepFrame(fi, -1)">◀</button>
+            <span class="dim mono">{{ secOf(fi) }}s · {{ frameIdx[fi]! + 1 }}/{{ cur.allSecs.length }}</span>
+            <button class="step" @click="stepFrame(fi, 1)">▶</button>
+          </p>
           <div v-for="(letter, k) in slotsFor(fi)" :key="letter" class="slot">
             <span class="letter" :class="{ bust: letter === '◆' }">{{ letter }}</span>
             <select v-model="picks[fi]![k]" class="sel">
@@ -49,10 +57,24 @@
                second title slot on 27 of 34 videos. -->
           <div v-if="cur.needs.side" class="attrib">
             <p class="warn">Which player is this side?</p>
+            <!-- The whole top quadrant, because the handle moves: under the health
+                 bar in some uploads, in a banner above it in others, and inside a
+                 channel's own overlay in others again. A band tuned to one layout
+                 returned gameplay for the rest. -->
+            <p class="dim">
+              Handle placement varies by upload — look anywhere in this quadrant.
+              Step the frames above if it is not drawn at this moment, or
+              <a
+                class="src"
+                :href="`https://www.youtube.com/watch?v=${cur.video}&t=${secOf(0)}`"
+                target="_blank"
+                rel="noreferrer"
+              >open the source at {{ secOf(0) }}s ↗</a>.
+            </p>
             <img
               class="strip"
-              :src="`/api/dev/portrait-crop?pool=bench&video=${cur.video}&side=${cur.side}&frame=0&strip=1`"
-              alt="player handle"
+              :src="`/api/dev/portrait-crop?video=${cur.video}&sec=${secOf(0)}&side=${cur.side}&strip=1`"
+              alt="this side's top corner"
             >
             <div class="acts">
               <button
@@ -79,10 +101,35 @@
           <p v-if="cur.savedPicks?.forced" class="warn">
             this one was saved with <em>use frame A anyway</em>
           </p>
+          <p v-if="cur.recheck" class="warn">
+            This side is complete but FAILS its own control — the title names a
+            fighter the saved reading does not include. Re-read it.
+          </p>
+          <p v-if="titleMissing" class="warn">
+            The title names <strong>{{ titleMissing.join(', ') }}</strong> on this
+            side and your reading does not include them.<br >
+            <span class="dim">
+              If the attribution is right, this is a mid-set team change: the title
+              witnesses that fighter, the frames witness the rest, and both are
+              true. Keeping both records the side as it actually was.
+            </span><br >
+            <button class="act union" @click="saveKeepingTitled()">
+              also keep {{ titleMissing.join(', ') }} — team changed
+            </button>
+            <button class="force" @click="save(true)">drop them and save</button>
+          </p>
           <p v-if="disagree" class="warn">
             The two frames read different benches.<br >
             A: {{ disagree.a.join(', ') }}<br >
             B: {{ disagree.b.join(', ') }}<br >
+            <span class="dim">
+              If the team CHANGED between games, both readings are true and the
+              side really did field more than four — keep both. Force frame A only
+              when one frame was misread.
+            </span><br >
+            <button class="act union" @click="save(false, true)">
+              both — the team changed mid-set
+            </button>
             <button class="force" @click="save(true)">use frame A anyway</button>
           </p>
           <button class="save" :disabled="!ready || busy" @click="save(false)">
@@ -119,7 +166,9 @@ const LETTERS = ['A', 'B', 'C'] as const;
 interface Item {
   i: number;
   video: string;
+  recheck: boolean;
   secs: number[];
+  allSecs: number[];
   side: 'L' | 'R';
   points: ({ id: string; name: string } | null)[];
   handles: [string, string];
@@ -135,6 +184,7 @@ const cursor = ref(0);
 const busy = ref(false);
 const sideIndex = ref<number | null>(null);
 const disagree = ref<{ a: string[]; b: string[] } | null>(null);
+const titleMissing = ref<string[] | null>(null);
 
 /** Three diamonds when the plate named the point fighter; the bust as a fourth
  *  when it did not. `◆` is the bust so the row cannot be mistaken for a diamond. */
@@ -145,6 +195,20 @@ const picks = ref<string[][]>([
   ['', '', ''],
   ['', '', ''],
 ]);
+/** which of the video's cached seconds each panel is showing */
+const frameIdx = ref<number[]>([0, 0]);
+
+function secOf(fi: number): number {
+  const it = cur.value;
+  if (!it) return 0;
+  return it.allSecs[frameIdx.value[fi]!] ?? it.secs[fi]!;
+}
+function stepFrame(fi: number, d: number): void {
+  const it = cur.value;
+  if (!it) return;
+  const n = it.allSecs.length;
+  frameIdx.value = frameIdx.value.map((v, i) => (i === fi ? (v + d + n) % n : v));
+}
 
 const { data, pending, error, refresh } = await useFetch<{
   total: number;
@@ -185,11 +249,17 @@ const restored = ref<'exact' | 'derived' | null>(null);
 function loadPicks(): void {
   const it = cur.value;
   disagree.value = null;
+  titleMissing.value = null;
   const blank = (): string[][] => [
     new Array<string>(slotsFor(0).length).fill(''),
     new Array<string>(slotsFor(1).length).fill(''),
   ];
   sideIndex.value = it?.sideIndex ?? null;
+  // start each panel on the second the worklist chose, then let the reviewer move
+  frameIdx.value = [0, 1].map((fi) => {
+    const at = it?.allSecs.indexOf(it.secs[fi]!) ?? -1;
+    return at >= 0 ? at : fi === 0 ? 0 : Math.max(0, (it?.allSecs.length ?? 1) - 1);
+  });
   if (!it) {
     picks.value = blank();
     restored.value = null;
@@ -215,11 +285,21 @@ function loadPicks(): void {
 watch(cursor, loadPicks);
 watch(items, loadPicks, { immediate: true });
 
-async function save(force: boolean): Promise<void> {
+async function saveKeepingTitled(): Promise<void> {
+  await save(false, false, true);
+}
+
+async function save(force: boolean, union = false, keepTitled = false): Promise<void> {
   if (!ready.value || busy.value) return;
   busy.value = true;
   try {
-    const r = await $fetch<{ ok: boolean; disagree?: boolean; a?: string[]; b?: string[] }>(
+    const r = await $fetch<{
+      ok: boolean;
+      disagree?: boolean;
+      a?: string[];
+      b?: string[];
+      titleMissing?: string[];
+    }>(
       '/api/dev/bench-review',
       {
         method: 'POST',
@@ -230,11 +310,18 @@ async function save(force: boolean): Promise<void> {
           a: picks.value[0]!.slice(0, slotsFor(0).length),
           b: picks.value[1]!.slice(0, slotsFor(1).length),
           force,
+          union,
+          keepTitled,
         },
       },
     );
+    if (r.titleMissing) {
+      titleMissing.value = r.titleMissing;
+      return;
+    }
     if (r.ok) {
       disagree.value = null;
+      titleMissing.value = null;
       await refresh();
       if (cursor.value < total.value - 1) cursor.value++;
     } else if (r.disagree) {
@@ -320,7 +407,28 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   max-width: 100%;
   border-radius: 4px;
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+}
+.step {
+  font: inherit;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid #3a4055;
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.step:hover {
+  border-color: #00e5ff;
+}
+.src {
+  color: #00e5ff;
 }
 .slot {
   display: flex;
@@ -343,7 +451,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 .strip {
   image-rendering: pixelated;
   width: 100%;
-  max-width: 22rem;
+  max-width: 34rem;
   border-radius: 4px;
   margin: 0.3rem 0;
 }
@@ -400,6 +508,18 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 .save:disabled {
   opacity: 0.4;
   cursor: default;
+}
+.act.union {
+  font: inherit;
+  margin-top: 0.5rem;
+  margin-right: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 0;
+  background: #35c46b;
+  color: #04121a;
+  font-weight: 600;
 }
 .force {
   font: inherit;
