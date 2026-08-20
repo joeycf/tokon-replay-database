@@ -8,7 +8,7 @@
 A new fighter has probably shipped. Add it to scripts/characters.ts and
 get an accent token before it silently shortens every side it appears on.
 
-_Generated 2026-08-20T02:45:27.008Z_
+_Generated 2026-08-20T08:19:38.092Z_
 
 ## Coverage
 
@@ -17,33 +17,33 @@ _Generated 2026-08-20T02:45:27.008Z_
 | highLevelReplays | 57 | 57 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 746 | 49 | 6.6% |
-| replaysHub | 83 | 78 | 94.0% |
-| fightingStationX | 2607 | 58 | 2.2% |
-| **total** | | **255** | |
+| replaysHub | 84 | 79 | 94.0% |
+| fightingStationX | 2610 | 59 | 2.3% |
+| **total** | | **257** | |
 
 ## Character provenance
 
-How every one of the 510 sides got its characters.
+How every one of the 514 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 73 | 14.3% |
-| description | 127 | 24.9% |
-| footage | 32 | 6.3% |
-| human | 278 | 54.5% |
+| title | 77 | 15.0% |
+| description | 127 | 24.7% |
+| footage | 32 | 6.2% |
+| human | 278 | 54.1% |
 | review | 0 | 0.0% |
 
-- complete (4/4): **437/510** (85.7%)
+- complete (4/4): **437/514** (85.0%)
 - oversize (>4, mid-set team change): **6** — counted in usage, excluded from pairing
-- bench alignment: handle 131 · character-subset 14 · ambiguous 3
-- title slot order: handle-first 387 · chars-first 49 · parallel-lists 74
+- bench alignment: handle 132 · character-subset 14 · ambiguous 3
+- title slot order: handle-first 391 · chars-first 49 · parallel-lists 74
 - tier conflicts (queued for review): 0
 - decomposed-Ō titles seen: 0
 
 ## Queues
 
-- review queue (never published): **5** — character-completion 5
-- bench queue (published, incomplete): **37**
+- review queue (never published): **6** — character-completion 6
+- bench queue (published, incomplete): **39**
 
 ## Misses
 
@@ -52,9 +52,9 @@ How every one of the 510 sides got its characters.
 | other-game | 1420 |
 | not-tokon | 1081 |
 | pre-launch | 663 |
-| not-a-match | 75 |
+| not-a-match | 76 |
+| char-unresolved | 6 |
 | short-duration | 6 |
-| char-unresolved | 5 |
 | no-vs-title | 2 |
 
 ## Unmatched text in character slots
@@ -67,6 +67,7 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 | `Doc.` | 2 | PsrOeas920s |
 | `Ranked#10` | 2 | mib6deU2T1k |
 | `P.Parker` | 1 | l-UvElOYcsU |
+| `Ranked#11` | 1 | gTQS8y57DyM |
 | `Ranked#1` | 1 | c6cixxFiSYc |
 | `Ranked#12` | 1 | vpm61tvhyRs |
 | `Ranked#4` | 1 | zcD7FXMqVfs |
