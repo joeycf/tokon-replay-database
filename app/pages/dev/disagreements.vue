@@ -1,27 +1,58 @@
 <template>
   <ClientOnly>
-    <div class="wrap">
-      <header class="bar">
-        <strong>disagreements</strong>
-        <span class="dim">human reads vs the automatic tiers</span>
-      </header>
+    <section class="mx-auto w-full max-w-[1200px] px-4 py-8 md:px-[26px]">
+      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <div>
+          <p class="font-mono text-label uppercase text-text-muted">Diagnostic — dev only</p>
+          <h1 class="mt-1 font-display text-d2 font-bold text-text">Disagreements</h1>
+        </div>
+        <p class="ml-auto font-mono text-[12px] text-text-muted">
+          human reads vs the automatic tiers
+        </p>
+      </div>
 
-      <p v-if="pending" class="dim">loading…</p>
-      <p v-else-if="error" class="warn">{{ error }}</p>
+      <p
+        v-if="pending"
+        class="mt-6 font-mono text-body text-text-muted"
+      >
+        loading…
+      </p>
+      <p
+        v-else-if="error"
+        class="mt-6 font-mono text-body text-warning"
+      >
+        {{ error }}
+      </p>
 
       <template v-else>
         <section class="block">
           <h2>cross-tier</h2>
-          <p v-if="!crossRows.length" class="ok">
-            No disagreements across {{ scanned }} human-read sides — no title,
-            description or footage tier named a fighter the reader did not see.
+          <p
+            v-if="!crossRows.length"
+            class="ok"
+          >
+            No disagreements across {{ scanned }} human-read sides — no title, description or
+            footage tier named a fighter the reader did not see.
           </p>
-          <table v-else class="tbl">
+          <table
+            v-else
+            class="tbl"
+          >
             <thead>
-              <tr><th>record</th><th>side</th><th>tier</th><th>tier claimed</th><th>human read</th><th>missing</th></tr>
+              <tr>
+                <th>record</th>
+                <th>side</th>
+                <th>tier</th>
+                <th>tier claimed</th>
+                <th>human read</th>
+                <th>missing</th>
+              </tr>
             </thead>
             <tbody>
-              <tr v-for="(r, i) in crossRows" :key="i">
+              <tr
+                v-for="(r, i) in crossRows"
+                :key="i"
+              >
                 <td class="mono">{{ r.video }}</td>
                 <td>{{ r.sideIndex + 1 }}</td>
                 <td>{{ r.tier }}</td>
@@ -34,39 +65,68 @@
         </section>
 
         <section class="block">
-          <h2>off-bench reads <span class="dim">({{ off.length }})</span></h2>
+          <h2>
+            off-bench reads <span class="dim">({{ off.length }})</span>
+          </h2>
           <p class="dim note">
-            A fighter read in a diamond that appears in <em>neither</em> of the
-            record's described benches. Tōkon allows a mid-set team change and the
-            contract counts sides of more than four, so the question is whether the
-            uploader left a swap out of their description or the read was wrong.
+            A fighter read in a diamond that appears in <em>neither</em> of the record's described
+            benches. Tōkon allows a mid-set team change and the contract counts sides of more than
+            four, so the question is whether the uploader left a swap out of their description or
+            the read was wrong.
           </p>
-          <p v-if="!off.length" class="ok">None outstanding.</p>
+          <p
+            v-if="!off.length"
+            class="ok"
+          >
+            None outstanding.
+          </p>
 
-          <article v-for="o in off" :key="o.key" class="item">
+          <article
+            v-for="o in off"
+            :key="o.key"
+            class="item"
+          >
             <img
               class="crop"
               :src="`/api/dev/portrait-crop?video=${o.video}&sec=${o.sec}&side=${o.side}`"
               :alt="o.key"
               @error="onCropError"
-            >
+            />
             <div class="detail">
               <p class="mono dim">{{ o.key }}</p>
               <p class="dim">
-                The cyan diamonds are what was read; the dashed box is the point
-                fighter. <strong>{{ o.cell }}</strong> is the one in question.
+                The cyan diamonds are what was read; the dashed box is the point fighter.
+                <strong>{{ o.cell }}</strong> is the one in question.
               </p>
-              <p>read <strong class="hot">{{ o.readName }}</strong> in the
-                <strong>{{ o.cell }}</strong> diamond · on point {{ o.pointName }}</p>
+              <p>
+                read <strong class="hot">{{ o.readName }}</strong> in the
+                <strong>{{ o.cell }}</strong> diamond · on point {{ o.pointName }}
+              </p>
               <p class="dim">
                 described benches —
-                <span v-for="(b, bi) in o.benchNames" :key="bi" class="bench">
+                <span
+                  v-for="(b, bi) in o.benchNames"
+                  :key="bi"
+                  class="bench"
+                >
                   {{ b.join('/') }}<span v-if="bi === 0"> · </span>
                 </span>
               </p>
-              <p v-if="o.applied" class="ok">already appended to side {{ o.sideIndex + 1 }}</p>
-              <div v-else class="acts">
-                <button class="act keep" :disabled="busy" @click="decide(o.key, 'team-change')">
+              <p
+                v-if="o.applied"
+                class="ok"
+              >
+                already appended to side {{ o.sideIndex + 1 }}
+              </p>
+              <div
+                v-else
+                class="acts"
+              >
+                <button
+                  class="act keep"
+                  :disabled="busy"
+                  @click="decide(o.key, 'team-change')"
+                >
                   the read is right — append to side {{ o.sideIndex + 1 }}
                 </button>
                 <select
@@ -75,9 +135,19 @@
                   @change="reassign(o.key, ($event.target as HTMLSelectElement).value)"
                 >
                   <option value="">it is actually…</option>
-                  <option v-for="r in roster" :key="r.id" :value="r.id">{{ r.name }}</option>
+                  <option
+                    v-for="r in roster"
+                    :key="r.id"
+                    :value="r.id"
+                  >
+                    {{ r.name }}
+                  </option>
                 </select>
-                <button class="act drop" :disabled="busy" @click="decide(o.key, 'misread')">
+                <button
+                  class="act drop"
+                  :disabled="busy"
+                  @click="decide(o.key, 'misread')"
+                >
                   nothing readable — drop it
                 </button>
               </div>
@@ -85,7 +155,7 @@
           </article>
         </section>
       </template>
-    </div>
+    </section>
   </ClientOnly>
 </template>
 
@@ -98,6 +168,23 @@
  * on a blank page, and this one is the standing guard over every side drained from
  * here on.
  */
+
+// Declares this tool on the /dev index (engine app/pages/dev/index.vue). Every
+// value MUST stay a plain quoted literal — the build extracts them from the AST
+// and a variable or backtick string drops the key silently.
+definePageMeta({
+  devTool: {
+    title: 'Disagreements',
+    category: 'Diagnostic',
+    description:
+      'Human reads versus the automatic tiers — cross-tier conflicts and the off-bench read queue.',
+  },
+});
+
+if (!import.meta.dev) {
+  throw createError({ statusCode: 404, statusMessage: 'Not Found' });
+}
+
 interface Cross {
   video: string;
   sideIndex: number;
@@ -171,41 +258,39 @@ function onCropError(e: Event): void {
 </script>
 
 <style scoped>
-.wrap {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
-  font-family: var(--font-sans, system-ui), sans-serif;
-}
-.bar {
-  display: flex;
-  gap: 1rem;
-  align-items: baseline;
-  margin-bottom: 1rem;
-}
+/* Two report tables and a decision list — the shape Tailwind is worst at, so it
+   stays scoped CSS. What changed is the palette: every colour is now an engine
+   semantic token. The old `var(--char-muted, #8b93a7)` pairs were fiction —
+   no `--char-*` custom property is defined anywhere in the engine, so each one
+   always resolved to its hardcoded fallback. */
 h2 {
-  font-size: 1rem;
-  margin: 0 0 0.5rem;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-text-muted);
+  margin: 0 0 0.75rem;
 }
 .block {
-  margin-bottom: 2rem;
+  margin-top: 2.5rem;
 }
 .dim {
-  color: var(--char-muted, #8b93a7);
+  color: var(--color-text-muted);
   font-size: 0.85rem;
 }
 .warn {
-  color: var(--char-danger, #ff5a5f);
+  color: var(--color-warning);
 }
 .ok {
-  color: #35c46b;
+  color: var(--color-success);
   font-size: 0.9rem;
 }
 .hot {
-  color: #ff9d2e;
+  color: var(--color-secondary);
 }
 .mono {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
 }
 .note {
   max-width: 46rem;
@@ -219,7 +304,11 @@ h2 {
 .tbl td {
   text-align: left;
   padding: 0.3rem 0.6rem;
-  border-bottom: 1px solid #2a2f3f;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.tbl th {
+  color: var(--color-text-muted);
+  font-weight: 600;
 }
 .item {
   display: flex;
@@ -227,14 +316,13 @@ h2 {
   align-items: flex-start;
   margin: 1rem 0;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #2a2f3f;
+  border-bottom: 1px solid var(--color-border-subtle);
   flex-wrap: wrap;
 }
 .crop {
   image-rendering: pixelated;
   width: 340px;
   max-width: 100%;
-  border-radius: 4px;
 }
 .detail {
   flex: 1 1 20rem;
@@ -251,21 +339,20 @@ h2 {
 .act {
   font: inherit;
   padding: 0.45rem 0.9rem;
-  border-radius: 4px;
   cursor: pointer;
-  border: 1px solid #3a4055;
+  border: 1px solid var(--color-border);
   background: transparent;
   color: inherit;
 }
 .act.keep {
-  background: #35c46b;
-  border-color: #35c46b;
-  color: #04121a;
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-bg);
   font-weight: 600;
 }
 .act.drop {
-  border-color: #ff5a5f;
-  color: #ff5a5f;
+  border-color: var(--color-warning);
+  color: var(--color-warning);
 }
 .act:disabled {
   opacity: 0.4;
@@ -274,13 +361,12 @@ h2 {
 .sel {
   font: inherit;
   padding: 0.4rem 0.5rem;
-  border: 1px solid #3a4055;
-  background: #12151f;
-  color: #e8ecf5;
-  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
 }
 .sel option {
-  background: #12151f;
-  color: #e8ecf5;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
 }
 </style>

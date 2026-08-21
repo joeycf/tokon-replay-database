@@ -1,11 +1,16 @@
 <template>
   <ClientOnly>
-    <div class="wrap">
-      <header class="bar">
-        <strong>bench queue</strong>
-        <span class="dim">{{ done }}/{{ total }} sides drained</span>
-        <span class="dim keys">⏎ save · ←/→ move · type in a box to jump to a fighter</span>
-      </header>
+    <section class="mx-auto w-full max-w-[1500px] px-4 py-8 md:px-[26px]">
+      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <div>
+          <p class="font-mono text-label uppercase text-text-muted">Curation — dev only</p>
+          <h1 class="mt-1 font-display text-d2 font-bold text-text">Bench queue</h1>
+        </div>
+        <p class="font-mono text-[12px] text-text-muted">{{ done }}/{{ total }} sides drained</p>
+        <p class="ml-auto font-mono text-[12px] text-text-muted">
+          ⏎ save · ←/→ move · type in a box to jump to a fighter
+        </p>
+      </div>
 
       <nav class="strip">
         <button
@@ -17,35 +22,94 @@
         />
       </nav>
 
-      <p v-if="pending" class="dim">loading…</p>
-      <p v-else-if="error" class="warn">{{ error }}</p>
-      <p v-else-if="!cur" class="dim">bench queue is empty 🎉</p>
+      <p
+        v-if="pending"
+        class="mt-6 font-mono text-body text-text-muted"
+      >
+        loading…
+      </p>
+      <p
+        v-else-if="error"
+        class="mt-6 font-mono text-body text-warning"
+      >
+        {{ error }}
+      </p>
+      <p
+        v-else-if="!cur"
+        class="mt-6 font-mono text-body text-text-muted"
+      >
+        bench queue is empty 🎉
+      </p>
 
-      <section v-else class="item">
-        <div v-for="(f, fi) in [0, 1]" :key="f" class="panel">
+      <section
+        v-else
+        class="item"
+      >
+        <div
+          v-for="(f, fi) in [0, 1]"
+          :key="f"
+          class="panel"
+        >
           <p class="head">
             frame {{ fi === 0 ? 'A' : 'B' }} ·
-            <span v-if="cur.points[fi]" class="pt">on point {{ cur.points[fi]!.name }}</span>
-            <span v-else class="warn">the plate read nothing — read the bust too</span>
+            <span
+              v-if="cur.points[fi]"
+              class="pt"
+              >on point {{ cur.points[fi]!.name }}</span
+            >
+            <span
+              v-else
+              class="warn"
+              >the plate read nothing — read the bust too</span
+            >
           </p>
           <img
             class="crop"
             :src="`/api/dev/portrait-crop?video=${cur.video}&sec=${secOf(fi)}&side=${cur.side}`"
             :alt="`side ${cursor + 1} frame ${fi}`"
-          >
+          />
           <!-- A sampled frame can land on a cinematic or a super flash where the
                cluster is not drawn at all. Stepping costs nothing: every one of
                these seconds is already on disk. -->
           <p class="stepper">
-            <button class="step" @click="stepFrame(fi, -1)">◀</button>
-            <span class="dim mono">{{ secOf(fi) }}s · {{ frameIdx[fi]! + 1 }}/{{ cur.allSecs.length }}</span>
-            <button class="step" @click="stepFrame(fi, 1)">▶</button>
+            <button
+              class="step"
+              @click="stepFrame(fi, -1)"
+            >
+              ◀
+            </button>
+            <span class="dim mono"
+              >{{ secOf(fi) }}s · {{ frameIdx[fi]! + 1 }}/{{ cur.allSecs.length }}</span
+            >
+            <button
+              class="step"
+              @click="stepFrame(fi, 1)"
+            >
+              ▶
+            </button>
           </p>
-          <div v-for="(letter, k) in slotsFor(fi)" :key="letter" class="slot">
-            <span class="letter" :class="{ bust: letter === '◆' }">{{ letter }}</span>
-            <select v-model="picks[fi]![k]" class="sel">
+          <div
+            v-for="(letter, k) in slotsFor(fi)"
+            :key="letter"
+            class="slot"
+          >
+            <span
+              class="letter"
+              :class="{ bust: letter === '◆' }"
+              >{{ letter }}</span
+            >
+            <select
+              v-model="picks[fi]![k]"
+              class="sel"
+            >
               <option value="">— pick —</option>
-              <option v-for="r in roster" :key="r.id" :value="r.id">{{ r.name }}</option>
+              <option
+                v-for="r in roster"
+                :key="r.id"
+                :value="r.id"
+              >
+                {{ r.name }}
+              </option>
             </select>
           </div>
         </div>
@@ -55,27 +119,31 @@
                handle under the health bar is the evidence and the reviewer reads
                it. Never inferred from title order: one uploader reverses its
                second title slot on 27 of 34 videos. -->
-          <div v-if="cur.needs.side" class="attrib">
+          <div
+            v-if="cur.needs.side"
+            class="attrib"
+          >
             <p class="warn">Which player is this side?</p>
             <!-- The whole top quadrant, because the handle moves: under the health
                  bar in some uploads, in a banner above it in others, and inside a
                  channel's own overlay in others again. A band tuned to one layout
                  returned gameplay for the rest. -->
             <p class="dim">
-              Handle placement varies by upload — look anywhere in this quadrant.
-              Step the frames above if it is not drawn at this moment, or
+              Handle placement varies by upload — look anywhere in this quadrant. Step the frames
+              above if it is not drawn at this moment, or
               <a
                 class="src"
                 :href="`https://www.youtube.com/watch?v=${cur.video}&t=${secOf(0)}`"
                 target="_blank"
                 rel="noreferrer"
-              >open the source at {{ secOf(0) }}s ↗</a>.
+                >open the source at {{ secOf(0) }}s ↗</a
+              >.
             </p>
             <img
-              class="strip"
+              class="side-strip"
               :src="`/api/dev/portrait-crop?video=${cur.video}&sec=${secOf(0)}&side=${cur.side}&strip=1`"
               alt="this side's top corner"
-            >
+            />
             <div class="acts">
               <button
                 v-for="(h, hi) in cur.handles"
@@ -88,62 +156,101 @@
               </button>
             </div>
           </div>
-          <p v-if="cur.known.length" class="dim">
+          <p
+            v-if="cur.known.length"
+            class="dim"
+          >
             already known: {{ cur.known.map((k) => k.name).join(', ') }}
           </p>
-          <p v-if="restored === 'exact'" class="restored">
+          <p
+            v-if="restored === 'exact'"
+            class="restored"
+          >
             saved earlier — showing exactly what you picked
           </p>
-          <p v-else-if="restored === 'derived'" class="restored">
-            saved earlier — fighters are exact; frame B's A/B/C order is
-            reconstructed, since that save predates recording it
+          <p
+            v-else-if="restored === 'derived'"
+            class="restored"
+          >
+            saved earlier — fighters are exact; frame B's A/B/C order is reconstructed, since that
+            save predates recording it
           </p>
-          <p v-if="cur.savedPicks?.forced" class="warn">
+          <p
+            v-if="cur.savedPicks?.forced"
+            class="warn"
+          >
             this one was saved with <em>use frame A anyway</em>
           </p>
-          <p v-if="cur.recheck" class="warn">
-            This side is complete but FAILS its own control — the title names a
-            fighter the saved reading does not include. Re-read it.
+          <p
+            v-if="cur.recheck"
+            class="warn"
+          >
+            This side is complete but FAILS its own control — the title names a fighter the saved
+            reading does not include. Re-read it.
           </p>
-          <p v-if="titleMissing" class="warn">
-            The title names <strong>{{ titleMissing.join(', ') }}</strong> on this
-            side and your reading does not include them.<br >
+          <p
+            v-if="titleMissing"
+            class="warn"
+          >
+            The title names <strong>{{ titleMissing.join(', ') }}</strong> on this side and your
+            reading does not include them.<br />
             <span class="dim">
-              If the attribution is right, this is a mid-set team change: the title
-              witnesses that fighter, the frames witness the rest, and both are
-              true. Keeping both records the side as it actually was.
-            </span><br >
-            <button class="act union" @click="saveKeepingTitled()">
+              If the attribution is right, this is a mid-set team change: the title witnesses that
+              fighter, the frames witness the rest, and both are true. Keeping both records the side
+              as it actually was. </span
+            ><br />
+            <button
+              class="act union"
+              @click="saveKeepingTitled()"
+            >
               also keep {{ titleMissing.join(', ') }} — team changed
             </button>
-            <button class="force" @click="save(true)">drop them and save</button>
+            <button
+              class="force"
+              @click="save(true)"
+            >
+              drop them and save
+            </button>
           </p>
-          <p v-if="disagree" class="warn">
-            The two frames read different benches.<br >
-            A: {{ disagree.a.join(', ') }}<br >
-            B: {{ disagree.b.join(', ') }}<br >
+          <p
+            v-if="disagree"
+            class="warn"
+          >
+            The two frames read different benches.<br />
+            A: {{ disagree.a.join(', ') }}<br />
+            B: {{ disagree.b.join(', ') }}<br />
             <span class="dim">
-              If the team CHANGED between games, both readings are true and the
-              side really did field more than four — keep both. Force frame A only
-              when one frame was misread.
-            </span><br >
-            <button class="act union" @click="save(false, true)">
+              If the team CHANGED between games, both readings are true and the side really did
+              field more than four — keep both. Force frame A only when one frame was misread. </span
+            ><br />
+            <button
+              class="act union"
+              @click="save(false, true)"
+            >
               both — the team changed mid-set
             </button>
-            <button class="force" @click="save(true)">use frame A anyway</button>
+            <button
+              class="force"
+              @click="save(true)"
+            >
+              use frame A anyway
+            </button>
           </p>
-          <button class="save" :disabled="!ready || busy" @click="save(false)">
+          <button
+            class="save"
+            :disabled="!ready || busy"
+            @click="save(false)"
+          >
             {{ busy ? 'saving…' : cur.done ? 're-save side' : 'save side' }}
           </button>
           <p class="dim note">
-            A person's read REPLACES this side — it does not merge with the
-            description. Four of 189 hand-read slots named a fighter absent from
-            both described benches, so when the pixels and the prose disagree the
-            pixels win.
+            A person's read REPLACES this side — it does not merge with the description. Four of 189
+            hand-read slots named a fighter absent from both described benches, so when the pixels
+            and the prose disagree the pixels win.
           </p>
         </div>
       </section>
-    </div>
+    </section>
   </ClientOnly>
 </template>
 
@@ -161,6 +268,23 @@
  * cells, so cell-by-cell comparison would flag disagreements that are not
  * disagreements; what must match is who is on the team.
  */
+
+// Declares this tool on the /dev index (engine app/pages/dev/index.vue). Every
+// value MUST stay a plain quoted literal — the build extracts them from the AST
+// and a variable or backtick string drops the key silently.
+definePageMeta({
+  devTool: {
+    title: 'Bench queue',
+    category: 'Curation',
+    description:
+      'Drain the bench queue by reading the HUD portrait cluster — two frames per side, compared as sets.',
+  },
+});
+
+if (!import.meta.dev) {
+  throw createError({ statusCode: 404, statusMessage: 'Not Found' });
+}
+
 const LETTERS = ['A', 'B', 'C'] as const;
 
 interface Item {
@@ -299,22 +423,19 @@ async function save(force: boolean, union = false, keepTitled = false): Promise<
       a?: string[];
       b?: string[];
       titleMissing?: string[];
-    }>(
-      '/api/dev/bench-review',
-      {
-        method: 'POST',
-        body: {
-          video: cur.value!.video,
-          side: cur.value!.side,
-          sideIndex: sideIndex.value,
-          a: picks.value[0]!.slice(0, slotsFor(0).length),
-          b: picks.value[1]!.slice(0, slotsFor(1).length),
-          force,
-          union,
-          keepTitled,
-        },
+    }>('/api/dev/bench-review', {
+      method: 'POST',
+      body: {
+        video: cur.value!.video,
+        side: cur.value!.side,
+        sideIndex: sideIndex.value,
+        a: picks.value[0]!.slice(0, slotsFor(0).length),
+        b: picks.value[1]!.slice(0, slotsFor(1).length),
+        force,
+        union,
+        keepTitled,
       },
-    );
+    });
     if (r.titleMissing) {
       titleMissing.value = r.titleMissing;
       return;
@@ -343,48 +464,37 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 </script>
 
 <style scoped>
-.wrap {
-  max-width: 1500px;
-  margin: 0 auto;
-  padding: 1rem;
-  font-family: var(--font-sans, system-ui), sans-serif;
-}
-.bar {
-  display: flex;
-  gap: 1rem;
-  align-items: baseline;
-  flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-}
+/* Structural only: the progress strip, the pixelated crops, the frame stepper
+   and the per-slot roster grid. Every colour is an engine semantic token now —
+   the `var(--char-*, #hex)` pairs this file used to carry named custom
+   properties that exist nowhere in the engine, so they always resolved to the
+   hardcoded fallback. */
 .dim {
-  color: var(--char-muted, #8b93a7);
+  color: var(--color-text-muted);
   font-size: 0.85rem;
 }
-.keys {
-  font-family: ui-monospace, monospace;
-}
 .warn {
-  color: var(--char-danger, #ff5a5f);
+  color: var(--color-warning);
 }
 .strip {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
-  margin-bottom: 1rem;
+  margin: 1.5rem 0 1rem;
 }
 .tick {
   width: 8px;
   height: 14px;
   border: 0;
   padding: 0;
-  background: #3a4055;
+  background: var(--color-surface-raised);
   cursor: pointer;
 }
 .tick.on {
-  background: #35c46b;
+  background: var(--color-success);
 }
 .tick.cur {
-  outline: 2px solid #00e5ff;
+  outline: 2px solid var(--color-primary);
 }
 .item {
   display: flex;
@@ -400,12 +510,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   font-size: 0.9rem;
 }
 .pt {
-  color: #ff9d2e;
+  color: var(--color-secondary);
 }
 .crop {
   image-rendering: pixelated;
   max-width: 100%;
-  border-radius: 4px;
   display: block;
   margin-bottom: 0.25rem;
 }
@@ -418,17 +527,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 .step {
   font: inherit;
   padding: 0.1rem 0.5rem;
-  border: 1px solid #3a4055;
+  border: 1px solid var(--color-border);
   background: transparent;
   color: inherit;
-  border-radius: 4px;
   cursor: pointer;
 }
 .step:hover {
-  border-color: #00e5ff;
+  border-color: var(--color-primary);
 }
 .src {
-  color: #00e5ff;
+  color: var(--color-primary);
 }
 .slot {
   display: flex;
@@ -437,59 +545,59 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   margin-bottom: 0.35rem;
 }
 .letter {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-weight: 700;
-  color: #00e5ff;
+  color: var(--color-primary);
   width: 1.2rem;
 }
 .letter.bust {
-  color: #ff9d2e;
+  color: var(--color-secondary);
 }
 .attrib {
   margin-bottom: 1rem;
 }
-.strip {
+/* Renamed from `.strip`, which this file also uses for the progress nav above:
+   both rules matched, the image inherited `display: flex` and the two margin
+   declarations fought. Distinct names, no cascade accident. */
+.side-strip {
   image-rendering: pixelated;
   width: 100%;
   max-width: 34rem;
-  border-radius: 4px;
   margin: 0.3rem 0;
 }
 .who {
   font: inherit;
   padding: 0.4rem 0.8rem;
-  border: 1px solid #3a4055;
+  border: 1px solid var(--color-border);
   background: transparent;
   color: inherit;
-  border-radius: 4px;
   cursor: pointer;
 }
 .who.on {
-  background: #00e5ff;
-  border-color: #00e5ff;
-  color: #04121a;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-contrast);
   font-weight: 600;
 }
 .sel {
   font: inherit;
   padding: 0.3rem 0.5rem;
-  border: 1px solid #3a4055;
+  border: 1px solid var(--color-border);
   /* The popup list is drawn by the OS, and it does NOT inherit the page's colours
      — a transparent background there resolves against the widget's own light
      surface while the text keeps the dark theme's pale colour, which is why the
      names were unreadable. Both ends are stated explicitly. */
-  background: #12151f;
-  color: #e8ecf5;
-  border-radius: 4px;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
   min-width: 12rem;
 }
 .sel option {
-  background: #12151f;
-  color: #e8ecf5;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
 }
 .sel option:checked {
-  background: #00e5ff;
-  color: #04121a;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
 }
 .actions {
   flex: 1 1 16rem;
@@ -500,9 +608,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   font-weight: 600;
   padding: 0.6rem 1.2rem;
   border: 0;
-  border-radius: 4px;
-  background: #35c46b;
-  color: #04121a;
+  background: var(--color-success);
+  color: var(--color-bg);
   cursor: pointer;
 }
 .save:disabled {
@@ -514,11 +621,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   margin-top: 0.5rem;
   margin-right: 0.4rem;
   padding: 0.4rem 0.8rem;
-  border-radius: 4px;
   cursor: pointer;
   border: 0;
-  background: #35c46b;
-  color: #04121a;
+  background: var(--color-success);
+  color: var(--color-bg);
   font-weight: 600;
 }
 .force {
@@ -528,7 +634,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   border: 1px solid currentcolor;
   background: transparent;
   color: inherit;
-  border-radius: 4px;
   cursor: pointer;
 }
 .note {
@@ -536,7 +641,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   max-width: 26rem;
 }
 .restored {
-  color: #35c46b;
+  color: var(--color-success);
   font-size: 0.85rem;
   max-width: 26rem;
 }

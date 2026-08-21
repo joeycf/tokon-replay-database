@@ -1,11 +1,16 @@
 <template>
   <ClientOnly>
-    <div class="wrap">
-      <header class="bar">
-        <strong>plate reading</strong>
-        <span class="dim">{{ savedCount }}/{{ total }} done</span>
-        <span class="dim keys">⏎ save &amp; next · ←/→ move · u unreadable both</span>
-      </header>
+    <section class="mx-auto w-full max-w-[1400px] px-4 py-8 md:px-[26px]">
+      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <div>
+          <p class="font-mono text-label uppercase text-text-muted">Curation — dev only</p>
+          <h1 class="mt-1 font-display text-d2 font-bold text-text">Plate reading</h1>
+        </div>
+        <p class="font-mono text-[12px] text-text-muted">{{ savedCount }}/{{ total }} done</p>
+        <p class="ml-auto font-mono text-[12px] text-text-muted">
+          ⏎ save &amp; next · ←/→ move · u unreadable both
+        </p>
+      </div>
 
       <nav class="strip">
         <button
@@ -17,41 +22,97 @@
         />
       </nav>
 
-      <p v-if="pending" class="dim">loading…</p>
-      <p v-else-if="error" class="warn">{{ error }}</p>
+      <p
+        v-if="pending"
+        class="mt-6 font-mono text-body text-text-muted"
+      >
+        loading…
+      </p>
+      <p
+        v-else-if="error"
+        class="mt-6 font-mono text-body text-warning"
+      >
+        {{ error }}
+      </p>
 
-      <section v-else class="item">
+      <section
+        v-else
+        class="item"
+      >
         <!-- Full width: the plates are ~145px of a 1280px frame and the whole
              task is reading them. Nothing else is on screen on purpose — see
              server/api/dev/source-review.get.ts. -->
-        <img class="frame" :src="`/api/dev/review-frame?sample=${cursor}`" :alt="`sample ${cursor + 1}`" >
+        <img
+          class="frame"
+          :src="`/api/dev/review-frame?sample=${cursor}`"
+          :alt="`sample ${cursor + 1}`"
+        />
 
         <div class="row">
           <label>
-            <span class="lbl">LEFT plate</span>
-            <select v-model="left" class="sel">
-              <option :value="UNSET" disabled>— pick —</option>
+            <span class="mb-1 block font-mono text-[12px] text-text-muted">LEFT plate</span>
+            <select
+              v-model="left"
+              class="min-w-[220px] border border-border bg-surface-raised px-2.5 py-1.5 font-ui text-body text-text cut-sm"
+            >
+              <option
+                :value="UNSET"
+                disabled
+              >
+                — pick —
+              </option>
               <option :value="NONE">— no readable plate —</option>
-              <option v-for="c in roster" :key="c.id" :value="c.id">{{ c.name }}</option>
+              <option
+                v-for="c in roster"
+                :key="c.id"
+                :value="c.id"
+              >
+                {{ c.name }}
+              </option>
             </select>
           </label>
           <label>
-            <span class="lbl">RIGHT plate</span>
-            <select v-model="right" class="sel">
-              <option :value="UNSET" disabled>— pick —</option>
+            <span class="mb-1 block font-mono text-[12px] text-text-muted">RIGHT plate</span>
+            <select
+              v-model="right"
+              class="min-w-[220px] border border-border bg-surface-raised px-2.5 py-1.5 font-ui text-body text-text cut-sm"
+            >
+              <option
+                :value="UNSET"
+                disabled
+              >
+                — pick —
+              </option>
               <option :value="NONE">— no readable plate —</option>
-              <option v-for="c in roster" :key="c.id" :value="c.id">{{ c.name }}</option>
+              <option
+                v-for="c in roster"
+                :key="c.id"
+                :value="c.id"
+              >
+                {{ c.name }}
+              </option>
             </select>
           </label>
-          <button class="save" :disabled="!answered || posting" @click="save()">
+          <button
+            class="border border-border bg-surface-raised px-[18px] py-2 font-ui text-body text-text transition-colors cut-sm hover:border-primary/50 disabled:cursor-not-allowed disabled:opacity-40"
+            :disabled="!answered || posting"
+            @click="save()"
+          >
             {{ posting ? 'saving…' : 'save  ⏎' }}
           </button>
         </div>
 
-        <p class="dim small">sample {{ cursor + 1 }} of {{ total }}</p>
-        <p v-if="postError" class="warn">{{ postError }}</p>
+        <p class="mt-3 font-mono text-[12px] text-text-muted">
+          sample {{ cursor + 1 }} of {{ total }}
+        </p>
+        <p
+          v-if="postError"
+          class="mt-2 font-mono text-body text-warning"
+        >
+          {{ postError }}
+        </p>
       </section>
-    </div>
+    </section>
   </ClientOnly>
 </template>
 
@@ -69,6 +130,20 @@
 // so "not yet answered" is structurally distinguishable from any real verdict —
 // including "no readable plate", which IS a verdict here and one of the main
 // things this pass measures.
+
+// Declares this tool on the /dev index (engine app/pages/dev/index.vue). Every
+// value MUST stay a plain quoted literal — the build extracts them from the AST
+// and a variable or backtick string drops the key silently.
+definePageMeta({
+  devTool: {
+    title: 'Plate reading',
+    category: 'Curation',
+    description:
+      'Label the left and right nameplates on each sampled frame. No title, no handles, nothing to anchor on.',
+    writes: 'data/plate-labels.json',
+  },
+});
+
 if (!import.meta.dev) {
   throw createError({ statusCode: 404, statusMessage: 'Not Found' });
 }
@@ -85,9 +160,10 @@ interface Item {
 
 const { data, pending, error, refresh } = await useAsyncData(
   'dev-plate-review',
-  () => $fetch<{ roster: { id: string; name: string }[]; total: number; items: Item[] }>(
-    '/api/dev/source-review',
-  ),
+  () =>
+    $fetch<{ roster: { id: string; name: string }[]; total: number; items: Item[] }>(
+      '/api/dev/source-review',
+    ),
   { server: false },
 );
 const roster = computed(() => data.value?.roster ?? []);
@@ -162,62 +238,35 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 </script>
 
 <style scoped>
-.wrap {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 1rem;
-  font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
-  color: #e8ecf5;
-  background: #101627;
-  min-height: 100vh;
-}
-.bar {
-  display: flex;
-  gap: 1rem;
-  align-items: baseline;
-  flex-wrap: wrap;
-  padding-bottom: 0.5rem;
-}
-.dim {
-  color: #8e9bb5;
-}
-.keys {
-  font-size: 12px;
-  margin-left: auto;
-}
-.small {
-  font-size: 12px;
-}
-.warn {
-  color: #ffb45f;
-}
+/* Only what Tailwind has no good answer for: the progress strip's tick states
+   and the full-bleed frame. Everything else is engine utilities, and every
+   colour is a semantic token — the page used to paint its own #101627 over the
+   layout's background. */
 .strip {
   display: flex;
   flex-wrap: wrap;
   gap: 3px;
-  margin: 0.5rem 0 1rem;
+  margin: 1.5rem 0 1rem;
 }
 .tick {
   width: 12px;
   height: 12px;
-  border-radius: 2px;
-  border: 1px solid #2a3550;
-  background: #1a2338;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
   cursor: pointer;
   padding: 0;
 }
 .tick.on {
-  background: #23c29e;
+  background: var(--color-success);
 }
 .tick.cur {
   transform: scale(1.5);
-  border-color: #03a5fe;
+  border-color: var(--color-primary);
 }
 .frame {
   width: 100%;
   height: auto;
   display: block;
-  border-radius: 6px;
 }
 .row {
   display: flex;
@@ -225,31 +274,5 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   align-items: flex-end;
   flex-wrap: wrap;
   margin-top: 1rem;
-}
-.lbl {
-  display: block;
-  font-size: 12px;
-  color: #8e9bb5;
-  margin-bottom: 0.25rem;
-}
-.sel,
-.save {
-  background: #1a2338;
-  color: #e8ecf5;
-  border: 1px solid #2a3550;
-  border-radius: 5px;
-  padding: 7px 10px;
-  font: inherit;
-  cursor: pointer;
-}
-.sel {
-  min-width: 220px;
-}
-.save {
-  padding: 8px 18px;
-}
-.save:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 </style>

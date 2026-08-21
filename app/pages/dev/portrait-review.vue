@@ -1,12 +1,24 @@
 <template>
   <ClientOnly>
-    <div class="wrap">
-      <header class="bar">
-        <strong>bench diamonds</strong>
-        <span class="dim">{{ labelled }}/{{ total }} sides · {{ crops }} crops</span>
-        <span v-if="offBench" class="off-count">{{ offBench }} off-bench</span>
-        <span class="dim keys">1/2/3 assign A · qwe assign B · asd assign C · ←/→ move · x clear</span>
-      </header>
+    <section class="mx-auto w-full max-w-[1400px] px-4 py-8 md:px-[26px]">
+      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <div>
+          <p class="font-mono text-label uppercase text-text-muted">Curation — dev only</p>
+          <h1 class="mt-1 font-display text-d2 font-bold text-text">Bench diamonds</h1>
+        </div>
+        <p class="font-mono text-[12px] text-text-muted">
+          {{ labelled }}/{{ total }} sides · {{ crops }} crops
+        </p>
+        <p
+          v-if="offBench"
+          class="font-mono text-[12px] text-secondary"
+        >
+          {{ offBench }} off-bench
+        </p>
+        <p class="ml-auto font-mono text-[12px] text-text-muted">
+          1/2/3 assign A · qwe assign B · asd assign C · ←/→ move · x clear
+        </p>
+      </div>
 
       <nav class="strip">
         <button
@@ -18,23 +30,49 @@
         />
       </nav>
 
-      <p v-if="pending" class="dim">loading…</p>
-      <p v-else-if="error" class="warn">{{ error }}</p>
-      <p v-else-if="!cur" class="dim">nothing to label</p>
+      <p
+        v-if="pending"
+        class="mt-6 font-mono text-body text-text-muted"
+      >
+        loading…
+      </p>
+      <p
+        v-else-if="error"
+        class="mt-6 font-mono text-body text-warning"
+      >
+        {{ error }}
+      </p>
+      <p
+        v-else-if="!cur"
+        class="mt-6 font-mono text-body text-text-muted"
+      >
+        nothing to label
+      </p>
 
-      <section v-else class="item">
+      <section
+        v-else
+        class="item"
+      >
         <!-- The corner at 4x with the three diamonds outlined and lettered. The
              dashed box is the point fighter's bust, which is WHY the candidate
              list is only three names: point plus three assists is the whole side. -->
-        <img class="crop" :src="`/api/dev/portrait-crop?i=${cursor}`" :alt="`side ${cursor + 1}`" >
+        <img
+          class="crop"
+          :src="`/api/dev/portrait-crop?i=${cursor}`"
+          :alt="`side ${cursor + 1}`"
+        />
 
         <div class="panel">
-          <p class="point">
-            on point <strong>{{ cur.pointName }}</strong>
-            <span class="dim"> · screen {{ cur.side === 'L' ? 'left' : 'right' }}</span>
+          <p class="mb-4 font-ui text-body text-text">
+            on point <strong class="font-semibold">{{ cur.pointName }}</strong>
+            <span class="text-text-muted"> · screen {{ cur.side === 'L' ? 'left' : 'right' }}</span>
           </p>
 
-          <div v-for="(cell, k) in CELLS" :key="cell" class="cellrow">
+          <div
+            v-for="(cell, k) in CELLS"
+            :key="cell"
+            class="cellrow"
+          >
             <span class="letter">{{ LETTERS[k] }}</span>
             <button
               v-for="(c, ci) in cur.candidates"
@@ -52,20 +90,31 @@
               @change="assign(cell, ($event.target as HTMLSelectElement).value || null)"
             >
               <option value="">other…</option>
-              <option v-for="r in roster" :key="r.id" :value="r.id">{{ r.name }}</option>
+              <option
+                v-for="r in roster"
+                :key="r.id"
+                :value="r.id"
+              >
+                {{ r.name }}
+              </option>
             </select>
-            <button class="cand clear" @click="assign(cell, null)">clear</button>
+            <button
+              class="cand clear"
+              @click="assign(cell, null)"
+            >
+              clear
+            </button>
           </div>
 
-          <p class="dim note">
-            Each diamond should hold one of these three, and the order changes as
-            the point fighter changes. If the pixels show someone else, pick them
-            from <em>other…</em> — the description is wrong, not you, and the
-            disagreement is recorded as a measurement of the truth set.
+          <p class="mt-4 max-w-[30rem] font-ui text-body text-text-muted">
+            Each diamond should hold one of these three, and the order changes as the point fighter
+            changes. If the pixels show someone else, pick them from <em>other…</em> — the
+            description is wrong, not you, and the disagreement is recorded as a measurement of the
+            truth set.
           </p>
         </div>
       </section>
-    </div>
+    </section>
   </ClientOnly>
 </template>
 
@@ -83,6 +132,23 @@
  * labeller what to say, and an auto-selected suggestion is the same mistake with
  * a friendlier face.
  */
+
+// Declares this tool on the /dev index (engine app/pages/dev/index.vue). Every
+// value MUST stay a plain quoted literal — the build extracts them from the AST
+// and a variable or backtick string drops the key silently.
+definePageMeta({
+  devTool: {
+    title: 'Bench diamonds',
+    category: 'Curation',
+    description:
+      'Three-way diamond labeller over 4x corner crops, keyboard-driven. Nothing pre-selects an answer.',
+  },
+});
+
+if (!import.meta.dev) {
+  throw createError({ statusCode: 404, statusMessage: 'Not Found' });
+}
+
 const CELLS = ['left', 'right', 'bottom'] as const;
 const LETTERS = ['A', 'B', 'C'] as const;
 const KEYS = [
@@ -135,7 +201,8 @@ async function assign(cell: string, char: string | null): Promise<void> {
 function onKey(e: KeyboardEvent): void {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
   if (e.key === 'ArrowLeft') return void (cursor.value = Math.max(0, cursor.value - 1));
-  if (e.key === 'ArrowRight') return void (cursor.value = Math.min(total.value - 1, cursor.value + 1));
+  if (e.key === 'ArrowRight')
+    return void (cursor.value = Math.min(total.value - 1, cursor.value + 1));
   for (const [k, row] of KEYS.entries()) {
     const ci = row.indexOf(e.key as never);
     if (ci >= 0) {
@@ -151,48 +218,29 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 </script>
 
 <style scoped>
-.wrap {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 1rem;
-  font-family: var(--font-sans, system-ui), sans-serif;
-}
-.bar {
-  display: flex;
-  gap: 1rem;
-  align-items: baseline;
-  flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-}
-.dim {
-  color: var(--char-muted, #8b93a7);
-  font-size: 0.85rem;
-}
-.keys {
-  font-family: ui-monospace, monospace;
-}
-.warn {
-  color: var(--char-danger, #ff5a5f);
-}
+/* Structural only — the progress strip, the pixelated crop, and the assignment
+   grid. Colours are engine semantic tokens; the page carries no palette of its
+   own and no `--char-*` fallbacks (those names exist nowhere in the engine, so
+   every one of them was silently resolving to its hardcoded default). */
 .strip {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
-  margin-bottom: 1rem;
+  margin: 1.5rem 0 1rem;
 }
 .tick {
   width: 10px;
   height: 14px;
   border: 0;
   padding: 0;
-  background: #3a4055;
+  background: var(--color-surface-raised);
   cursor: pointer;
 }
 .tick.on {
-  background: #35c46b;
+  background: var(--color-success);
 }
 .tick.cur {
-  outline: 2px solid #00e5ff;
+  outline: 2px solid var(--color-primary);
 }
 .item {
   display: flex;
@@ -203,14 +251,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 .crop {
   image-rendering: pixelated;
   max-width: 100%;
-  border-radius: 4px;
 }
 .panel {
   min-width: 22rem;
   flex: 1;
-}
-.point {
-  margin: 0 0 1rem;
 }
 .cellrow {
   display: flex;
@@ -220,27 +264,26 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   flex-wrap: wrap;
 }
 .letter {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-weight: 700;
-  color: #00e5ff;
+  color: var(--color-primary);
   width: 1.2rem;
 }
 .cand {
   font: inherit;
   padding: 0.4rem 0.7rem;
-  border: 1px solid #3a4055;
+  border: 1px solid var(--color-border);
   background: transparent;
   color: inherit;
-  border-radius: 4px;
   cursor: pointer;
 }
 .cand:hover {
-  border-color: #00e5ff;
+  border-color: var(--color-primary);
 }
 .cand.picked {
-  background: #35c46b;
-  border-color: #35c46b;
-  color: #04121a;
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-bg);
   font-weight: 600;
 }
 .cand.clear {
@@ -249,31 +292,22 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 .other {
   font: inherit;
   padding: 0.4rem 0.5rem;
-  border: 1px dashed #6b7391;
+  border: 1px dashed var(--color-border);
   background: transparent;
   color: inherit;
-  border-radius: 4px;
   cursor: pointer;
   max-width: 12rem;
 }
 .other.picked {
-  background: #ff9d2e;
+  background: var(--color-secondary);
   border-style: solid;
-  border-color: #ff9d2e;
-  color: #04121a;
+  border-color: var(--color-secondary);
+  color: var(--color-bg);
   font-weight: 600;
 }
-.off-count {
-  font-size: 0.85rem;
-  color: #ff9d2e;
-}
 kbd {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   opacity: 0.7;
-}
-.note {
-  margin-top: 1rem;
-  max-width: 30rem;
 }
 </style>

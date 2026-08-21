@@ -184,6 +184,29 @@ is local-only and the cron carries committed overrides forward.
   cannot fire for a channel holding 20 or fewer, and four of the five are under 40. Both thresholds are still correct; `verify:deployed` and the freeze pin
   are the live protection until it wakes.
 
+## Dev tooling (local-only)
+
+**Start at [`/dev`](http://localhost:3000/tokon/dev)** — it lists every tool below with its
+description, and there is a **Dev** entry in the site nav while the dev server is
+running. That index is the engine's (`app/pages/dev/index.vue`); it builds itself
+from what each page declares in `definePageMeta({ devTool })`, so a new tool
+appears there the moment it exists.
+
+Four pages do the hand-reading the three automatic tiers can't, plus the standing check on what they disagree about.
+
+Everything under `/dev` is **`nuxt dev` only**: the page and every `/api/dev/*`
+route it uses guard on `import.meta.dev` and 404 otherwise,
+`nitro.prerender.ignore` skips the whole `/dev` prefix, and nothing public links
+to them (the nav entry is compiled out of production builds). They read and write
+the committed JSON directly — there is no database.
+
+| page                   | what it's for                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `/dev/source-review`   | **Plate reading.** Label the left and right nameplates on each sampled frame — no title, no handles, nothing to anchor on → `data/plate-labels.json` |
+| `/dev/bench-review`    | **Bench queue.** Drain the queue by reading the HUD portrait cluster — two frames per side, compared as sets  |
+| `/dev/portrait-review` | **Bench diamonds.** Three-way diamond labeller over 4x corner crops, keyboard-driven; nothing pre-selects     |
+| `/dev/disagreements`   | Human reads versus the automatic tiers — the cross-tier table and the off-bench read queue                    |
+
 ## Vercel
 
 Static (`npm run generate`), `app.baseURL` defaults to `/tokon/` — an env
