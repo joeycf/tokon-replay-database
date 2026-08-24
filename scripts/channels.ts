@@ -1,7 +1,7 @@
 /**
  * The source channels — checklist step 1, done before a fetcher existed.
  *
- * Five channels, all of them ordinary daily channels: there is no
+ * Six channels, all of them ordinary daily channels: there is no
  * backfill-once mechanism on this platform and never was. The first cron run IS
  * the backfill, which is why the cron-preservation gate (a simulated daily run
  * proving untouched channels survive) is the one that matters.
@@ -18,6 +18,12 @@
  *   5 fightingStationX  6 of 445 uploads. A general FGC channel, lowest
  *                       specificity, and the most likely to be re-posting
  *                       someone else's footage.
+ *   6 fgcReplaysHub     1 of 2,517 uploads — a 2XKO channel that added Tokon
+ *                       on 2026-08-23, so its Tokon output is the newest and
+ *                       thinnest here. Same tier as 5 and below it: its players
+ *                       (Hook, Supernoon, Hikari) already arrive via three
+ *                       other channels, so a tie should resolve to whichever
+ *                       of those saw it first.
  *
  * Cross-channel duplication is REAL — one confirmed pair in the launch corpus
  * (the same Roda vs Snake Eyez match on two channels the same day) — but at
@@ -118,6 +124,56 @@ export const CHANNELS: ChannelConfig[] = [
     // rejected as CPU matches, shorts and multi-match compilations — that
     // rejection rate is the gate working, not the gate misfiring.
     tokonSignal: 'titleOrDescription',
+  },
+  {
+    id: 'fgcReplaysHub',
+    source: 'fgcReplaysHub',
+    name: 'FGC Replays Hub',
+    channelId: 'UCUULKDufuCn_OSInbqNz50g',
+    uploadsPlaylist: uploads('UCUULKDufuCn_OSInbqNz50g'),
+    /**
+     * The SAME physical channel 2xko-replay-database tracks as `bestReplays`.
+     * It rebranded to the multi-game "FGC Replays Hub" on 2026-08-23 and now
+     * publishes both games; 2XKO gated it title-scoped the same day (e00d238)
+     * and holds its Tokon uploads out. This entry claims them.
+     *
+     * Unlike proReplays above, this channel did NOT walk — it straddles. So the
+     * answer is a gate on each side, not a freeze on one. Last in the array
+     * deliberately: a general multi-game channel is the lowest-specificity
+     * source and the most likely to be re-posting footage the dedicated
+     * channels already carry, which is the same argument fightingStationX sits
+     * on. Its players are already here — Hook, Supernoon and Hikari all appear
+     * across three other channels — so its copies lose dedupe, as they should.
+     */
+    // TITLE SCOPE. Measured over the channel's 2,517 uploads:
+    //
+    //   scope                 kept   rejected
+    //   'title'                  1   2516 other-game
+    //   'titleOrDescription'     1   2516 other-game
+    //
+    // The two agree TODAY, and the reason is OTHER_GAME_RE, not the scope: all
+    // 2,516 2XKO uploads name 2XKO in the TITLE, so they are rejected whichever
+    // way the positive marker is read. The dual-game boilerplate that names
+    // both games sits on 1 of 2,517 descriptions — the Tokon one. Its 2XKO
+    // uploads still carry a bare "Patch: 23rd July 2026" (0/2,516 mention
+    // Tokon).
+    //
+    // 'title' is chosen for what happens when that boilerplate spreads to the
+    // 2XKO uploads: 'titleOrDescription' would then match TOKON_RE on 2,516
+    // foreign records and leave their rejection resting entirely on the
+    // both-markers branch, burying the miss report. Leaning on one gate to
+    // catch another's over-reach is not a design.
+    tokonSignal: 'title',
+    // No descriptionBench. The channel DOES state a full four-per-side bench
+    // ("EDUARDO HOOK with Blade, Storm, Spider Man, Iron Man vs SUPERNOON with
+    // Magik, Spider Man, Green Goblin, Blade" — all 8 resolve against the
+    // roster), but none of the three shapes reads it: DESC_SIDE_RE
+    // (bench.ts:48) requires parentheses and this is a bare list after "with".
+    // A fourth shape would be a grammar authored against ONE sample, and a
+    // wrong bench shape does not fail loudly — it "completes" a 4-slot side
+    // with fabricated fighters (checklist 5e). Revisit once the channel has
+    // published enough Tokon uploads to measure the variant against its own
+    // rejects.
   },
 ];
 

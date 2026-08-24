@@ -3,12 +3,17 @@
 // like the SF6, Tekken and 2XKO pipelines do).
 
 /** The Replay.source contract: doubles as GameConfig.sourceChannels[].id
- *  (badge/filter). Five channels, currently 1:1 with ChannelKey — the two
+ *  (badge/filter). Six channels, currently 1:1 with ChannelKey — the two
  *  types stay distinct anyway, because SF6 learned the hard way that they stop
  *  being 1:1 the moment one physical channel starts publishing two kinds of
  *  footage, and retrofitting the split is worse than carrying it. */
 export type SourceId =
-  'highLevelReplays' | 'proReplays' | 'hadoukenReplays' | 'replaysHub' | 'fightingStationX';
+  | 'highLevelReplays'
+  | 'proReplays'
+  | 'hadoukenReplays'
+  | 'replaysHub'
+  | 'fightingStationX'
+  | 'fgcReplaysHub';
 
 /** Per-YouTube-channel intake key: names raw/<key>.json and the coverage
  *  report's rows. THE DEDUPE KEY (checklist step 2) — never the SourceId, which

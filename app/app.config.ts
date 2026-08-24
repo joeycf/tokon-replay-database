@@ -129,6 +129,7 @@ export default defineAppConfig({
       { id: 'hadoukenReplays', name: 'Hadouken Replays' },
       { id: 'replaysHub', name: 'Tōkon Replays Hub' },
       { id: 'fightingStationX', name: 'Fighting Station X' },
+      { id: 'fgcReplaysHub', name: 'FGC Replays Hub' },
     ],
     // Era → patch hierarchy. PIPELINE-EMITTED (scripts/emit.ts →
     // data/patchGroups.json) from the same boundary authority that derives every
