@@ -283,6 +283,82 @@ try {
       );
       await writeFile(rawPath, JSON.stringify(original, null, 1));
 
+      // 4c — the title tail affixes, BOTH bracket families.
+      // hadoukenReplays publishes the same "MARVEL TŌKON: Fighting Souls" tail
+      // in 【】 on 53 titles and in ASCII [] on 17, and only the full-width form
+      // was modelled. The ASCII tail rode into the last side's handle: it minted
+      // 12 junk players, and where it pushed the handle past 40 characters the
+      // bad-handle guard deleted the record outright. Controlled here because
+      // the failure is invisible in every count — a junk handle looks like a
+      // player and a deleted record looks like a channel that posted less.
+      const hadoPath = join(ROOT, 'raw', 'hadoukenReplays.json');
+      const hadoOriginal = JSON.parse(await readFile(hadoPath, 'utf8')) as Record<
+        string,
+        unknown
+      >[];
+      const fixture = (id: string, title: string) => ({
+        id,
+        channel: 'hadoukenReplays',
+        title,
+        description: 'control fixture',
+        publishedAt: '2026-08-11T00:00:00Z',
+        durationSec: 600,
+        liveBroadcastContent: 'none',
+      });
+      const LONG = 'A'.repeat(45); // > 40 with no tail at all
+      await writeFile(
+        hadoPath,
+        JSON.stringify(
+          [
+            fixture(
+              'CTLTAIL01',
+              'TOKON ▰ CTLONE (Spider-Man) vs (Champion) CTLBRACKET 👊[MARVEL TŌKON: Fighting Souls]',
+            ),
+            fixture(
+              'CTLTAIL02',
+              'TOKON ▰ CTLTWO (Magik) vs (Loki) CTLFULLWIDTH 👊 【MARVEL TŌKON: Fighting Souls】',
+            ),
+            fixture(
+              'CTLTAIL03',
+              `TOKON ▰ CTLTHREE (Blade) vs (Hulk) ${LONG} 👊[MARVEL TŌKON: Fighting Souls]`,
+            ),
+            ...hadoOriginal,
+          ],
+          null,
+          1,
+        ),
+      );
+      parse();
+      const tailVideos = JSON.parse(
+        await readFile(join(ROOT, 'data', 'videos.json'), 'utf8'),
+      ) as MatchVideo[];
+      const tailPlayers = JSON.parse(
+        await readFile(join(ROOT, 'data', 'players.json'), 'utf8'),
+      ) as PlayerRecord[];
+      const handleOf = (id: string) =>
+        tailVideos.find((v) => v.id === id)?.sides.at(-1)?.handle ?? '(record absent)';
+      check(
+        'ASCII [MARVEL TŌKON: Fighting Souls] stripped from the handle',
+        handleOf('CTLTAIL01') === 'CTLBRACKET',
+        `"${handleOf('CTLTAIL01')}"`,
+      );
+      check(
+        'full-width 【…】 still stripped (the regression this widening could cause)',
+        handleOf('CTLTAIL02') === 'CTLFULLWIDTH',
+        `"${handleOf('CTLTAIL02')}"`,
+      );
+      check(
+        'a handle still over 40 chars AFTER the strip is refused, not published',
+        !tailVideos.some((v) => v.id === 'CTLTAIL03'),
+        `record ${tailVideos.some((v) => v.id === 'CTLTAIL03') ? 'present' : 'absent'}`,
+      );
+      check(
+        'no player handle anywhere carries a bracket',
+        !tailPlayers.some((pl) => /[[\]【】]/u.test(pl.handle)),
+        `${tailPlayers.length} players`,
+      );
+      await writeFile(hadoPath, JSON.stringify(hadoOriginal, null, 1));
+
       // 4b — the collapse guard. Cut a channel to 20% and the run must refuse to
       // write, BEFORE touching anything.
       // Keep the OLDEST fifth, not the newest. raw/ is sorted newest-first and

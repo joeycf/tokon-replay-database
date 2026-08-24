@@ -240,6 +240,18 @@ function testSubstrate(): void {
     `no player handle is a fighter name (${collisions.map((c) => c.handle).join(', ') || 'clean'})`,
   );
 
+  // ITS SIBLING, AND THE ONE THAT WOULD HAVE CAUGHT THE BRACKET TAIL. A title
+  // affix that survives into a handle is invisible in every count: it mints a
+  // plausible-looking player page, and once it pushes the handle past 40 chars
+  // the bad-handle guard deletes the record instead. 12 handles carried
+  // "[MARVEL TŌKON: Fighting Souls]" until BRACKET_TAIL_RE covered both bracket
+  // families; 3 records were being dropped outright.
+  const bracketed = players.filter((p) => /[[\]【】「」《》]/u.test(p.handle));
+  expect(
+    bracketed.length === 0,
+    `no player handle contains a bracket (${bracketed.map((b) => b.handle).join(', ') || 'clean'})`,
+  );
+
   // queues — two of them, and they mean different things
   const KINDS = new Set(['character-completion', 'bench-conflict', 'slot-ambiguous']);
   expect(

@@ -95,6 +95,9 @@ interface Miss {
 //
 //   a  "Marvel Tokon ▰ HANDLE (Chars) vs HANDLE (Chars) ▰ Pro level replays"
 //   b  "TOKON ▰ HANDLE (Chars) vs (Chars) HANDLE 👊【MARVEL TŌKON: Fighting Souls】"
+//      — and the SAME tail in ASCII brackets, "👊[MARVEL TŌKON: Fighting Souls]".
+//        53 titles use 【】, 17 use []. Modelling only the full-width form is
+//        what let the tail ride into a handle; see BRACKET_TAIL_RE below.
 //   c  "HANDLE (Chars) vs HANDLE (Chars) ▰ MARVEL TOKON: High Level Gameplay"
 //   d  side 2 reversed:  "(Chars) HANDLE"   — 27 of 34 on one channel
 //
@@ -112,7 +115,25 @@ interface Miss {
 // eat into a side segment.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const BRACKET_TAIL_RE = /\s*【[^】]*】\s*$/u;
+// BOTH bracket families. hadoukenReplays publishes the same tail two ways — 53
+// titles with 【MARVEL TŌKON: Fighting Souls】 and 17 with the ASCII
+// [MARVEL TŌKON: Fighting Souls] — and only the full-width form was modelled.
+// The ASCII form rode all the way into the handle of whichever side came last:
+// these titles carry only a LEADING ▰, so core() has no trailing ▰ to cut
+// against; EMOJI_TAIL_RE is anchored at $ and "]" is not in its class (which is
+// also why the 👊 survived); and cleanHandle's trim class has no "]" either.
+//
+// It cost two things. It minted 12 junk players ("DIAPHONE [MARVEL TŌKON:
+// Fighting Souls]"), and — worse — it pushed 3 records past the 40-char
+// bad-handle refusal at :396 and deleted them outright. The longest surviving
+// junk handle was 39 of 40, so the corpus sat on both sides of that edge: short
+// names minted junk players, long names were silently discarded.
+//
+// Safe to widen: across 6,132 raw titles on six channels, no bracket character
+// of any kind appears mid-title, and all 70 tails carry the same game name.
+// NOT parens — fightingStationX has 36 trailing (…) and the chars-first grammar
+// depends on a real trailing paren (slot(), below).
+const BRACKET_TAIL_RE = /\s*(?:【[^】]*】|\[[^\]]*\])\s*$/u;
 const EMOJI_TAIL_RE = /[\p{Extended_Pictographic}️‍\s|·—–-]+$/u;
 
 interface Slot {
@@ -496,10 +517,17 @@ async function main() {
         if (provenance.complete) completeSides += 1;
 
         // A description handle beats an ALL-CAPS title handle for display.
-        const handle =
-          benchSide && benchSide.handle && benchSide.handle.length <= 40
-            ? benchSide.handle
-            : handles[i];
+        //
+        // cleanHandle FIRST. bench.ts has no handle hygiene of its own — its
+        // capture classes ([^():\n!] and [^\n(]) admit brackets and emoji and it
+        // takes the match with a bare .trim() — and this branch OUTRANKS the
+        // title handle, so an unclean description handle would reach playerId()
+        // past a title path that had already been cleaned. Changes nothing in
+        // the corpus today (measured: 0 handles differ); it closes the
+        // higher-priority half of the defect BRACKET_TAIL_RE fixes above, so
+        // don't go looking for the bug it repaired.
+        const benchHandle = benchSide?.handle ? cleanHandle(benchSide.handle) : '';
+        const handle = benchHandle && benchHandle.length <= 40 ? benchHandle : handles[i];
 
         built.push({ player: playerId(handle), handle, characters: chars, provenance });
       }
@@ -773,6 +801,40 @@ async function main() {
     lines.push('| text | count | example |', '| --- | ---: | --- |');
     for (const [text, e] of [...residues].sort((a, b) => b[1].n - a[1].n).slice(0, 25)) {
       lines.push(`| \`${text}\` | ${e.n} | ${e.ids[0]} |`);
+    }
+    lines.push('');
+  }
+
+  // ── handles that read like the game, not like a person ────────────────────
+  // SURFACED, NEVER REWRITTEN — the same contract as the residue block above.
+  // These are not parse errors: the uploader typed the game name (or a
+  // placeholder) into the handle slot and the parser read the slot correctly.
+  // "TOKON PLAYER" and "TŌKON PLAYER" are the same placeholder on two channels,
+  // split only by the macron, which is exactly the kind of thing a person has to
+  // adjudicate and a regex must not. Rewriting them would be the guess this
+  // parser refuses everywhere else; leaving them unlisted is how the NEXT one
+  // becomes a silent player page.
+  const gameish = new Map<string, { n: number; ids: string[] }>();
+  for (const r of withOverrides) {
+    for (const side of r.sides) {
+      if (!/t[ōo]kon|marvel/iu.test(side.handle)) continue;
+      const e = gameish.get(side.handle) ?? { n: 0, ids: [] };
+      e.n += 1;
+      if (e.ids.length < 3) e.ids.push(r.id);
+      gameish.set(side.handle, e);
+    }
+  }
+  if (gameish.size) {
+    lines.push('## Handles that resemble the game name', '');
+    lines.push(
+      'Handles matching `/t[ōo]kon|marvel/i`. The parser read the slot correctly —',
+      'the uploader put this in the handle position. Listed so a placeholder or a',
+      'garbled game name gets a human verdict instead of a quiet player page.',
+      '',
+    );
+    lines.push('| handle | records | example |', '| --- | ---: | --- |');
+    for (const [handle, e] of [...gameish].sort((a, b) => b[1].n - a[1].n)) {
+      lines.push(`| \`${handle}\` | ${e.n} | ${e.ids[0]} |`);
     }
     lines.push('');
   }
