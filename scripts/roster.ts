@@ -68,10 +68,30 @@ const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  *  reach for them; the em/en dashes because a hyphen-separated bench sometimes
  *  arrives typographically. */
 const SEPARATOR_RE = /[\s,/&+·\-–—]|(?:\band\b)|(?:\bvs?\.?\b)/gi;
-/** The per-character leaderboard position, e.g. "#2 Ranked Danger". Stripped
- *  BEFORE matching so it can never be read as part of a name, and so the
- *  residue gate does not report it forever. */
-const LEADERBOARD_RE = /#\s*\d+\s*(?:ranked|rank)\s*/gi;
+/**
+ * The per-character leaderboard position. Stripped BEFORE matching so it can
+ * never be read as part of a name, and so the residue gate does not report it
+ * forever.
+ *
+ * THREE ORDERINGS, because uploaders use all three and an earlier version read
+ * only the first:
+ *
+ *   "#2 Ranked Danger"        hash first        — always handled
+ *   "Ranked #5 Storm"         WORD first        — was not, on 4 records
+ *   "#1 Captain America"      bare, no word     — was not, on 2 records
+ *
+ * The miss was not a data defect: the fighter still resolved in every case,
+ * because the leftover "Ranked"/"#5" matches no alias. It was an ALARM defect.
+ * `Ranked#5` and `Ranked#10` cleared the residue gate's 3-record threshold and
+ * raised "a new fighter has probably shipped" in report.md — so the one signal
+ * that exists to catch a real DLC fighter was already crying wolf.
+ *
+ * The `#` is mandatory in every branch. A bare "Ranked Danger" is left alone to
+ * surface as residue, and this only ever sees a TITLE'S CHARACTER SLOT
+ * (parse.ts) — never a handle, never a description — so it cannot reach the
+ * hashtag soup that ends most descriptions.
+ */
+const LEADERBOARD_RE = /(?:\brank(?:ed)?\b\s*)?#\s*\d+(?:\s*\brank(?:ed)?\b)?\s*/gi;
 
 export const stripLeaderboard = (text: string): string =>
   text.replace(LEADERBOARD_RE, ' ').replace(/\s+/g, ' ').trim();

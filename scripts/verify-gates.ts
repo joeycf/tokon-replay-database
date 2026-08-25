@@ -108,10 +108,38 @@ try {
       matcher.ids('Doctor Doom').join(',') === 'doctor-doom',
       matcher.ids('Doctor Doom').join(','),
     );
+    // THREE ORDERINGS. The first always worked; the other two did not, and the
+    // symptom was not a short side — every fighter still resolved — but a
+    // residue string ("Ranked#5", "Ranked#10") clearing the 3-record threshold
+    // and raising "a new fighter has probably shipped" in report.md. These
+    // controls exist so the DLC alarm stays trustworthy.
+    for (const [slot, want] of [
+      ['#2 Ranked Danger', 'danger'],
+      ['Ranked #5 Storm', 'storm'],
+      ['Rank #3 Magik', 'magik'],
+      ['#1 Captain America', 'captain-america'],
+      ['Ranked #10 Wolverine', 'wolverine'],
+    ] as const) {
+      const stripped = stripLeaderboard(slot);
+      check(
+        `leaderboard stripped: "${slot}" → ${want}`,
+        matcher.ids(stripped).join(',') === want && matcher.residue(stripped) === '',
+        `ids=${matcher.ids(stripped).join(',')} residue="${matcher.residue(stripped)}"`,
+      );
+    }
+    // The widened strip must not become a swallower. A `#` is mandatory in every
+    // branch, so a bare word still surfaces — otherwise the fix to the alarm
+    // would have quietly disabled the alarm.
     check(
-      'leaderboard prefix stripped before matching',
-      matcher.ids(stripLeaderboard('#2 Ranked Danger')).join(',') === 'danger',
-      matcher.ids(stripLeaderboard('#2 Ranked Danger')).join(','),
+      'no bare-word swallowing: "Ranked Danger" keeps its residue',
+      stripLeaderboard('Ranked Danger') === 'Ranked Danger' &&
+        matcher.residue('Ranked Danger').toLowerCase() === 'ranked',
+      `"${matcher.residue(stripLeaderboard('Ranked Danger'))}"`,
+    );
+    check(
+      'the strip does not eat an unknown fighter after a rank',
+      matcher.residue(stripLeaderboard('#1 Sentinel')).toLowerCase() === 'sentinel',
+      `"${matcher.residue(stripLeaderboard('#1 Sentinel'))}"`,
     );
     // The residue gate: an unknown name must SURFACE, not vanish.
     check(
