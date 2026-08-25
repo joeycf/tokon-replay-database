@@ -54,6 +54,39 @@ const DESC_SIDE_RE =
 const PLAYER_LINE_RE = /player\s*([12])\s*:\s*([^\n(]{1,50}?)\s*\(([^()\n]{1,80})\)/giu;
 
 /**
+ * fgcReplaysHub's shape — a bare list after "with", no parentheses at all.
+ *
+ *   "This replay features EDUARDO HOOK with Blade, Storm, Spider Man, Iron Man
+ *    vs SUPERNOON with Magik, Spider Man, Green Goblin, Blade."
+ *
+ * DEFERRED AT ADD-TIME, AND CORRECTLY. The channel had ONE Tokon upload when it
+ * was added (channels.ts), and a bench grammar authored against one sample does
+ * not fail loudly — it "completes" a 4-slot side with fabricated fighters. It is
+ * authored now because the channel has published SIX, all in one grammar, and
+ * all 48 names resolve against the roster.
+ *
+ * THE HANDLE CLASS IS UPPERCASE-ONLY, AND THAT IS THE WHOLE SAFETY ARGUMENT.
+ * The obvious class — DESC_SIDE_RE's `[^():\n!]{1,50}?` — is catastrophic here,
+ * because this shape has no parenthesis to anchor on and the sentence runs
+ * backwards into boilerplate. On the sample above it captures the handle as
+ * "This replay features EDUARDO HOOK": 31 characters, under the 40-char guard in
+ * parse.ts, so it would OUTRANK the title handle and ship as the player's
+ * display name. Requiring `[A-Z0-9]` from the first character cannot start
+ * inside "This replay features" — the lowercase 'h' of "This" fails one
+ * character in — so the match can only begin at the real handle.
+ *
+ * There is no `i` flag for exactly that reason: `[A-Z]` under `i` matches
+ * lowercase and the guard silently evaporates. The connectors spell both cases
+ * out instead.
+ *
+ * A lowercase handle therefore returns null and the record simply stays
+ * incomplete. That is the correct direction to fail: a refused bench costs a
+ * partially-known side, a wrong one ships a confidently mislabelled record.
+ */
+const DESC_WITH_RE =
+  /([A-Z0-9][A-Z0-9 '._-]{0,49}?)\s+[Ww]ith\s+([^()\n]{1,160}?)\s+(?:[Vv]ersus|[Vv][Ss]\.?)\s+([A-Z0-9][A-Z0-9 '._-]{0,49}?)\s+[Ww]ith\s+([^()\n]{1,160}?)\s*(?=[.\n]|$)/u;
+
+/**
  * Read a description's bench, if its channel states one.
  *
  * Returns null when the shape does not appear — which is the common case and
@@ -80,6 +113,17 @@ export function readBench(
         characters: matcher.ids(found[k]!.chars),
         residue: matcher.residue(found[k]!.chars),
       })) as [BenchSide, BenchSide],
+    };
+  }
+
+  if (shape === 'prose-with') {
+    const w = DESC_WITH_RE.exec(text);
+    if (!w) return null;
+    return {
+      sides: [
+        { handle: w[1]!.trim(), characters: matcher.ids(w[2]!), residue: matcher.residue(w[2]!) },
+        { handle: w[3]!.trim(), characters: matcher.ids(w[4]!), residue: matcher.residue(w[4]!) },
+      ],
     };
   }
 

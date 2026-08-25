@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 import { buildAliasMatcher, loadCharacters, stripLeaderboard } from './roster';
+import { alignBench, readBench } from './bench';
 import { emitGeneric } from './emit';
 import { buildPatchGroups, validatePatches } from './patches';
 import type { MatchVideo, PlayerRecord } from '../types/index';
@@ -148,6 +149,89 @@ try {
       `"${matcher.residue('Magik, Sentinel')}"`,
     );
     check('residue empty on a clean bench', matcher.residue('Magik, Storm') === '', undefined);
+  }
+
+  // ── 1b. the fgcReplaysHub 'prose-with' bench shape ──────────────────────────
+  //
+  // A bench shape's failure mode is not a crash. It is a side that looks
+  // complete and is wrong. So the controls that matter here are the REJECTIONS:
+  // three descriptions this shape must refuse, one of which contains five
+  // roster names and would be the fabrication if it were ever read.
+  console.log("\n[1b] description bench — the 'prose-with' shape");
+  {
+    const FGC =
+      'FGC Replays Hub is your place for fighting game replay videos, featuring ' +
+      'matches from 2XKO and Marvel Tokon. This replay features EDUARDO HOOK with ' +
+      'Blade, Storm, Spider Man, Iron Man vs SUPERNOON with Magik, Spider Man, ' +
+      'Green Goblin, Blade.\n\n#marveltokon #tokon';
+
+    const read = readBench(FGC, 'prose-with', matcher);
+    check(
+      'reads both sides to exactly 4',
+      read?.sides[0]!.characters.length === 4 && read?.sides[1]!.characters.length === 4,
+      `${read?.sides[0]!.characters.join('/')} | ${read?.sides[1]!.characters.join('/')}`,
+    );
+    // The defect the uppercase handle class exists to prevent. With
+    // DESC_SIDE_RE's class this reads "This replay features EDUARDO HOOK" — 31
+    // chars, under parse.ts's 40-char guard, so it would outrank the title
+    // handle and ship as the player's display name.
+    check(
+      'handle is the handle, not the boilerplate lead-in',
+      read?.sides[0]!.handle === 'EDUARDO HOOK' && read?.sides[1]!.handle === 'SUPERNOON',
+      `"${read?.sides[0]!.handle}" | "${read?.sides[1]!.handle}"`,
+    );
+    check(
+      'clean bench leaves no residue',
+      read?.sides[0]!.residue === '',
+      `"${read?.sides[0]!.residue}"`,
+    );
+    check(
+      'it aligns to the title by handle, not by position',
+      alignBench(read!, ['EDUARDO HOOK', 'SUPERNOON'], [['blade'], ['magik']]).how === 'handle',
+      alignBench(read!, ['EDUARDO HOOK', 'SUPERNOON'], [['blade'], ['magik']]).how,
+    );
+
+    // ── the rejections ──
+    // hadoukenReplays' boilerplate. FIVE roster names, identical on every one of
+    // its 758 uploads, belonging to no side at all. This is the fabrication the
+    // shape must refuse, and the reason the channel has no descriptionBench.
+    const SOUP =
+      'Electrifying battles, insane and flawless plays, breathtaking comebacks.\n\n' +
+      '#marveltokon \n#IronMan #HomemDeFerro\n#SpiderMan #Storm\n#StarLord #GhostRider';
+    check(
+      'REJECTS hadouken hashtag soup (5 roster names, no side structure)',
+      readBench(SOUP, 'prose-with', matcher) === null,
+      `${matcher.ids(SOUP).length} names present, read ${readBench(SOUP, 'prose-with', matcher) === null ? 'null' : 'A SIDE'}`,
+    );
+    // replaysHub's shape — parenthesised, one per side. Reading it as a bench
+    // would "complete" a 4-slot side at 1.
+    check(
+      'REJECTS a replaysHub Player-lines description',
+      readBench(
+        'Player 1: JOHNNY (Captain America)\nPlayer 2: LORD VENOM (Loki)',
+        'prose-with',
+        matcher,
+      ) === null,
+      undefined,
+    );
+    // The uppercase guard, stated as a control rather than a comment.
+    check(
+      'REJECTS a lowercase handle rather than guessing at its extent',
+      readBench(
+        'this replay features someone with Blade, Storm, Magik, Loki vs other with Magik, Storm, Blade, Loki.',
+        'prose-with',
+        matcher,
+      ) === null,
+      undefined,
+    );
+    // An unknown name must SURFACE, not silently shorten the side to three.
+    const DLC = FGC.replace('Storm,', 'Sentinel,');
+    const dlc = readBench(DLC, 'prose-with', matcher);
+    check(
+      'an unknown fighter surfaces as residue instead of a quiet 3-name side',
+      dlc?.sides[0]!.characters.length === 3 && dlc?.sides[0]!.residue.toLowerCase() === 'sentinel',
+      `n=${dlc?.sides[0]!.characters.length} residue="${dlc?.sides[0]!.residue}"`,
+    );
   }
 
   // ── 2. the emit contract ────────────────────────────────────────────────────

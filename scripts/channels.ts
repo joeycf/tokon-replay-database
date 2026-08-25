@@ -164,16 +164,19 @@ export const CHANNELS: ChannelConfig[] = [
     // both-markers branch, burying the miss report. Leaning on one gate to
     // catch another's over-reach is not a design.
     tokonSignal: 'title',
-    // No descriptionBench. The channel DOES state a full four-per-side bench
+    // The channel states a full four-per-side bench as a bare list after "with"
     // ("EDUARDO HOOK with Blade, Storm, Spider Man, Iron Man vs SUPERNOON with
-    // Magik, Spider Man, Green Goblin, Blade" — all 8 resolve against the
-    // roster), but none of the three shapes reads it: DESC_SIDE_RE
-    // (bench.ts:48) requires parentheses and this is a bare list after "with".
-    // A fourth shape would be a grammar authored against ONE sample, and a
-    // wrong bench shape does not fail loudly — it "completes" a 4-slot side
-    // with fabricated fighters (checklist 5e). Revisit once the channel has
-    // published enough Tokon uploads to measure the variant against its own
-    // rejects.
+    // Magik, Spider Man, Green Goblin, Blade"), which none of the original three
+    // shapes read: DESC_SIDE_RE requires parentheses.
+    //
+    // DEFERRED AT ADD-TIME AT n=1, AUTHORED AT n=6. The deferral was right: a
+    // bench grammar written against one sample does not fail loudly, it
+    // "completes" a side with fabricated fighters (checklist 5e). The channel
+    // published five more within two days, all in one grammar, and all 48 names
+    // resolve — so the shape is now measurable against its own rejects rather
+    // than fitted to a single string. See bench.ts for why its handle class is
+    // uppercase-only; that is the part that took the argument, not the list.
+    descriptionBench: 'prose-with',
   },
 ];
 

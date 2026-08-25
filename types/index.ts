@@ -28,7 +28,7 @@ export type ChannelKey = SourceId;
  *   'player-lines' replaysHub       "Player 1: HANDLE (Char)" — ONE per side, no bench.
  *                                   Parsed for handle CASING only, never as a bench.
  *  Absent  ⇒ the description is boilerplate and is not read at all. */
-export type DescriptionBench = 'prose-comma' | 'prose-and' | 'player-lines';
+export type DescriptionBench = 'prose-comma' | 'prose-and' | 'prose-with' | 'player-lines';
 
 export interface ChannelConfig {
   /** Raw-dump key / report row (unique per YouTube channel). */
