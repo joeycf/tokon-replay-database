@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-25T01:14:51.306Z_
+_Generated 2026-08-25T08:24:59.725Z_
 
 ## Coverage
 
@@ -9,27 +9,27 @@ _Generated 2026-08-25T01:14:51.306Z_
 | highLevelReplays | 83 | 83 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 762 | 65 | 8.5% |
-| replaysHub | 112 | 107 | 95.5% |
-| fightingStationX | 2666 | 80 | 3.0% |
-| fgcReplaysHub | 2527 | 6 | 0.2% |
-| **total** | | **354** | |
+| replaysHub | 114 | 109 | 95.6% |
+| fightingStationX | 2669 | 80 | 3.0% |
+| fgcReplaysHub | 2529 | 7 | 0.3% |
+| **total** | | **357** | |
 
 ## Character provenance
 
-How every one of the 708 sides got its characters.
+How every one of the 714 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 207 | 29.2% |
-| description | 191 | 27.0% |
+| title | 211 | 29.6% |
+| description | 193 | 27.0% |
 | footage | 32 | 4.5% |
-| human | 278 | 39.3% |
+| human | 278 | 38.9% |
 | review | 0 | 0.0% |
 
-- complete (4/4): **501/708** (70.8%)
+- complete (4/4): **503/714** (70.4%)
 - oversize (>4, mid-set team change): **6** — counted in usage, excluded from pairing
-- bench alignment: handle 187 · character-subset 19 · ambiguous 3
-- title slot order: handle-first 567 · chars-first 65 · parallel-lists 76
+- bench alignment: handle 190 · character-subset 19 · ambiguous 3
+- title slot order: handle-first 573 · chars-first 65 · parallel-lists 76
 - tier conflicts (queued for review): 0
 - decomposed-Ō titles seen: 0
 
@@ -37,32 +37,32 @@ How every one of the 708 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 207 | 29.2% |
-| 4 | 495 | 69.9% |
+| 1 | 211 | 29.6% |
+| 4 | 497 | 69.6% |
 | 5 _(mid-set change)_ | 3 | 0.4% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 | 8 _(mid-set change)_ | 2 | 0.3% |
 
-- **207 side(s) awaiting a drain** across 104 record(s) — oldest published **18 day(s)** ago
+- **211 side(s) awaiting a drain** across 106 record(s) — oldest published **18 day(s)** ago
 
-> The bench queue is at 104 (nudge threshold 40).
+> The bench queue is at 106 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
-- review queue (never published): **8** — character-completion 8
-- bench queue (published, incomplete): **104**
+- review queue (never published): **10** — character-completion 10
+- bench queue (published, incomplete): **106**
 
 ## Misses
 
 | reason | count |
 | --- | ---: |
-| other-game | 3942 |
+| other-game | 3943 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 99 |
-| char-unresolved | 8 |
+| not-a-match | 100 |
+| char-unresolved | 10 |
 | short-duration | 6 |
 | no-vs-title | 2 |
 
