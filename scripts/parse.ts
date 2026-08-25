@@ -271,6 +271,12 @@ async function main() {
     string,
     { channel: ChannelKey; title: string; publishedAt: string; durationSec: number }
   >();
+  /** When report.md starts asking for a local drain. Chosen from the measured
+   *  arrival rate — ~12 records/day enter the queue — so 40 is about three days
+   *  of drift: long enough not to nag on a normal day, short enough that the
+   *  backlog is still one sitting's work when it fires. */
+  const BENCH_QUEUE_NUDGE = 40;
+
   const residues = new Map<string, { n: number; ids: string[] }>();
   let decomposedOnly = 0;
   const slotOrders: Record<SlotOrder, number> = {
@@ -278,7 +284,13 @@ async function main() {
     'chars-first': 0,
     'parallel-lists': 0,
   };
-  const tierCount: Record<CharTier, number> = { title: 0, description: 0, footage: 0, human: 0, review: 0 };
+  const tierCount: Record<CharTier, number> = {
+    title: 0,
+    description: 0,
+    footage: 0,
+    human: 0,
+    review: 0,
+  };
   const alignCount: Record<string, number> = {};
   let conflicts = 0;
   let completeSides = 0;
@@ -689,7 +701,10 @@ async function main() {
   // somebody's attention.
   benchQueue.length = 0;
   for (const r of withOverrides) {
-    const known = [r.sides[0]!.characters.length, r.sides[1]!.characters.length] as [number, number];
+    const known = [r.sides[0]!.characters.length, r.sides[1]!.characters.length] as [
+      number,
+      number,
+    ];
     if (known[0] >= 4 && known[1] >= 4) continue;
     const src = byIdForQueue.get(r.id);
     if (!src) continue;
@@ -779,6 +794,60 @@ async function main() {
   lines.push(`- title slot order: ${fmtTally(slotOrders)}`);
   lines.push(`- tier conflicts (queued for review): ${conflicts}`);
   lines.push(`- decomposed-Ō titles seen: ${decomposedOnly}`);
+  lines.push('');
+
+  // ── THE SIDE-SIZE DISTRIBUTION, AND WHY A PERCENTAGE IS NOT ENOUGH ─────────
+  //
+  // "complete 71.5%" above is a single number that moves slowly and hides which
+  // direction it is moving for. The distribution does not: this corpus is
+  // BIMODAL — sides are either 1 (title only, nothing has drained them) or 4
+  // (a description, the reader, or a human closed them), with essentially
+  // nothing between. So the count at 1 IS the undrained backlog, and watching it
+  // is watching the drift.
+  //
+  // This exists because the drift ran for four days unseen. Extraction is
+  // local-only by design (YouTube blocks datacenter IPs), so the daily cron adds
+  // ~25 sides/day at 1-of-4 and structurally cannot drain them. Without this
+  // block the first visible symptom is a lone badge on the live site; with it,
+  // the day the backlog starts growing is in the commit the cron itself makes.
+  const sizeTally = new Map<number, number>();
+  for (const r of withOverrides)
+    for (const s of r.sides)
+      sizeTally.set(s.characters.length, (sizeTally.get(s.characters.length) ?? 0) + 1);
+  const sizeKeys = [...sizeTally.keys()].sort((a, b) => a - b);
+  lines.push('### Side-size distribution', '');
+  lines.push('| fighters on a side | sides | share |', '| --- | ---: | ---: |');
+  for (const k of sizeKeys) {
+    const n = sizeTally.get(k)!;
+    lines.push(
+      `| ${k}${k > 4 ? ' _(mid-set change)_' : ''} | ${n} | ${sideTotal ? ((n / sideTotal) * 100).toFixed(1) : '0.0'}% |`,
+    );
+  }
+  lines.push('');
+
+  // The backlog's AGE, not only its size. A queue of 40 that is all from today is
+  // a normal day; a queue of 40 whose oldest entry is three weeks back means the
+  // drain has stopped, and the two are indistinguishable from a count alone.
+  const queueDays = benchQueue
+    .map((q) => Math.floor((Date.now() - Date.parse(q.publishedAt)) / 86_400_000))
+    .sort((a, b) => b - a);
+  const oldest = queueDays[0] ?? 0;
+  const benchSides = withOverrides.reduce(
+    (n, r) => n + r.sides.filter((s) => s.characters.length < 4).length,
+    0,
+  );
+  lines.push(
+    `- **${benchSides} side(s) awaiting a drain** across ${benchQueue.length} record(s)` +
+      (benchQueue.length ? ` — oldest published **${oldest} day(s)** ago` : ''),
+  );
+  if (benchQueue.length >= BENCH_QUEUE_NUDGE) {
+    lines.push(
+      '',
+      `> The bench queue is at ${benchQueue.length} (nudge threshold ${BENCH_QUEUE_NUDGE}).`,
+      '> Run `npm run data:catchup` locally — the cron cannot do this: extraction',
+      '> needs a logged-in YouTube session from a residential address.',
+    );
+  }
   lines.push('');
 
   lines.push('## Queues', '');

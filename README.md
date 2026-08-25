@@ -134,22 +134,23 @@ vendor that shipped twice in its first five days.
 
 ## Scripts
 
-| command                     | what it does                                                             |
-| --------------------------- | ------------------------------------------------------------------------ |
-| `npm run data:fetch`        | every upload from the five channels → `raw/`, plus a recon report        |
-| `npm run data:parse`        | gate, parse, bench, merge, emit — the daily path                         |
-| `npm run data:build`        | fetch + parse                                                            |
-| `npm run data:emit`         | re-emit the engine artifacts from the substrate                          |
-| `npm run data:characters`   | rebuild the roster (accents from the design tokens; fails loud on a gap) |
-| `npm run data:art`          | scrape character art from the Marvel Database manifest                   |
-| `npm run data:art-tile`     | generate the comic-register fallback tile / cutout ground                |
-| `npm run data:og`           | regenerate `public/og-default.png`                                       |
-| `npm run data:patch-check`  | diff the patch table against the vendor's news feed                      |
-| `npm run data:expiries`     | the self-expiring gates (`--check`)                                      |
-| `npm run data:replay-dupes` | cross-channel duplicate audit — report-only, never drops                 |
-| `npm run verify:gates`      | positive-control every gate                                              |
-| `npm run test:e2e`          | the audit suite (needs `npm run generate` first)                         |
-| `npm run verify:deployed`   | post-deploy smoke check against production                               |
+| command                     | what it does                                                                |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `npm run data:fetch`        | every upload from the five channels → `raw/`, plus a recon report           |
+| `npm run data:parse`        | gate, parse, bench, merge, emit — the daily path                            |
+| `npm run data:build`        | fetch + parse                                                               |
+| `npm run data:emit`         | re-emit the engine artifacts from the substrate                             |
+| `npm run data:characters`   | rebuild the roster (accents from the design tokens; fails loud on a gap)    |
+| `npm run data:art`          | scrape character art from the Marvel Database manifest                      |
+| `npm run data:art-tile`     | generate the comic-register fallback tile / cutout ground                   |
+| `npm run data:og`           | regenerate `public/og-default.png`                                          |
+| `npm run data:patch-check`  | diff the patch table against the vendor's news feed                         |
+| `npm run data:expiries`     | the self-expiring gates (`--check`)                                         |
+| `npm run data:catchup`      | **the maintenance ritual** — fetch → parse → read new footage → what's left |
+| `npm run data:replay-dupes` | cross-channel duplicate audit — report-only, never drops                    |
+| `npm run verify:gates`      | positive-control every gate                                                 |
+| `npm run test:e2e`          | the audit suite (needs `npm run generate` first)                            |
+| `npm run verify:deployed`   | post-deploy smoke check against production                                  |
 
 ## Daily data refresh
 
@@ -163,6 +164,58 @@ log.
 
 Extraction never runs here. YouTube blocks datacenter IPs, so the footage tier
 is local-only and the cron carries committed overrides forward.
+
+## Keeping the corpus complete — the local half
+
+**The cron cannot finish a record, and this is by design, not a gap.** It adds
+~19 records and ~25 one-of-four sides a day from titles alone. Closing those
+sides needs footage, footage needs a logged-in YouTube session from a
+residential address, and that is never going in CI. So completeness only ever
+improves when a person runs the local half.
+
+Between 2026-08-20 and 2026-08-24 nobody did, and the numbers show exactly what
+that costs:
+
+|                             |      complete sides |
+| --------------------------- | ------------------: |
+| 2026-08-19, after a drain   | 437/510 — **85.7%** |
+| 2026-08-24, four days later | 479/670 — **71.5%** |
+
+No record ever lost a fighter. The corpus simply grew ~25 unread sides a day
+while nothing drained it — about **2.8 points of completeness per day**.
+
+### The cadence
+
+Run **`npm run data:catchup`** weekly, or whenever `data/report.md` says the
+bench queue has passed 40 records (it prints the nudge itself, and the daily
+cron commits that file — so the ask arrives without anyone having to remember
+to look).
+
+At the measured arrival rate, ~12 records enter the queue per day, so the
+threshold fires roughly every three days and a weekly run is about 170 sides of
+labelling. Pick whichever you will actually do; the threshold is the more
+forgiving of the two, because it scales with how busy the channels have been
+rather than with the calendar.
+
+```
+npm run data:catchup              # fetch → parse → read new footage → report
+npm run data:catchup -- --limit 20   # cap the download at 20 videos
+npm run data:catchup -- --no-extract # text tiers only, no downloads
+```
+
+**Why it is one command and not four.** `raw/` is gitignored, so it is local,
+and the cron writes `data/` in CI without it — which means local `raw/` is
+routinely _older_ than the committed `data/`. Running `data:parse` on its own
+then deletes every record the stale dump cannot reproduce. That is not
+hypothetical: on 2026-08-24 local `raw/` was 5 records behind, and the collapse
+guard would not have caught it, because it needs >10% _and_ >20 records from a
+single channel and this arrives as one or two spread across four. Pairing fetch
+with parse is the fix.
+
+`data:catchup` runs extraction `--dry`: it persists reads and frames for the
+labelling UI and never writes `data/overrides.json`. Publishing a fighter onto
+a side stays a human decision in `/dev/bench-review` — the reader closes a side
+outright only 15.9% of the time, so it is a head start, not an answer.
 
 ## Things worth knowing
 
@@ -200,12 +253,12 @@ route it uses guard on `import.meta.dev` and 404 otherwise,
 to them (the nav entry is compiled out of production builds). They read and write
 the committed JSON directly — there is no database.
 
-| page                   | what it's for                                                                                              |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| page                   | what it's for                                                                                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/dev/source-review`   | **Plate reading.** Label the left and right nameplates on each sampled frame — no title, no handles, nothing to anchor on → `data/plate-labels.json` |
-| `/dev/bench-review`    | **Bench queue.** Drain the queue by reading the HUD portrait cluster — two frames per side, compared as sets  |
-| `/dev/portrait-review` | **Bench diamonds.** Three-way diamond labeller over 4x corner crops, keyboard-driven; nothing pre-selects     |
-| `/dev/disagreements`   | Human reads versus the automatic tiers — the cross-tier table and the off-bench read queue                    |
+| `/dev/bench-review`    | **Bench queue.** Drain the queue by reading the HUD portrait cluster — two frames per side, compared as sets                                         |
+| `/dev/portrait-review` | **Bench diamonds.** Three-way diamond labeller over 4x corner crops, keyboard-driven; nothing pre-selects                                            |
+| `/dev/disagreements`   | Human reads versus the automatic tiers — the cross-tier table and the off-bench read queue                                                           |
 
 ## Vercel
 

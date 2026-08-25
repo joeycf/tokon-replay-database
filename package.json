@@ -28,6 +28,7 @@
     "data:patch-check": "tsx scripts/patch-check.ts",
     "data:expiries": "tsx scripts/expiries.ts --check",
     "data:extract": "tsx scripts/complete-characters.ts",
+    "data:catchup": "tsx --env-file-if-exists=.env scripts/catchup.ts",
     "data:labels": "tsx scripts/spike/snapshot-labels.ts",
     "data:plate-sample": "tsx scripts/spike/build-plate-sample.ts",
     "data:plate-accuracy": "tsx scripts/spike/plate-accuracy.ts",
