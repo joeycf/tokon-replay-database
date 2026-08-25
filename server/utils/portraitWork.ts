@@ -20,7 +20,7 @@
  * passing a video id around.
  */
 
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 export interface WorkItem {
@@ -74,7 +74,12 @@ export function buildWorkList(): WorkItem[] {
       const r = reads[Math.floor(reads.length / 2)]!;
       const owning = benches.filter((b) => b.includes(r.id!));
       if (owning.length !== 1) continue; // ambiguous attribution — not a labelling task
-      const frame = join(process.cwd(), 'cache/tokon/frames', v.id, `${String(r.sec).padStart(6, '0')}.png`);
+      const frame = join(
+        process.cwd(),
+        'cache/tokon/frames',
+        v.id,
+        `${String(r.sec).padStart(6, '0')}.png`,
+      );
       if (!existsSync(frame)) continue;
       out.push({
         video: v.id,
@@ -101,7 +106,8 @@ export function buildWorkList(): WorkItem[] {
   for (const w of out) for (const c of w.candidates) freq.set(c, (freq.get(c) ?? 0) + 1);
   const rarity = (w: WorkItem) => Math.min(...w.candidates.map((c) => freq.get(c) ?? 0));
   return out.sort(
-    (a, b) => rarity(a) - rarity(b) || a.video.localeCompare(b.video) || a.side.localeCompare(b.side),
+    (a, b) =>
+      rarity(a) - rarity(b) || a.video.localeCompare(b.video) || a.side.localeCompare(b.side),
   );
 }
 
@@ -209,11 +215,45 @@ export function buildBenchList(): BenchItem[] {
     // Preferring those matters for sides the plate could not read at all: their
     // frames are often mid-super, the wash that defeated the OCR also bleaches the
     // handle, and a reviewer would be handed the one frame least worth showing.
-    const cleanSecs = [...new Set([...e.left, ...e.right].filter((r) => r.id && r.dist === 0).map((r) => r.sec))].sort(
-      (a, b) => a - b,
-    );
+    const cleanSecs = [
+      ...new Set([...e.left, ...e.right].filter((r) => r.id && r.dist === 0).map((r) => r.sec)),
+    ].sort((a, b) => a - b);
     const anySecs = [...new Set([...e.left, ...e.right].map((r) => r.sec))].sort((a, b) => a - b);
-    const hudSecs = cleanSecs.length >= 2 ? cleanSecs : anySecs;
+
+    /**
+     * THE FRAMES ON DISK ARE THE LAST FALLBACK, AND THE ONLY ONE THAT WORKS WHEN
+     * THE PLATE READ NOTHING AT ALL.
+     *
+     * The two pools above both derive from `e.left`/`e.right` — the reader's own
+     * rows. That degrades gracefully from "the OCR read a lot" to "the OCR read a
+     * little", and then collapses at zero: no rows means no seconds, `pool.length
+     * < 2` fires, and the side is never offered.
+     *
+     * Which is exactly backwards. "The plate resolved nothing" is the case a human
+     * is MOST needed for, and it was the one case the worklist silently refused.
+     * Measured when this was found: 19 records with zero read rows, 38 incomplete
+     * sides unreachable, and 3,368 frames sitting on disk unused — every one of
+     * them grabbed from a burst window the sampler had already chosen as
+     * mid-match. The frames were never the problem.
+     *
+     * Filenames are the zero-padded second, so the directory IS the seconds list.
+     * Read it only when the reader's pools cannot fill two slots; a directory
+     * listing per record is not free, and for the ~85% of records with rows it
+     * would be pure waste.
+     */
+    const framesDir = join(process.cwd(), 'cache/tokon/frames', id);
+    const diskSecs = (): number[] => {
+      try {
+        return readdirSync(framesDir)
+          .filter((f) => f.endsWith('.png'))
+          .map((f) => Number(f.slice(0, -4)))
+          .filter((n) => Number.isFinite(n))
+          .sort((a, b) => a - b);
+      } catch {
+        return [];
+      }
+    };
+    const hudSecs = cleanSecs.length >= 2 ? cleanSecs : anySecs.length >= 2 ? anySecs : diskSecs();
 
     // ATTRIBUTION IS DEDUCIBLE FROM THE OTHER SIDE. A record has exactly two
     // players, so once the plate places one screen side the other follows by
@@ -251,11 +291,13 @@ export function buildBenchList(): BenchItem[] {
 
       // two frames as far apart as available, so they are different bursts. Fall
       // back to any HUD frame when the plate resolved nothing: a person can read a
-      // cluster the OCR could not.
+      // cluster the OCR could not. `hudSecs` ends at the frames directory itself,
+      // so "the plate resolved nothing" still yields frames rather than silence.
       const pool = reads.length >= 2 ? reads.map((r) => r.sec) : hudSecs;
       if (pool.length < 2) continue;
       const firstSec = pool[0]!;
-      const lastSec = [...pool].reverse().find((sec) => sec - firstSec > 30) ?? pool[pool.length - 1]!;
+      const lastSec =
+        [...pool].reverse().find((sec) => sec - firstSec > 30) ?? pool[pool.length - 1]!;
       if (lastSec === firstSec) continue;
       const secs = [firstSec, lastSec] as [number, number];
       if (

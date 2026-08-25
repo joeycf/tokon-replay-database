@@ -16,7 +16,7 @@
  * Run: npm run verify:gates
  */
 
-import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,6 +24,7 @@ import { execFileSync } from 'node:child_process';
 
 import { buildAliasMatcher, loadCharacters, stripLeaderboard } from './roster';
 import { alignBench, readBench } from './bench';
+import { buildBenchList } from '../server/utils/portraitWork';
 import { emitGeneric } from './emit';
 import { buildPatchGroups, validatePatches } from './patches';
 import type { MatchVideo, PlayerRecord } from '../types/index';
@@ -232,6 +233,93 @@ try {
       dlc?.sides[0]!.characters.length === 3 && dlc?.sides[0]!.residue.toLowerCase() === 'sentinel',
       `n=${dlc?.sides[0]!.characters.length} residue="${dlc?.sides[0]!.residue}"`,
     );
+  }
+
+  // ── 1c. the human tier's front door ─────────────────────────────────────────
+  //
+  // buildBenchList decides which incomplete sides a person is ever SHOWN. A side
+  // it silently omits is not deferred, it is abandoned — nothing else in the
+  // pipeline will ever revisit it — so its two guards need controls as much as
+  // any parser predicate does.
+  //
+  // The bug these were written for: both frame pools derived from the reader's
+  // own rows, so a record the OCR read NOTHING on had no seconds, tripped
+  // `pool.length < 2`, and never appeared. That is the case a human is most
+  // needed for. 19 records, 38 sides, 3,368 unused frames on disk.
+  console.log('\n[1c] bench worklist — what a person is allowed to see');
+  {
+    const tmp = await mkdtemp(join(tmpdir(), 'tokon-bench-'));
+    const cwd = process.cwd();
+    const write = async (rel: string, data: unknown) => {
+      await mkdir(dirname(join(tmp, rel)), { recursive: true });
+      await writeFile(join(tmp, rel), JSON.stringify(data));
+    };
+    const frame = async (id: string, sec: number) => {
+      await mkdir(join(tmp, 'cache/tokon/frames', id), { recursive: true });
+      await writeFile(
+        join(tmp, 'cache/tokon/frames', id, `${String(sec).padStart(6, '0')}.png`),
+        '',
+      );
+    };
+    const side = (chars: string[]) => ({
+      characters: chars,
+      handle: 'H',
+      provenance: { fromTitle: [chars[0]!] },
+    });
+    const rec = (id: string) => ({ id, sides: [side(['magik']), side(['storm'])] });
+    try {
+      // zeroRead   — OCR read nothing, but frames exist 100s apart  → MUST SURFACE
+      // noFrames   — same, no frames directory at all               → must be refused
+      // oneFrame   — same, only ONE frame on disk                   → must be refused
+      await write('data/bench-queue.json', [
+        { id: 'zeroRead' },
+        { id: 'noFrames' },
+        { id: 'oneFrame' },
+      ]);
+      await write('data/videos.json', [rec('zeroRead'), rec('noFrames'), rec('oneFrame')]);
+      await write('cache/tokon/extracted.json', {
+        zeroRead: { geom: {}, left: [], right: [] },
+        noFrames: { geom: {}, left: [], right: [] },
+        oneFrame: { geom: {}, left: [], right: [] },
+      });
+      await frame('zeroRead', 100);
+      await frame('zeroRead', 200);
+      await frame('oneFrame', 100);
+
+      process.chdir(tmp);
+      const list = buildBenchList();
+      const ids = list.map((w) => w.video);
+      check(
+        'a record the plate read NOTHING on still reaches the labeller',
+        ids.filter((x) => x === 'zeroRead').length === 2,
+        `${ids.filter((x) => x === 'zeroRead').length} item(s) — expected 2, one per screen side`,
+      );
+      // The frames the fallback picks must be far enough apart to be different
+      // bursts; two frames of the same moment is not a set comparison.
+      const zr = list.find((w) => w.video === 'zeroRead');
+      check(
+        'it picks two DIFFERENT seconds, not the same frame twice',
+        !!zr && zr.secs[0] !== zr.secs[1],
+        zr ? `${zr.secs[0]}s and ${zr.secs[1]}s` : 'no item',
+      );
+      // It must ask for attribution rather than assume it: with no plate read
+      // there is nothing placing this screen side on a player.
+      check(
+        'with nothing read, it ASKS which player the side is',
+        !!zr && zr.needs.side === true && zr.known.length === 0,
+        zr ? `needs.side=${zr.needs.side} known=${zr.known.length}` : 'no item',
+      );
+      // The two guards the fix must not have weakened.
+      check(
+        'a record with NO frames on disk is still refused',
+        !ids.includes('noFrames'),
+        undefined,
+      );
+      check('a record with only ONE frame is still refused', !ids.includes('oneFrame'), undefined);
+    } finally {
+      process.chdir(cwd);
+      await rm(tmp, { recursive: true, force: true });
+    }
   }
 
   // ── 2. the emit contract ────────────────────────────────────────────────────
