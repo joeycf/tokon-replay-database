@@ -20,6 +20,9 @@
 
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+// The pipeline's own constant, not a second 4. stats.ts owns it and emit's
+// oversize accounting keys off the same value.
+import { CHARACTERS_PER_SIDE } from '../../../scripts/stats';
 
 interface Body {
   /** identity of the side, as handed out by the GET — NOT a list position */
@@ -106,9 +109,7 @@ export default defineEventHandler(async (event) => {
   // contract already counts sides of more than four: legal, counted in usage,
   // excluded from pairing so C(n,2) cannot fabricate pairs never played.
   if (setA !== setB && body.union === true) {
-    const characters = [
-      ...new Set([...membersOf(w.points[0], a), ...membersOf(w.points[1], b)]),
-    ];
+    const characters = [...new Set([...membersOf(w.points[0], a), ...membersOf(w.points[1], b)])];
     return writeSide(w, sideIndex, characters, { teamChange: true });
   }
 
@@ -189,6 +190,43 @@ function writeSide(
   // start from any existing override so the OTHER side's work is never clobbered
   const existing = overrides[w.video] ?? {};
   const baseSides = (existing.sides ?? v.sides) as SideRec[];
+
+  /**
+   * THE UNION SLIP: both screen clusters read onto one side.
+   *
+   * When two players SWAP SCREEN SIDES mid-match, both portrait clusters appear
+   * on both halves over the course of the set. Reading the whole HUD then puts
+   * all eight fighters on each side, and the result is two "oversize" sides
+   * holding an identical set — which nothing downstream questions, because
+   * `types/index.ts` treats a side longer than four as a legitimate mid-set team
+   * change, `emit` counts it in usage and only excludes it from pairing. The
+   * record looks healthy the whole way through while counting sixteen side
+   * appearances for a match that had eight.
+   *
+   * Found twice in ~380 records — once live on the site for days before anyone
+   * noticed, because there was no signature to look for.
+   *
+   * The refusal is narrow on purpose. A four-fighter mirror match is legal and
+   * common (SPLYxPgwT5o is one), so identity alone must not fire; it takes
+   * identity AND exceeding charactersPerSide, which a mirror cannot reach. A
+   * genuine mid-set change also cannot reach it: to trip this, a player would
+   * have to field more than four AND land on exactly the same set as the
+   * opponent, which is the union and nothing else.
+   */
+  const otherSide = baseSides[1 - sideIndex];
+  if (otherSide && characters.length > CHARACTERS_PER_SIDE) {
+    const key = (xs: string[]) => [...xs].sort().join(',');
+    if (key(characters) === key(otherSide.characters)) {
+      return {
+        ok: false,
+        unionSlip: true,
+        message:
+          `this side reads ${characters.length} fighters and is the SAME SET as the other side — ` +
+          'that is what a mid-match side swap looks like when both clusters get read onto one ' +
+          'side. Record the four this player actually fielded, not everything on screen.',
+      };
+    }
+  }
   const sides = baseSides.map((s, k) =>
     k !== sideIndex
       ? s

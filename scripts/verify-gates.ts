@@ -764,6 +764,71 @@ try {
     }
   }
 
+  // ── 4d. the union slip ──────────────────────────────────────────────────────
+  //
+  // Two players swapping screen sides mid-match puts both portrait clusters on
+  // both halves; reading the whole HUD then records all eight fighters on each
+  // side. Nothing downstream questions it — a side over four is a legitimate
+  // mid-set change, counted in usage and only excluded from pairing — so the
+  // record counts sixteen appearances for a match that had eight and looks
+  // healthy the entire way. Found twice in ~380 records.
+  //
+  // The controls that matter are the NEGATIVE ones: a four-fighter mirror match
+  // is legal and present in this corpus, so identity alone must never fire.
+  console.log('\n[4d] union slip — identical OVERSIZE sides, and only those');
+  {
+    const slip = (a: string[], b: string[]) =>
+      a.length > 4 && [...a].sort().join(',') === [...b].sort().join(',');
+    const eight = [
+      'iron-man',
+      'carnage',
+      'danger',
+      'ghost-rider',
+      'champion',
+      'blade',
+      'loki',
+      'spider-man',
+    ];
+    check(
+      'catches identical 8+8 (the real etfJczrqGQ0 shape)',
+      slip(eight, [...eight].reverse()),
+      undefined,
+    );
+    check(
+      'a 4-fighter MIRROR match is not a slip',
+      !slip(
+        ['spider-man', 'blade', 'carnage', 'magneto'],
+        ['carnage', 'blade', 'spider-man', 'magneto'],
+      ),
+      'SPLYxPgwT5o is exactly this and is legal',
+    );
+    check(
+      'a genuine 5-fighter mid-set change is not a slip',
+      !slip(
+        ['magik', 'storm', 'blade', 'carnage', 'loki'],
+        ['danger', 'hulk', 'iron-man', 'magneto'],
+      ),
+      undefined,
+    );
+    check(
+      'oversize sides that merely OVERLAP are not a slip',
+      !slip(['magik', 'storm', 'blade', 'carnage', 'loki'], ['magik', 'storm', 'blade', 'carnage']),
+      undefined,
+    );
+    // The corpus itself must be clean, so a future slip fails this run rather
+    // than waiting for somebody to read report.md.
+    const vids = JSON.parse(await readFile(join(ROOT, 'data', 'videos.json'), 'utf8')) as {
+      id: string;
+      sides: { characters: string[] }[];
+    }[];
+    const live = vids.filter((v) => slip(v.sides[0]!.characters, v.sides[1]!.characters));
+    check(
+      'no union slip survives in the committed corpus',
+      live.length === 0,
+      live.map((v) => v.id).join(', ') || 'clean',
+    );
+  }
+
   // ── 5. the review verdict — the only exit a queued record has ───────────────
   //
   // A character-completion record is held off the site entirely, and until the

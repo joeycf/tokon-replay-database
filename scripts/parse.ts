@@ -867,6 +867,35 @@ async function main() {
   lines.push(
     `- oversize (>4, mid-set team change): **${oversizeSides}** — counted in usage, excluded from pairing`,
   );
+
+  // THE UNION SLIP, WHICH LOOKS EXACTLY LIKE HEALTHY DATA.
+  //
+  // When two players swap screen sides mid-match, both portrait clusters appear
+  // on both halves, and reading the whole HUD puts all eight fighters on each
+  // side. The result is two oversize sides holding an IDENTICAL set — and every
+  // check downstream waves it through, because a side longer than four is a
+  // legitimate mid-set team change, counted in usage and merely excluded from
+  // pairing. Sixteen side appearances get counted for a match that had eight.
+  //
+  // Found twice in ~380 records, one of them live on the site for days. The save
+  // path now refuses it (bench-review.post.ts); this line is the backstop for
+  // anything written before that guard existed, and for a hand-edited override.
+  //
+  // Identity alone is NOT the signature: a four-fighter mirror match is legal
+  // and present in this corpus. It takes identity AND oversize, which a mirror
+  // cannot reach.
+  const unionSlips = withOverrides.filter((r) => {
+    const [a, b] = r.sides.map((sd) => sd.characters);
+    if (!a || !b || a.length <= 4) return false;
+    return [...a].sort().join(',') === [...b].sort().join(',');
+  });
+  if (unionSlips.length) {
+    lines.push(
+      `- ⚠ **${unionSlips.length} record(s) with identical oversize sides** — both screen clusters`,
+      `  read onto one side, which is what a mid-match side swap looks like. Re-read in`,
+      `  /dev/bench-review: ${unionSlips.map((r) => r.id).join(', ')}`,
+    );
+  }
   lines.push(`- bench alignment: ${fmtTally(alignCount) || '—'}`);
   lines.push(`- title slot order: ${fmtTally(slotOrders)}`);
   lines.push(`- tier conflicts (queued for review): ${conflicts}`);
