@@ -25,6 +25,7 @@ import { execFileSync } from 'node:child_process';
 import { buildAliasMatcher, loadCharacters, stripLeaderboard } from './roster';
 import { alignBench, readBench } from './bench';
 import { buildBenchList } from '../server/utils/portraitWork';
+import { NOT_A_MATCH_RE } from './parse';
 import { emitGeneric } from './emit';
 import { buildPatchGroups, validatePatches } from './patches';
 import type { MatchVideo, PlayerRecord } from '../types/index';
@@ -150,6 +151,62 @@ try {
       `"${matcher.residue('Magik, Sentinel')}"`,
     );
     check('residue empty on a clean bench', matcher.residue('Magik, Storm') === '', undefined);
+
+    // OBSERVED UPLOADER TYPOS. Each of these sat in the review queue as
+    // character-completion — the whole record held off the site because one
+    // slot named a fighter nobody could spell. Added only where the misspelling
+    // has exactly ONE plausible referent; `P. Parker` stays unresolved on
+    // purpose, because Peni Parker and Peter Parker are both real answers.
+    for (const [typo, want] of [
+      ['Ghsot Rider', 'ghost-rider'],
+      ['Stard-Lord', 'star-lord'],
+      ['Capitan America', 'captain-america'],
+      ['Black Phanther', 'black-panther'],
+      ['Sipder Man', 'spider-man'],
+      ['Strom', 'storm'],
+    ] as const) {
+      check(
+        `typo alias: "${typo}" → ${want}`,
+        matcher.ids(typo).join(',') === want && matcher.residue(typo) === '',
+        `ids=${matcher.ids(typo).join(',')} residue="${matcher.residue(typo)}"`,
+      );
+    }
+  }
+
+  // ── 1a. the not-a-match filter ──────────────────────────────────────────────
+  //
+  // This regex is the one with a body count. Its own header records that
+  // testing /Top \d+/ "cost SF6 real records", so every widening owes TWO
+  // controls: that it catches what it was widened for, and that it still lets a
+  // real match through. The second is the one that would have caught SF6's.
+  console.log('\n[1a] not-a-match — catches mod showcases, still passes real matches');
+  {
+    for (const title of [
+      'Dark Magik vs Lady Deadpool ▰ Mod Showcase ▰ Marvel Tokon',
+      'Deadpool (Lady Deadpool) vs Spider-Man (Black Gold Suit) ▰ Mod Showcase ▰ Marvel Tokon',
+      'MARVEL TOKON ▰ A (Magik) vs B (Storm) ▰ MODSHOWCASE',
+    ]) {
+      check(`rejects: "${title.slice(0, 52)}…"`, NOT_A_MATCH_RE.test(title), undefined);
+    }
+    // Mod showcases are worse than unresolvable: "Lady Deadpool" and "Dark
+    // Magik" BOTH resolve against the roster, so a looser rule would publish
+    // mod skins as fighters rather than fail loudly.
+    check(
+      'and the danger is real — a mod title does resolve to fighters',
+      matcher.ids('Dark Magik vs Lady Deadpool').length === 2,
+      matcher.ids('Dark Magik vs Lady Deadpool').join(','),
+    );
+    // THE OVER-REJECTION CONTROL. Every one of these is a real match from the
+    // corpus, and each contains a substring near the new pattern.
+    for (const title of [
+      'MARVEL TOKON ▰ KEAZER (#1 Ranked Danger) vs JERRES (Iron Man) ▰ High Level Gameplay',
+      'MARVEL Tokon ▰ K7 showoff (Doc. Doom/Magneto) vs Yamii (Spider-Man/G. Goblin) ▰ High Level Gameplay',
+      'TOKON ▰ NAIRE (Spider-Man) vs (Green Goblin) HADO 👊【MARVEL TŌKON: Fighting Souls】',
+      'Marvel Tokon ▰ SENSHII (#1 Black Panther) vs SOAP EATER (Blade) ▰ High Level Gameplay',
+      'MARVEL TOKON ▰ MODESTO (Magik) vs SHOWCASER (Storm) ▰ High Level Gameplay',
+    ]) {
+      check(`still a match: "${title.slice(0, 46)}…"`, !NOT_A_MATCH_RE.test(title), undefined);
+    }
   }
 
   // ── 1b. the fgcReplaysHub 'prose-with' bench shape ──────────────────────────

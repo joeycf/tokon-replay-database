@@ -77,7 +77,15 @@ const ROSTER: RosterEntry[] = [
     name: 'Captain America',
     team: 'Fighting Avengers',
     leader: true,
-    aliases: ['captain america', 'captain-america', 'c. america', 'c america', 'cap america'],
+    // 'capitan america' is an observed uploader typo (MdS4wMUEp0U).
+    aliases: [
+      'captain america',
+      'captain-america',
+      'c. america',
+      'c america',
+      'cap america',
+      'capitan america',
+    ],
   },
   {
     id: 'iron-man',
@@ -90,7 +98,8 @@ const ROSTER: RosterEntry[] = [
     id: 'black-panther',
     name: 'Black Panther',
     team: 'Fighting Avengers',
-    aliases: ['black panther', 'black-panther', 'b. panther'],
+    // 'black phanther' is an observed uploader typo (9D0Tw_ZUah4).
+    aliases: ['black panther', 'black-panther', 'b. panther', 'black phanther'],
   },
 
   // ── Amazing Guardians ──────────────────────────────────────────────────────
@@ -112,7 +121,8 @@ const ROSTER: RosterEntry[] = [
     id: 'star-lord',
     name: 'Star-Lord',
     team: 'Amazing Guardians',
-    aliases: ['star-lord', 'star lord', 'starlord'],
+    // 'stard-lord' is an observed uploader typo (_v8p3qC-nJU, on both sides).
+    aliases: ['star-lord', 'star lord', 'starlord', 'stard-lord'],
   },
   {
     id: 'peni-parker',
@@ -160,7 +170,8 @@ const ROSTER: RosterEntry[] = [
     // 'g.rider' surfaced through the residue gate on a real upload
     // ("Magneto/G.Rider") — the abbreviation the uploader used, which no
     // spelling of the full name covers. That is the gate's whole purpose.
-    aliases: ['ghost rider', 'ghost-rider', 'ghostrider', 'g.rider', 'g. rider'],
+    // 'ghsot rider' is an observed uploader typo (o3iKh3zvX5I).
+    aliases: ['ghost rider', 'ghost-rider', 'ghostrider', 'g.rider', 'g. rider', 'ghsot rider'],
   },
   { id: 'blade', name: 'Blade', team: 'Samurai Outriders', aliases: ['blade'] },
   { id: 'loki', name: 'Loki', team: 'Samurai Outriders', aliases: ['loki'] },

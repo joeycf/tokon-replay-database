@@ -67,8 +67,8 @@ const OTHER_GAME_RE =
 /** Content that is not a competitive human-vs-human match. Deliberately does
  *  NOT test /Top \d+/ — that reads "Top 8" out of real tournament matches and
  *  is the filter that cost SF6 real records. */
-const NOT_A_MATCH_RE =
-  /\bCPU\b|HARDEST\s*AI|MAX\s*DIFFICULTY|#shorts|COMBO\s*(?:EXHIBITION|VIDEO|GUIDE)|\bTRAILER\b|TIER\s*LIST|STORY\s*MODE|WALKTHROUGH|ALL\s*(?:SUPERS|CHARACTERS|WIN)|COMPILATION|\bINTRO\b|BETA\s*TEST|\bREVIEW\b|GAMEPLAY\s*OVERVIEW|CHARACTER\s*GUIDE|\bRANKING\b|\bTUTORIAL\b/iu;
+export const NOT_A_MATCH_RE =
+  /\bCPU\b|HARDEST\s*AI|MAX\s*DIFFICULTY|#shorts|COMBO\s*(?:EXHIBITION|VIDEO|GUIDE)|\bTRAILER\b|TIER\s*LIST|STORY\s*MODE|WALKTHROUGH|ALL\s*(?:SUPERS|CHARACTERS|WIN)|COMPILATION|\bINTRO\b|BETA\s*TEST|\bREVIEW\b|GAMEPLAY\s*OVERVIEW|CHARACTER\s*GUIDE|\bRANKING\b|\bTUTORIAL\b|MOD\s*SHOWCASE/iu;
 
 type MissReason =
   | 'not-tokon'
