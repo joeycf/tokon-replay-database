@@ -322,6 +322,93 @@ try {
     }
   }
 
+  // ── 1d. attribution collision ───────────────────────────────────────────────
+  //
+  // Both screen sides cannot be the same player. When the plate places them both
+  // on one record side, the elimination rule (which only rescues exactly-one-null)
+  // does not fire, `settled()` skips both, and the incomplete side is unreachable.
+  // Observed on L_s3lYOuR3k: the right plate read the LEFT player's title fighter
+  // — ordinary on a 21-fighter roster, not necessarily an OCR error — and HADO's
+  // bench sat behind 72 frames nobody was ever shown.
+  console.log('\n[1d] bench worklist — contradictory attribution asks instead of skipping');
+  {
+    const tmp = await mkdtemp(join(tmpdir(), 'tokon-collide-'));
+    const cwd = process.cwd();
+    const write = async (rel: string, data: unknown) => {
+      await mkdir(dirname(join(tmp, rel)), { recursive: true });
+      await writeFile(join(tmp, rel), JSON.stringify(data));
+    };
+    const frame = async (id: string, sec: number) => {
+      await mkdir(join(tmp, 'cache/tokon/frames', id), { recursive: true });
+      await writeFile(
+        join(tmp, 'cache/tokon/frames', id, `${String(sec).padStart(6, '0')}.png`),
+        '',
+      );
+    };
+    const row = (sec: number, id: string) => ({ sec, id, dist: 0 });
+    const pair = (id: string) => ({
+      id,
+      sides: [
+        {
+          characters: ['spider-man', 'blade', 'magik', 'carnage'],
+          handle: 'A',
+          provenance: { fromTitle: ['spider-man'] },
+        },
+        { characters: ['loki'], handle: 'B', provenance: { fromTitle: ['loki'] } },
+      ],
+    });
+    try {
+      // collide — BOTH plates read spider-man, side 0's title fighter. Side 0 is
+      //           complete and settled; side 1 is short and must still be offered.
+      // clean   — each plate reads its own side's fighter. Attribution resolves,
+      //           and the page must NOT ask for a side it already knows.
+      await write('data/bench-queue.json', [{ id: 'collide' }, { id: 'clean' }]);
+      await write('data/videos.json', [pair('collide'), pair('clean')]);
+      await write('cache/tokon/extracted.json', {
+        collide: {
+          geom: {},
+          left: [row(10, 'spider-man'), row(100, 'spider-man')],
+          right: [row(20, 'spider-man'), row(200, 'spider-man')],
+        },
+        clean: {
+          geom: {},
+          left: [row(10, 'spider-man'), row(100, 'spider-man')],
+          right: [row(20, 'loki'), row(200, 'loki')],
+        },
+      });
+      for (const sec of [10, 100, 20, 200]) {
+        await frame('collide', sec);
+        await frame('clean', sec);
+      }
+
+      process.chdir(tmp);
+      const list = buildBenchList();
+      const collide = list.filter((w) => w.video === 'collide');
+      check(
+        'both plates on one player: the unreachable side is still offered',
+        collide.length === 2,
+        `${collide.length} item(s) — expected 2`,
+      );
+      check(
+        'and it ASKS which player, rather than trusting a contradiction',
+        collide.length > 0 && collide.every((w) => w.sideIndex === null && w.needs.side === true),
+        collide.map((w) => `sideIndex=${w.sideIndex}`).join(' ') || 'no items',
+      );
+      // The guard must not fire on ordinary records: a correct attribution still
+      // resolves, and asking a reviewer a question they already answered is a cost.
+      const clean = list.filter((w) => w.video === 'clean');
+      check(
+        'normal attribution still resolves without asking',
+        clean.length === 1 && clean[0]!.sideIndex === 1 && clean[0]!.needs.side === false,
+        clean.map((w) => `sideIndex=${w.sideIndex} needs.side=${w.needs.side}`).join(' ') ||
+          'no item',
+      );
+    } finally {
+      process.chdir(cwd);
+      await rm(tmp, { recursive: true, force: true });
+    }
+  }
+
   // ── 2. the emit contract ────────────────────────────────────────────────────
   console.log('\n[2] emit contract — every assertion is a throw');
   {

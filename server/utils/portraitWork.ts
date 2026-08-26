@@ -274,6 +274,32 @@ export function buildBenchList(): BenchItem[] {
     if (placed.L === null && placed.R !== null) placed.L = 1 - placed.R;
     else if (placed.R === null && placed.L !== null) placed.R = 1 - placed.L;
 
+    /**
+     * BOTH SCREEN SIDES CANNOT BE THE SAME PLAYER, so if they both resolve to one
+     * record side the attribution is wrong and neither answer is usable.
+     *
+     * The elimination step above only rescues the case where exactly ONE side is
+     * unknown. Nothing caught the collision, and its consequence was silent: both
+     * screen sides carry the index of a record side that is usually already
+     * complete, `settled()` skips both, and the OTHER side — the incomplete one,
+     * the whole reason the record is queued — is never offered to anybody.
+     *
+     * On L_s3lYOuR3k the right plate read spider-man, which is the LEFT player's
+     * title fighter, so both sides placed onto record side 0 and HADO's bench was
+     * unreachable behind 72 frames and 68 clean reads. Rare (1 of 312 records with
+     * reads) and not necessarily even an OCR error: on a 21-fighter roster two
+     * players fielding Spider-Man is ordinary, which is exactly why this cannot be
+     * resolved by picking one.
+     *
+     * So drop both to null and let the page ask. That is the same verdict
+     * alignBench reaches on an ambiguous bench: refuse and ask, never assume. A
+     * question costs a reviewer one extra click; a guess costs the side.
+     */
+    if (placed.L !== null && placed.L === placed.R) {
+      placed.L = null;
+      placed.R = null;
+    }
+
     for (const side of ['L', 'R'] as const) {
       const reads = (side === 'L' ? e.left : e.right).filter((r) => r.id && r.dist === 0);
       // ATTRIBUTION PREFERS THE TITLE-KNOWN FIGHTER, never title order — one
