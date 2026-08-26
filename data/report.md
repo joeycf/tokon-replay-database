@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-26T02:21:31.636Z_
+_Generated 2026-08-26T03:35:47.218Z_
 
 ## Coverage
 
@@ -11,25 +11,25 @@ _Generated 2026-08-26T02:21:31.636Z_
 | hadoukenReplays | 764 | 67 | 8.8% |
 | replaysHub | 119 | 114 | 95.8% |
 | fightingStationX | 2675 | 84 | 3.1% |
-| fgcReplaysHub | 2535 | 10 | 0.4% |
-| **total** | | **376** | |
+| fgcReplaysHub | 2536 | 11 | 0.4% |
+| **total** | | **377** | |
 
 ## Character provenance
 
-How every one of the 752 sides got its characters.
+How every one of the 754 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 9 | 1.2% |
-| description | 209 | 27.8% |
-| footage | 32 | 4.3% |
-| human | 502 | 66.8% |
+| title | 1 | 0.1% |
+| description | 211 | 28.0% |
+| footage | 32 | 4.2% |
+| human | 510 | 67.6% |
 | review | 0 | 0.0% |
 
-- complete (4/4): **743/752** (98.8%)
+- complete (4/4): **753/754** (99.9%)
 - oversize (>4, mid-set team change): **9** — counted in usage, excluded from pairing
-- bench alignment: handle 201 · character-subset 21 · ambiguous 3
-- title slot order: handle-first 609 · chars-first 67 · parallel-lists 76
+- bench alignment: handle 202 · character-subset 21 · ambiguous 3
+- title slot order: handle-first 611 · chars-first 67 · parallel-lists 76
 - tier conflicts (queued for review): 0
 - decomposed-Ō titles seen: 0
 
@@ -37,18 +37,18 @@ How every one of the 752 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 9 | 1.2% |
-| 4 | 734 | 97.6% |
+| 1 | 1 | 0.1% |
+| 4 | 744 | 98.7% |
 | 5 _(mid-set change)_ | 6 | 0.8% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 | 8 _(mid-set change)_ | 2 | 0.3% |
 
-- **9 side(s) awaiting a drain** across 5 record(s) — oldest published **10 day(s)** ago
+- **1 side(s) awaiting a drain** across 1 record(s) — oldest published **10 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **11** — character-completion 11
-- bench queue (published, incomplete): **5**
+- bench queue (published, incomplete): **1**
 
 ## Misses
 
