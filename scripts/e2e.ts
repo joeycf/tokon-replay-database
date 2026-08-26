@@ -233,11 +233,37 @@ function testSubstrate(): void {
 
   // THE ASSERTION THAT CAUGHT THE FIFTH GRAMMAR. Player handles came from a
   // title slot that actually held fighter names; nothing else noticed.
+  //
+  // SOME PEOPLE ARE JUST NAMED AFTER A FIGHTER, and the check cannot tell that
+  // from a parse error — both produce a player whose handle is a roster name.
+  // So the exception is a NAMED LIST WITH ITS EVIDENCE rather than a softened
+  // rule: the assertion keeps its full strength for every handle nobody has
+  // vouched for, and each entry here records who confirmed it and from what.
+  //
+  // Adding to this list is a human verdict, not a way to make the suite green.
+  // The test is: does the TITLE parse cleanly with the fighter in its own slot?
+  // If it does, the handle is really that person's name. If it does not, the
+  // handle is wreckage from a slot boundary and belongs in the review queue.
+  const CONFIRMED_FIGHTER_HANDLES = new Map<string, string>([
+    [
+      'deadpool',
+      // "MARVEL TOKON ▰ GR7 (#1 Ranked Peni Parker) vs DEADPOOL (Magik) ▰ …"
+      // (fcUF-QsUdz0, replaysHub). Handle-then-paren, Magik in its own slot —
+      // the parse is right and the player is called DEADPOOL. Confirmed by the
+      // maintainer 2026-08-26.
+      'fcUF-QsUdz0 — clean handle/paren split, player is genuinely named DEADPOOL',
+    ],
+  ]);
   const rosterNames = new Set(characters.map((c) => c.name.toLowerCase()));
-  const collisions = players.filter((p) => rosterNames.has(p.handle.toLowerCase()));
+  const collisions = players.filter(
+    (p) =>
+      rosterNames.has(p.handle.toLowerCase()) &&
+      !CONFIRMED_FIGHTER_HANDLES.has(p.handle.toLowerCase()),
+  );
   expect(
     collisions.length === 0,
-    `no player handle is a fighter name (${collisions.map((c) => c.handle).join(', ') || 'clean'})`,
+    `no player handle is a fighter name (${collisions.map((c) => c.handle).join(', ') || 'clean'}` +
+      `${CONFIRMED_FIGHTER_HANDLES.size ? `; ${CONFIRMED_FIGHTER_HANDLES.size} confirmed real` : ''})`,
   );
 
   // ITS SIBLING, AND THE ONE THAT WOULD HAVE CAUGHT THE BRACKET TAIL. A title
