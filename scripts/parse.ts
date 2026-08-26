@@ -298,6 +298,73 @@ async function main() {
   const records: MatchVideo[] = [];
   const parsedPerChannel = new Map<ChannelKey, number>();
 
+  /**
+   * A HUMAN VERDICT OUTRANKS THE PARSER'S INABILITY TO RESOLVE.
+   *
+   * Records that reach the two `character-completion` branches below are held
+   * off the site entirely, and until now that was permanent by construction. A
+   * queued record is absent from videos.json, therefore absent from
+   * bench-queue.json, so the extractor could not read its footage and
+   * /dev/bench-review could not show it — and `applyOverrides` maps over
+   * `records`, which these never enter, so hand-authoring `sides` or setting
+   * `exclude` did nothing either. The only way to resolve one was a commit.
+   *
+   * So the verdict is consulted HERE, before the record is queued, which is the
+   * only point where it can still become a record. /dev/review-queue writes it.
+   *
+   * Deliberately scoped to these branches: a record that already parses is
+   * untouched, and `exclude` keeps its existing meaning downstream in
+   * applyOverrides. Nothing about the healthy path changes.
+   *
+   * The invariant this must not break (asserted in e2e.ts and in verify-gates):
+   * a pending review item never reaches videos.json or replays.json. It holds
+   * because a record is either pending — queued, unpublished — or resolved:
+   * published and dequeued. A verdict moves it from one state to the other and
+   * there is no third state where it is both.
+   */
+  type Verdict = 'excluded' | 'adopted' | null;
+  const applyVerdict = (
+    v: RawVideoRecord,
+    ch: (typeof ACTIVE_CHANNELS)[number],
+    title: string,
+    handles?: [string, string],
+  ): Verdict => {
+    const ov = overrides[v.id];
+    if (!ov) return null;
+    if (ov.exclude === true) {
+      misses.push({
+        id: v.id,
+        channel: ch.id,
+        title,
+        reason: 'not-a-match',
+        detail: 'review verdict',
+      });
+      return 'excluded';
+    }
+    if (!ov.sides) return null;
+    // Mirrors the ordinary record push below — same fields, same order, so the
+    // two cannot drift into producing differently-shaped records.
+    byIdForQueue.set(v.id, {
+      channel: ch.id,
+      title,
+      publishedAt: v.publishedAt,
+      durationSec: v.durationSec,
+    });
+    records.push({
+      id: v.id,
+      channel: ch.source,
+      intake: ch.id,
+      title,
+      publishedAt: v.publishedAt,
+      durationSec: v.durationSec,
+      ...(v.viewCount !== undefined ? { viewCount: v.viewCount } : {}),
+      season: seasonForDate(v.publishedAt.slice(0, 10)),
+      sides: ov.sides as [MatchSide, MatchSide],
+    });
+    void handles;
+    return 'adopted';
+  };
+
   for (const ch of ACTIVE_CHANNELS) {
     const raw: RawVideoRecord[] = await readJson(`../raw/${ch.id}.json`, []);
     if (raw.length === 0) {
@@ -406,15 +473,20 @@ async function main() {
           detail: 'no (chars) slot',
         });
         if (queueable) {
-          review.push({
-            id: v.id,
-            kind: 'character-completion',
-            channel: ch.id,
-            title,
-            publishedAt: v.publishedAt,
-            durationSec: v.durationSec,
-            handles: [bare[0]!, bare[1]!],
-          });
+          const verdict = applyVerdict(v, ch, title, [bare[0]!, bare[1]!]);
+          if (verdict === null) {
+            review.push({
+              id: v.id,
+              kind: 'character-completion',
+              channel: ch.id,
+              title,
+              publishedAt: v.publishedAt,
+              durationSec: v.durationSec,
+              handles: [bare[0]!, bare[1]!],
+            });
+          } else if (verdict === 'adopted') {
+            parsed += 1;
+          }
         }
         continue;
       }
@@ -454,15 +526,20 @@ async function main() {
         });
         // Match-shaped footage whose characters no text resolves — exactly what
         // the extractor exists for.
-        review.push({
-          id: v.id,
-          kind: 'character-completion',
-          channel: ch.id,
-          title,
-          publishedAt: v.publishedAt,
-          durationSec: v.durationSec,
-          handles,
-        });
+        const verdict = applyVerdict(v, ch, title, handles);
+        if (verdict === null) {
+          review.push({
+            id: v.id,
+            kind: 'character-completion',
+            channel: ch.id,
+            title,
+            publishedAt: v.publishedAt,
+            durationSec: v.durationSec,
+            handles,
+          });
+        } else if (verdict === 'adopted') {
+          parsed += 1;
+        }
         continue;
       }
       for (const t of titleChars) {

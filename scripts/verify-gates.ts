@@ -207,6 +207,37 @@ try {
     ]) {
       check(`still a match: "${title.slice(0, 46)}…"`, !NOT_A_MATCH_RE.test(title), undefined);
     }
+
+    // THE SIGNAL /dev/review-queue REFUSES A VERDICT ON.
+    //
+    // Some queued titles name their fighters with no parentheses — "GLIDER
+    // Ranked #13 Magik vs Senshii Ranked #9 Spider Man" — so the slot boundary
+    // lands in the wrong place and the whole span becomes the handle. Those
+    // characters are not unknown; the PARSE is wrong, and no answer about
+    // characters can repair it. Accepting one would mint
+    // `glider-ranked-13-magik` beside the `glider` who already exists — a real
+    // player split across two pages, each holding some of their matches.
+    //
+    // This controls the predicate the endpoint keys on, not the HTTP layer:
+    // a handle that resolves a fighter is a broken handle.
+    for (const h of [
+      'GLIDER Ranked #13 Magik',
+      'Senshii Ranked #9 Spider Man',
+      'Eduardo Hook Ranked #1 Blade',
+    ]) {
+      check(
+        `unusable handle detected: "${h}"`,
+        matcher.ids(h).length > 0,
+        matcher.ids(h).join(','),
+      );
+    }
+    for (const h of ['DIAPHONE', 'LIQUID GIANT', 'Eduardo Hook', 'SAVE THE QUEEN', 'Cloud805']) {
+      check(
+        `real handle passes: "${h}"`,
+        matcher.ids(h).length === 0,
+        matcher.ids(h).join(',') || 'clean',
+      );
+    }
   }
 
   // ── 1b. the fgcReplaysHub 'prose-with' bench shape ──────────────────────────
@@ -731,6 +762,120 @@ try {
     } finally {
       // restored by the global finally
     }
+  }
+
+  // ── 5. the review verdict — the only exit a queued record has ───────────────
+  //
+  // A character-completion record is held off the site entirely, and until the
+  // verdict hook existed that was permanent by construction: absent from
+  // videos.json, therefore absent from bench-queue.json, so neither the
+  // extractor nor /dev/bench-review could reach it, and applyOverrides maps over
+  // `records`, which it never enters. These controls drive a real parse run
+  // through all three states.
+  console.log('\n[5] review verdict — pending, rejected, adopted');
+  {
+    const parse = () => {
+      try {
+        execFileSync('npx', ['tsx', 'scripts/parse.ts'], {
+          cwd: ROOT,
+          stdio: 'pipe',
+          encoding: 'utf8',
+        });
+        return 0;
+      } catch (e) {
+        return (e as { status?: number }).status ?? 1;
+      }
+    };
+    const rawPath = join(ROOT, 'raw', 'proReplays.json');
+    const ovPath = join(ROOT, 'data', 'overrides.json');
+    const ID = 'CTLVERDICT1';
+    // A title that PARSES as a match — two clean handles either side of a vs —
+    // but names no fighter either side. That is exactly what reaches the queue.
+    const bait = {
+      id: ID,
+      channel: 'proReplays',
+      title: '🕹️ CTLALPHA vs CTLBETA 🕹️ MARVEL TOKON: Fighting Souls',
+      description: 'MARVEL TOKON high level replay',
+      publishedAt: '2026-08-11T00:00:00Z',
+      durationSec: 600,
+      viewCount: 10,
+      liveBroadcastContent: 'none',
+    };
+    const original = JSON.parse(await readFile(rawPath, 'utf8')) as Record<string, unknown>[];
+    const baseOv = JSON.parse(await readFile(ovPath, 'utf8')) as Record<string, unknown>;
+    const readQueue = async () =>
+      JSON.parse(await readFile(join(ROOT, 'data', 'review-queue.json'), 'utf8')) as {
+        id: string;
+      }[];
+    const readVideos = async () =>
+      JSON.parse(await readFile(join(ROOT, 'data', 'videos.json'), 'utf8')) as {
+        id: string;
+        sides: { characters: string[]; provenance: { tier: string } }[];
+      }[];
+
+    await writeFile(rawPath, JSON.stringify([...original, bait]));
+
+    // 5a — PENDING. No verdict: it queues, and it must not reach the site. This
+    // is the invariant e2e.ts asserts, restated here so it fails at the gate.
+    await writeFile(ovPath, JSON.stringify(baseOv, null, 2));
+    parse();
+    let q = await readQueue();
+    let vids = await readVideos();
+    check(
+      'with no verdict it queues for review',
+      q.some((r) => r.id === ID),
+      `${q.length} pending`,
+    );
+    check(
+      'and a pending item NEVER reaches videos.json',
+      !vids.some((r) => r.id === ID),
+      undefined,
+    );
+
+    // 5b — REJECTED. `exclude` must remove it from the queue too, not just from
+    // the corpus: a record nobody can publish and nobody can dismiss is the dead
+    // end this whole surface exists to remove.
+    await writeFile(ovPath, JSON.stringify({ ...baseOv, [ID]: { exclude: true } }, null, 2));
+    parse();
+    q = await readQueue();
+    vids = await readVideos();
+    check('a reject verdict clears it from the queue', !q.some((r) => r.id === ID), undefined);
+    check('and it still never reaches videos.json', !vids.some((r) => r.id === ID), undefined);
+
+    // 5c — ADOPTED. The verdict publishes the record at tier 'review', which
+    // until now was a CharTier nothing in the codebase could produce.
+    const sides = [0, 1].map((i) => ({
+      player: `ctl${i}`,
+      handle: `CTL${i === 0 ? 'ALPHA' : 'BETA'}`,
+      characters: ['magik', 'storm', 'blade', 'carnage'],
+      provenance: {
+        tier: 'review',
+        tiers: ['review'],
+        fromTitle: [],
+        fromHuman: ['magik', 'storm', 'blade', 'carnage'],
+        slotOrder: 'handle-first',
+        complete: true,
+      },
+    }));
+    await writeFile(
+      ovPath,
+      JSON.stringify({ ...baseOv, [ID]: { sides, resolvedBy: 'human' } }, null, 2),
+    );
+    parse();
+    q = await readQueue();
+    vids = await readVideos();
+    const adopted = vids.find((r) => r.id === ID);
+    check('an adopted verdict publishes the record', !!adopted, adopted ? 'present' : 'ABSENT');
+    check(
+      "at tier 'review' — the tier nothing could reach before",
+      adopted?.sides.every((sd) => sd.provenance.tier === 'review') === true,
+      adopted?.sides.map((sd) => sd.provenance.tier).join(',') ?? '-',
+    );
+    check(
+      'and it leaves the queue, so it is never both pending and published',
+      !q.some((r) => r.id === ID),
+      undefined,
+    );
   }
 } finally {
   await restoreAll();
