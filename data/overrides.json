@@ -9364,21 +9364,22 @@
     "resolvedBy": "human"
   },
   "L_s3lYOuR3k": {
-    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-08-18]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-08-26]",
     "sides": [
       {
         "player": "naire",
         "handle": "NAIRE",
         "characters": [
           "spider-man",
-          "blade",
-          "green-goblin",
-          "carnage"
+          "carnage",
+          "iron-man",
+          "green-goblin"
         ],
         "provenance": {
           "tier": "human",
           "tiers": [
             "title",
+            "human",
             "human",
             "human"
           ],
@@ -9389,10 +9390,53 @@
           "complete": true,
           "fromHuman": [
             "spider-man",
+            "carnage",
+            "iron-man",
+            "green-goblin"
+          ],
+          "humanPicks": {
+            "a": [
+              "carnage",
+              "iron-man",
+              "green-goblin"
+            ],
+            "b": [
+              "carnage",
+              "iron-man",
+              "green-goblin"
+            ],
+            "forced": false
+          },
+          "humanScreenSide": "L"
+        }
+      },
+      {
+        "player": "hado",
+        "handle": "HADO",
+        "characters": [
+          "spider-man",
+          "blade",
+          "green-goblin",
+          "carnage"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "green-goblin"
+          ],
+          "slotOrder": "chars-first",
+          "complete": true,
+          "fromHuman": [
+            "spider-man",
             "blade",
             "green-goblin",
             "carnage"
           ],
+          "humanScreenSide": "R",
           "humanPicks": {
             "a": [
               "blade",
@@ -9401,29 +9445,11 @@
             ],
             "b": [
               "blade",
-              "carnage",
-              "green-goblin"
+              "green-goblin",
+              "carnage"
             ],
             "forced": false
           }
-        }
-      },
-      {
-        "player": "hado",
-        "handle": "HADO",
-        "characters": [
-          "green-goblin"
-        ],
-        "provenance": {
-          "tier": "title",
-          "tiers": [
-            "title"
-          ],
-          "fromTitle": [
-            "green-goblin"
-          ],
-          "slotOrder": "chars-first",
-          "complete": false
         }
       }
     ],

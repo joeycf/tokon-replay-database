@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-26T03:35:47.218Z_
+_Generated 2026-08-26T03:49:09.580Z_
 
 ## Coverage
 
@@ -20,13 +20,13 @@ How every one of the 754 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 1 | 0.1% |
+| title | 0 | 0.0% |
 | description | 211 | 28.0% |
 | footage | 32 | 4.2% |
-| human | 510 | 67.6% |
+| human | 511 | 67.8% |
 | review | 0 | 0.0% |
 
-- complete (4/4): **753/754** (99.9%)
+- complete (4/4): **754/754** (100.0%)
 - oversize (>4, mid-set team change): **9** — counted in usage, excluded from pairing
 - bench alignment: handle 202 · character-subset 21 · ambiguous 3
 - title slot order: handle-first 611 · chars-first 67 · parallel-lists 76
@@ -37,18 +37,17 @@ How every one of the 754 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 1 | 0.1% |
-| 4 | 744 | 98.7% |
+| 4 | 745 | 98.8% |
 | 5 _(mid-set change)_ | 6 | 0.8% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 | 8 _(mid-set change)_ | 2 | 0.3% |
 
-- **1 side(s) awaiting a drain** across 1 record(s) — oldest published **10 day(s)** ago
+- **0 side(s) awaiting a drain** across 0 record(s)
 
 ## Queues
 
 - review queue (never published): **11** — character-completion 11
-- bench queue (published, incomplete): **1**
+- bench queue (published, incomplete): **0**
 
 ## Misses
 
