@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-26T05:00:13.750Z_
+_Generated 2026-08-26T08:26:07.380Z_
 
 ## Coverage
 
@@ -9,27 +9,27 @@ _Generated 2026-08-26T05:00:13.750Z_
 | highLevelReplays | 88 | 88 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 764 | 68 | 8.9% |
-| replaysHub | 119 | 115 | 96.6% |
-| fightingStationX | 2675 | 87 | 3.3% |
+| replaysHub | 120 | 116 | 96.7% |
+| fightingStationX | 2677 | 88 | 3.3% |
 | fgcReplaysHub | 2536 | 11 | 0.4% |
-| **total** | | **382** | |
+| **total** | | **384** | |
 
 ## Character provenance
 
-How every one of the 764 sides got its characters.
+How every one of the 768 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 0 | 0.0% |
-| description | 211 | 27.6% |
+| title | 4 | 0.5% |
+| description | 211 | 27.5% |
 | footage | 32 | 4.2% |
-| human | 519 | 67.9% |
+| human | 519 | 67.6% |
 | review | 2 | 0.3% |
 
-- complete (4/4): **764/764** (100.0%)
+- complete (4/4): **764/768** (99.5%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 203 · character-subset 21 · ambiguous 3
-- title slot order: handle-first 619 · chars-first 67 · parallel-lists 76
+- bench alignment: handle 204 · character-subset 21 · ambiguous 3
+- title slot order: handle-first 621 · chars-first 67 · parallel-lists 78
 - tier conflicts (queued for review): 0
 - decomposed-Ō titles seen: 0
 
@@ -37,16 +37,18 @@ How every one of the 764 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 4 | 757 | 99.1% |
+| 1 | 2 | 0.3% |
+| 2 | 2 | 0.3% |
+| 4 | 757 | 98.6% |
 | 5 _(mid-set change)_ | 6 | 0.8% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **0 side(s) awaiting a drain** across 0 record(s)
+- **4 side(s) awaiting a drain** across 2 record(s) — oldest published **0 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **2** — character-completion 2
-- bench queue (published, incomplete): **0**
+- bench queue (published, incomplete): **2**
 
 ## Misses
 
@@ -55,7 +57,7 @@ How every one of the 764 sides got its characters.
 | other-game | 3946 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 105 |
+| not-a-match | 106 |
 | short-duration | 6 |
 | char-unresolved | 3 |
 | no-vs-title | 2 |
