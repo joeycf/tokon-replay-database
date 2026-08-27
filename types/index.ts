@@ -3,22 +3,41 @@
 // like the SF6, Tekken and 2XKO pipelines do).
 
 /** The Replay.source contract: doubles as GameConfig.sourceChannels[].id
- *  (badge/filter). Six channels, currently 1:1 with ChannelKey — the two
- *  types stay distinct anyway, because SF6 learned the hard way that they stop
- *  being 1:1 the moment one physical channel starts publishing two kinds of
- *  footage, and retrofitting the split is worse than carrying it. */
+ *  (badge/filter). The six original channels are each their own source; the
+ *  tournament intake (marvelTokonYT) is the one that breaks the 1:1 — see
+ *  ChannelKey below. Grouping into Online/Tournament chips lives ONLY in
+ *  app/app.config.ts sourceGroups; group ids never appear in data or URLs. */
 export type SourceId =
   | 'highLevelReplays'
   | 'proReplays'
   | 'hadoukenReplays'
   | 'replaysHub'
   | 'fightingStationX'
-  | 'fgcReplaysHub';
+  | 'fgcReplaysHub'
+  | 'marvelTokonTournament';
 
-/** Per-YouTube-channel intake key: names raw/<key>.json and the coverage
- *  report's rows. THE DEDUPE KEY (checklist step 2) — never the SourceId, which
- *  two channels may one day deliberately share. */
-export type ChannelKey = SourceId;
+/**
+ * Per-YouTube-channel intake key: names raw/<key>.json and the coverage
+ * report's rows. THE DEDUPE KEY (checklist step 2) — never the SourceId, which
+ * two channels may one day deliberately share.
+ *
+ * `export type ChannelKey = SourceId` stood here until marvelTokonYT arrived,
+ * with a comment predicting it would stop being true "the moment one physical
+ * channel starts publishing two kinds of footage". @MarvelTokonYT publishes
+ * both — daily online replays AND CEO/EVO event footage — and this repo ingests
+ * only the events (`eventsOnly`), so the channel is `marvelTokonYT` and its one
+ * public token is `marvelTokonTournament`. Keeping the two unions separate is
+ * what makes adding its online half later a config change rather than a
+ * migration: a second SourceId on the same ChannelKey, SF6's kingArena shape.
+ */
+export type ChannelKey =
+  | 'highLevelReplays'
+  | 'proReplays'
+  | 'hadoukenReplays'
+  | 'replaysHub'
+  | 'fightingStationX'
+  | 'fgcReplaysHub'
+  | 'marvelTokonYT';
 
 /** How a channel's descriptions state the bench, when they do at all. Measured
  *  per channel on the launch corpus; see scripts/bench.ts.
@@ -48,6 +67,40 @@ export interface ChannelConfig {
   tokonSignal?: 'title' | 'titleOrDescription';
   /** The prose shape of this channel's descriptions, if it states characters. */
   descriptionBench?: DescriptionBench;
+  /**
+   * This channel is ingested for EVENT FOOTAGE ONLY: a title carrying no
+   * event-brand signal is a miss (`not-an-event`), not a record.
+   *
+   * @MarvelTokonYT publishes both kinds — ~25 daily "High Level Match" replays
+   * alongside its CEO/EVO uploads — and its online half is deliberately not
+   * claimed here: those players (Punk, ChrisG, SonicFox, Cloud805, Hikari,
+   * Bleed, Leffen) already arrive via the six online channels, so claiming them
+   * would add duplicate adjudication for footage the archive already holds.
+   * Its event footage nobody else carries.
+   *
+   * The gate is DELIBERATELY TIGHT (see EVENT_RE in parse.ts). On an
+   * events-only channel the two failure directions are not symmetric: an
+   * unrecognised event brand is dropped and shows up as a countable
+   * `not-an-event` miss in report.md, while an over-broad pattern publishes an
+   * ordinary ranked replay under the Tournament chip, where nothing looks
+   * wrong. So the pattern requires an event BRAND, never a bare round word.
+   */
+  eventsOnly?: boolean;
+  /**
+   * This channel's date floor, in place of the global LAUNCH gate.
+   *
+   * SCOPED PER CHANNEL, AND THAT IS THE WHOLE POINT. Measured on the raw dumps:
+   * moving the floor globally to 2026-06-26 admits 212 records — 204 from
+   * fightingStationX (Open Beta ranked matches and EVO 2026 Las Vegas footage)
+   * and 8 from hadoukenReplays dating to December 2025, a closed-test build
+   * eight months pre-launch. The floor is the gate that keeps those out; it
+   * stays hard for every channel that does not set this.
+   *
+   * Only meaningful together with a pre-release era in patches.ts — emit throws
+   * on a patch token no boundary accounts for, so a record admitted here with
+   * no era to file under fails loudly rather than shipping undated.
+   */
+  preReleaseFrom?: string;
   /** A channel that stopped publishing this game. Its committed records are
    *  still real and still play at their URLs, so they are CARRIED FORWARD
    *  byte-stable rather than pruned; fetch skips it entirely. `records` is a
@@ -307,6 +360,10 @@ export interface SeasonBoundary {
   start: string; // ISO date, inclusive
   end: string | null; // exclusive; null = open (current season)
   confirmed: boolean;
+  /** Facet-parent display label. Defaults to `Season ${season}`, which reads
+   *  wrong for the pre-release era — "Season 0" names a balance era the vendor
+   *  never shipped. Set it there and nowhere else. */
+  label?: string;
   note?: string;
 }
 
@@ -333,8 +390,13 @@ export interface PatchBoundary {
   version: string;
   /** ISO release day, inclusive. Equals `version`; the validator asserts it. */
   start: string;
-  /** Where the vendor announced it. An undocumented row cannot hide. */
-  announcedOn: 'steam' | 'x' | 'discord' | 'launch';
+  /** Where the vendor announced it. An undocumented row cannot hide.
+   *
+   *  'event' is the pre-release case and reads differently from the rest: that
+   *  build was EXPOSED at a tournament, never announced anywhere. Recording it
+   *  as its own value keeps the honest distinction — nobody can later mistake a
+   *  playable-on-a-show-floor build for a published patch. */
+  announcedOn: 'steam' | 'x' | 'discord' | 'launch' | 'event';
   /** Builds shipped inside this window that the vendor did not post
    *  separately, recorded so they are declared rather than silently absorbed. */
   includes?: string[];

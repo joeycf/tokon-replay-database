@@ -98,8 +98,17 @@ const ROSTER: RosterEntry[] = [
     id: 'black-panther',
     name: 'Black Panther',
     team: 'Fighting Avengers',
-    // 'black phanther' is an observed uploader typo (9D0Tw_ZUah4).
-    aliases: ['black panther', 'black-panther', 'b. panther', 'black phanther'],
+    // 'black phanther' is an observed uploader typo (9D0Tw_ZUah4); 'black
+    // phanter' is a SECOND, independent misspelling of the same name, used
+    // consistently by marvelTokonYT (dO0h9Iwub4U, dQFLnW2moiU). Two of its
+    // eight CEO 2026 matches would otherwise be char-unresolved.
+    aliases: [
+      'black panther',
+      'black-panther',
+      'b. panther',
+      'black phanther',
+      'black phanter',
+    ],
   },
 
   // ── Amazing Guardians ──────────────────────────────────────────────────────

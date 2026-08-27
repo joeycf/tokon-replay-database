@@ -1,5 +1,16 @@
 [
   {
+    "id": "S0",
+    "label": "Pre-release",
+    "note": "Event builds, before launch",
+    "children": [
+      {
+        "id": "2026-06-26",
+        "note": "EVO 2026 exhibition build"
+      }
+    ]
+  },
+  {
     "id": "S1",
     "label": "Season 1",
     "note": "Launch",

@@ -515,16 +515,49 @@ async function main(): Promise<void> {
   );
   expect(body.includes('fighter'), 'vocabulary reads "fighter", not "character"');
 
-  // source chips — 5, one per channel, no grouping
-  const chipText = await page.evaluate(() => document.body.innerText);
-  const chipHits = CHANNELS.filter((c) => chipText.includes(c.name)).length;
-  expect(
-    chipHits >= 4,
-    `source chips render per channel, not grouped (${chipHits}/${CHANNELS.length} names present)`,
+  // ── source chips: TWO GROUPS, not seven channels ──────────────────────────
+  // Inverted when marvelTokonYT arrived and app.config.ts declared
+  // sourceGroups. It used to assert the opposite ("chips render per channel,
+  // not grouped") and that assertion was correct for as long as every channel
+  // was an online re-uploader.
+  //
+  // Asserting the ABSENCE of the channel names matters as much as the presence
+  // of the group labels: with sourceGroups set the engine renders ONLY group
+  // chips, so a channel name leaking back into the filter bar means the config
+  // silently stopped being read — which looks like nothing at all on a page
+  // that still filters correctly.
+  //
+  // Read the CHIPS, not document.innerText: every card carries a SourceBadge
+  // printing the same channel names, so a body-text search cannot tell a filter
+  // chip from a badge and would report the grouping as broken while it works.
+  const chipLabels = new Set(
+    await page.evaluate(() =>
+      [...document.querySelectorAll('button[aria-pressed]')].map((b) =>
+        (b.textContent ?? '').trim(),
+      ),
+    ),
   );
+  expect(chipLabels.has('Online'), 'source facet renders the Online group chip');
+  expect(chipLabels.has('Tournament'), 'source facet renders the Tournament group chip');
+  const leaked = CHANNELS.filter((c) => chipLabels.has(c.name)).map((c) => c.name);
+  expect(
+    leaked.length === 0,
+    `no per-channel source chip renders when grouped${leaked.length ? ` (leaked: ${leaked.join(', ')})` : ''}`,
+  );
+  const chipText = await page.evaluate(() => document.body.innerText);
 
   // patch facet — S1 parent with date children
   expect(chipText.includes('Season 1'), 'patch facet shows the Season 1 parent label');
+  // S0 is the era that is emitted CONDITIONALLY — emit.ts prunes an era with no
+  // records so its chip cannot advertise an empty filter, which means the chip
+  // being here is the only proof the pre-release footage actually published.
+  // Its label is asserted rather than its token: `buildPatchGroups` would
+  // otherwise default it to "Season 0", naming a balance era the game never had.
+  expect(chipText.includes('Pre-release'), 'patch facet shows the S0 Pre-release parent label');
+  expect(
+    !chipText.includes('Season 0'),
+    'the pre-release era is never labelled "Season 0"',
+  );
 
   // deep link round-trip
   const topChar = Object.entries(stats.characterUsage).sort((a, b) => b[1] - a[1])[0];

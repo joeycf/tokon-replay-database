@@ -1,9 +1,12 @@
 /**
  * Cross-channel duplicate AUDIT. Read-only: nothing here edits data/.
  *
- * Five channels re-upload from the same public pool, so the same match can
+ * Six channels re-upload from the same public pool, so the same match can
  * appear more than once. One pair is already confirmed in the launch corpus —
- * the same Roda vs Snake Eyez set on two channels the same day.
+ * the same Roda vs Snake Eyez set on two channels the same day. (The seventh,
+ * marvelTokonYT, is events-only: nothing else here carries CEO or EVO footage
+ * today, so it has no overlap to lose — but it is ranked last in CHANNELS
+ * precisely so that it loses if one ever appears.)
  *
  * IT NEVER DROPS ANYTHING, AND THAT IS THE DESIGN. A dedupe signature is a
  * HYPOTHESIS about footage identity, not a fact about it: on a sibling game,
@@ -109,19 +112,90 @@ if (unkeyable) {
   );
 }
 
-if (!pairs.length) {
-  console.log(
-    `✓ no cross-channel duplicate candidates among the ${keyable.length} keyable records`,
-  );
-  process.exit(0);
+/**
+ * ── SECOND PASS: THE THIN-SIDE AUDIT ─────────────────────────────────────────
+ *
+ * The signature above needs ≥2 known characters a side, and that is a real
+ * blind spot rather than a conservative one. A channel whose titles state ONE
+ * character per side and whose descriptions carry no bench contributes records
+ * that are unkeyable at intake and stay unkeyable until a human or the
+ * extractor drains them — which is to say, exactly when a duplicate would be
+ * cheapest to catch, the audit cannot see it. marvelTokonYT is that channel:
+ * every one of its titles states one fighter a side.
+ *
+ * So drop the character component and lean on the pair that is always known:
+ * WHO PLAYED, plus duration as the independent signal the pass above already
+ * trusts. Measured across the 384-record corpus at the time this was written:
+ * 2 collisions total, 0 of them cross-channel. That is a low enough false-pair
+ * rate to print without burying the real findings — the thing that made
+ * KEYABLE_MIN necessary in the first place was character-less signatures
+ * matching the roster, and a player PAIR does not have that failure mode.
+ *
+ * Reported separately, and second, because it IS a weaker hypothesis than the
+ * pass above: two players who meet often can play two sets that happen to land
+ * within a second of each other. Same rule as everything else here — it prints
+ * candidates, a person watches the footage, nothing drops automatically.
+ *
+ * Runs over EVERY record, not only the thin ones, then reports a pair only when
+ * at least one side of it is thin. That is what catches the cross-tier case —
+ * a 1-of-4 record from one channel against a filled-in 4-of-4 record of the
+ * same match from another — which no character signature can ever match,
+ * because the two disagree about the characters by construction.
+ */
+const thinIds = new Set(videos.filter((v) => !keyable.includes(v)).map((v) => v.id));
+const alreadyPaired = new Set(pairs.map((p) => p.drop.id));
+
+const byPlayers = new Map<string, MatchVideo[]>();
+for (const v of videos) {
+  if (v.durationSec <= 0) continue;
+  const k = v.sides
+    .map((s) => s.player)
+    .sort()
+    .join('~');
+  byPlayers.set(k, [...(byPlayers.get(k) ?? []), v]);
 }
 
-for (const p of pairs) {
+const thinPairs: Pair[] = [];
+for (const list of byPlayers.values()) {
+  if (list.length < 2) continue;
+  const sorted = [...list].sort((a, b) => a.durationSec - b.durationSec);
+  for (let i = 1; i < sorted.length; i++) {
+    const a = sorted[i - 1]!;
+    const b = sorted[i]!;
+    const delta = b.durationSec - a.durationSec;
+    if (delta > 1) continue;
+    if (a.intake === b.intake) continue;
+    if (!thinIds.has(a.id) && !thinIds.has(b.id)) continue; // pass one's job
+    const [keep, drop] =
+      (priority.get(a.intake) ?? 99) <= (priority.get(b.intake) ?? 99) ? [a, b] : [b, a];
+    if (alreadyPaired.has(drop.id)) continue;
+    thinPairs.push({ keep, drop, deltaSec: delta });
+  }
+}
+
+const show = (p: Pair) => {
   console.log(`  ${p.keep.id} (${p.keep.intake})  ⟵ keep`);
   console.log(`  ${p.drop.id} (${p.drop.intake})  ⟵ candidate, Δ${p.deltaSec}s`);
   console.log(`     ${p.keep.title.slice(0, 88)}`);
   console.log(`     ${p.drop.title.slice(0, 88)}\n`);
+};
+
+if (pairs.length) {
+  for (const p of pairs) show(p);
+} else {
+  console.log(
+    `✓ no cross-channel duplicate candidates among the ${keyable.length} keyable records\n`,
+  );
 }
+
+console.log(
+  `Thin-side pass — ${thinIds.size} record(s) below ${KEYABLE_MIN} chars/side, ` +
+    `keyed on players + duration only: ${thinPairs.length} candidate(s)\n`,
+);
+for (const p of thinPairs) show(p);
+
+const all = [...pairs, ...thinPairs];
+if (!all.length) process.exit(0);
 
 console.log('─'.repeat(72));
 console.log('CANDIDATES ONLY — nothing has been changed. A signature is a hypothesis:');
@@ -130,7 +204,7 @@ console.log('the footage, then paste what survives into data/overrides.json:\n')
 console.log(
   JSON.stringify(
     Object.fromEntries(
-      pairs.map((p) => [
+      all.map((p) => [
         p.drop.id,
         { exclude: true, '//': `dupe of ${p.keep.id} (${p.keep.intake})` },
       ]),

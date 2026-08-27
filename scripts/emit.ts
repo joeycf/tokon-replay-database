@@ -137,7 +137,6 @@ export async function emitGeneric(
 
   const windows = patchWindows();
   const replays = records.map((v) => toReplay(v, windows));
-  const groups = buildPatchGroups();
 
   /**
    * EMPTY-CORPUS MODE.
@@ -158,6 +157,34 @@ export async function emitGeneric(
     }
     console.log('  ⓘ empty-corpus mode: 0 records. Registry + patch assertions still run.');
   }
+
+  /**
+   * The facet hierarchy, minus any era the corpus cannot fill.
+   *
+   * An era with no records renders as a chip that filters to nothing — the
+   * exact failure scripts/patches.ts refuses to pre-declare a future season
+   * for. S0 (pre-release) is the live case, and it is not hypothetical: it is
+   * REAL AND EMPTY at the same time, because its ten EVO exhibition matches
+   * name no fighters in their titles and sit in the review queue until a person
+   * reads them off the footage. Shipping its chip meanwhile advertises a filter
+   * with nothing behind it.
+   *
+   * Derived from the records rather than authored, so nothing has to remember
+   * to switch it back on: the day the first pre-release verdict lands, the
+   * era's own count stops being zero and the chip appears. Children are pruned
+   * on the same rule for the same reason.
+   *
+   * Empty-corpus mode is exempt — with zero records this would prune everything,
+   * and the patch assertions below are correct precisely because they run
+   * against the full hierarchy on an empty registry.
+   */
+  const liveTokens = new Set(replays.map((r) => r.patch!));
+  const groups = buildPatchGroups()
+    .map((g) => ({
+      ...g,
+      ...(g.children ? { children: g.children.filter((c) => liveTokens.has(c.id)) } : {}),
+    }))
+    .filter((g) => empty || liveTokens.has(g.id) || (g.children?.length ?? 0) > 0);
 
   // ── contract assertions: every one a throw ────────────────────────────────
   if (replays.length !== records.length) {

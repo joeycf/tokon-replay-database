@@ -1,10 +1,15 @@
 /**
  * The source channels — checklist step 1, done before a fetcher existed.
  *
- * Six channels, all of them ordinary daily channels: there is no
+ * Seven channels, all of them ordinary daily channels: there is no
  * backfill-once mechanism on this platform and never was. The first cron run IS
  * the backfill, which is why the cron-preservation gate (a simulated daily run
  * proving untouched channels survive) is the one that matters.
+ *
+ * Six are online re-uploaders and one (marvelTokonYT) is claimed for event
+ * footage only. That is the split app/app.config.ts sourceGroups renders as
+ * Online / Tournament — the group ids live there and nowhere else, never in
+ * this file, in the data, or in a URL.
  *
  * ─────────────────────────────────────────────────────────────────────────────
  * ARRAY ORDER IS DEDUPE PRECEDENCE. Reordering changes which copy of a
@@ -24,6 +29,14 @@
  *                       (Hook, Supernoon, Hikari) already arrive via three
  *                       other channels, so a tie should resolve to whichever
  *                       of those saw it first.
+ *   7 marvelTokonYT     events only, and the ONE channel here whose footage
+ *                       nothing else carries. Ranked last regardless, because
+ *                       precedence decides who wins a tie and it is a
+ *                       re-uploader, not the event's rights holder — the
+ *                       opposite of why SF6 ranks @EvoEvents high. If
+ *                       fightingStationX's EVO Las Vegas uploads are ever
+ *                       claimed, that channel should win the overlap on the
+ *                       same argument, and this order already says so.
  *
  * Cross-channel duplication is REAL — one confirmed pair in the launch corpus
  * (the same Roda vs Snake Eyez match on two channels the same day) — but at
@@ -40,6 +53,7 @@
  * dedupe.
  */
 
+import { PRE_RELEASE } from './patches';
 import type { ChannelConfig } from '../types/index';
 
 /** The uploads playlist is always 'UU' + channelId.slice(2). Pinned rather than
@@ -177,6 +191,55 @@ export const CHANNELS: ChannelConfig[] = [
     // than fitted to a single string. See bench.ts for why its handle class is
     // uppercase-only; that is the part that took the argument, not the list.
     descriptionBench: 'prose-with',
+  },
+  {
+    /**
+     * @MarvelTokonYT — "Marvel Tokon Replays". THE TOURNAMENT CHANNEL, and the
+     * reason app.config.ts finally declares sourceGroups: until it arrived, one
+     * "Online" group would have collapsed six chips into one that toggles
+     * everything.
+     *
+     * EVENTS ONLY, which is why `id` and `source` differ here and nowhere else.
+     * Of its 47 uploads, 28 are ordinary "High Level Match" online replays and
+     * 19 are CEO 2026 / EVO 2026 event footage. The online half is not claimed:
+     * its players — Punk, ChrisG, SonicFox, Cloud805, Hikari, Bleed, Leffen —
+     * all already arrive via the six channels above, so claiming it would buy
+     * duplicate adjudication for footage the archive already holds. Its event
+     * footage nobody else carries at all.
+     *
+     * TWO TITLE GRAMMARS, and it switched between them mid-August. Its newer
+     * uploads use the ▰ affixes every other channel here uses; its older ones
+     * use ➤ … ✦. Measured before this entry existed: with the ▰-only affix cut,
+     * 5 of its 9 CEO uploads died as `bad-handle` because the event suffix rode
+     * into the second handle past the 40-char refusal, and its EVO titles
+     * yielded handles like "Marvel Tokon ➤ Nerdjosh". core() reads all three
+     * delimiters now (see AFFIX in parse.ts).
+     *
+     * NO descriptionBench: descriptions are pure SEO boilerplate on all 47 —
+     * the same paragraph plus a fixed comma list of fighters unrelated to the
+     * match. Reading them would fabricate benches, not fill them.
+     */
+    id: 'marvelTokonYT',
+    source: 'marvelTokonTournament',
+    name: 'Marvel Tokon Events',
+    channelId: 'UCDVoHjJRebhSyzqdg7dlvHw',
+    uploadsPlaylist: uploads('UCDVoHjJRebhSyzqdg7dlvHw'),
+    // Title scope is enough: all 19 event titles name the game in the title.
+    tokonSignal: 'title',
+    eventsOnly: true,
+    /**
+     * Its 10 EVO 2026 Exhibition uploads are dated 2026-06-26/27 — six weeks
+     * before launch, on a build that was never shipped. They are real
+     * competitive footage and the only pre-launch records this archive admits;
+     * see PRE_RELEASE in patches.ts for why the floor moved HERE and not
+     * globally (a global move admits 212 records of beta ranked matches and
+     * December 2025 closed-test footage from two other channels).
+     *
+     * None of the 10 names a fighter in its title, so they land in the review
+     * queue as `character-completion` and publish as verdicts arrive. That is
+     * the intended path, not a failure.
+     */
+    preReleaseFrom: PRE_RELEASE,
   },
 ];
 

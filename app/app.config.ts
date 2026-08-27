@@ -34,11 +34,19 @@ import type { GameConfig } from '@engine/types';
  *   Browse / Stats / Fighters / Players and whose active chip reads
  *   "fighter: storm". Greenfield URLs, so /fighters/* costs nothing.
  *
- * - sourceGroups UNSET. All five channels are online replay re-uploaders, so a
- *   single "Online" group would collapse five chips into one that toggles
- *   everything — strictly less useful than the 1:1 chips the engine renders by
- *   default. The Online/Tournament split arrives when a tournament channel
- *   genuinely does; the siblings collapse to two groups because they HAVE two.
+ * - sourceGroups SET, as of the marvelTokonYT intake. It was deliberately unset
+ *   until then, and the reason it was is the reason it is now: with six online
+ *   re-uploaders and nothing else, a single "Online" group collapses six chips
+ *   into one that toggles everything — strictly less useful than the 1:1 chips
+ *   the engine renders by default. The split needed a second kind of footage to
+ *   be a split at all, and @MarvelTokonYT's CEO/EVO coverage is it. The
+ *   siblings collapsed to two groups for the same reason, not by convention.
+ *
+ *   Note what this costs: the engine renders ONLY group chips when sourceGroups
+ *   is set, so the six per-channel chips are gone from the filter bar. They are
+ *   not gone from the data — SourceBadge still names the real channel on every
+ *   card, and a group toggle writes its member ids into the same `?src=` CSV,
+ *   so every per-channel deep link ever shared still resolves.
  *
  * Accents are transcribed from design/handoff/tokens.css (--char-*), the design
  * system's source of truth — scripts/characters.ts reads the same block when
@@ -130,6 +138,32 @@ export default defineAppConfig({
       { id: 'replaysHub', name: 'Tōkon Replays Hub' },
       { id: 'fightingStationX', name: 'Fighting Station X' },
       { id: 'fgcReplaysHub', name: 'FGC Replays Hub' },
+      // ONE channel (marvelTokonYT), claimed for its event footage only, so the
+      // badge names what the record IS rather than the channel it came from —
+      // the same reason SF6 labels its second KingArena token "King Arena
+      // Events". Index 6, so it shares the warning outline with 2..5; the label
+      // is what disambiguates.
+      { id: 'marvelTokonTournament', name: 'Marvel Tokon Events' },
+    ],
+    // Filter chips consolidate to two groups (engine v0.5.5). Group ids appear
+    // NOWHERE else — not in Replay.source, not in a URL: toggling a group
+    // writes its member ids to the same `?src=` CSV the per-channel links
+    // already used. Membership mirrors scripts/channels.ts, where `eventsOnly`
+    // marks the one channel on the tournament side.
+    sourceGroups: [
+      {
+        id: 'online',
+        name: 'Online',
+        sources: [
+          'highLevelReplays',
+          'proReplays',
+          'hadoukenReplays',
+          'replaysHub',
+          'fightingStationX',
+          'fgcReplaysHub',
+        ],
+      },
+      { id: 'tournament', name: 'Tournament', sources: ['marvelTokonTournament'] },
     ],
     // Era → patch hierarchy. PIPELINE-EMITTED (scripts/emit.ts →
     // data/patchGroups.json) from the same boundary authority that derives every

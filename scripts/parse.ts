@@ -70,8 +70,49 @@ const OTHER_GAME_RE =
 export const NOT_A_MATCH_RE =
   /\bCPU\b|HARDEST\s*AI|MAX\s*DIFFICULTY|#shorts|COMBO\s*(?:EXHIBITION|VIDEO|GUIDE)|\bTRAILER\b|TIER\s*LIST|STORY\s*MODE|WALKTHROUGH|ALL\s*(?:SUPERS|CHARACTERS|WIN)|COMPILATION|\bINTRO\b|BETA\s*TEST|\bREVIEW\b|GAMEPLAY\s*OVERVIEW|CHARACTER\s*GUIDE|\bRANKING\b|\bTUTORIAL\b|MOD\s*SHOWCASE/iu;
 
+/**
+ * The event-brand gate for `eventsOnly` channels (marvelTokonYT).
+ *
+ * DELIBERATELY TIGHT, and the asymmetry is the reason. On an events-only
+ * channel an unrecognised brand drops the record and prints a `not-an-event`
+ * count in report.md — visible, countable, fixed by adding one alternative
+ * here. An over-broad pattern instead publishes an ordinary ranked replay under
+ * the Tournament chip, where nothing looks wrong and nothing is counted. So the
+ * pattern requires an event BRAND and never a bare round word: "Top 8",
+ * "Pools", "Grand Finals" and "Winners Semis" all appear in online-replay
+ * titles across this platform's corpora, and SF6 already paid for reading
+ * /Top \d+/ as a signal (see NOT_A_MATCH_RE above).
+ *
+ * Corpus-derived from marvelTokonYT's 47 uploads (CEO 2026, EVO 2026) plus the
+ * majors a Tōkon channel would plausibly cover next. Not aspirational: every
+ * brand a run drops shows up in the miss table, so the list grows from evidence.
+ */
+const EVENT_RE = new RegExp(
+  [
+    '\\bCEO\\s*\\d{4}\\b',
+    '\\bCEOtaku\\b',
+    '\\bEVO\\b',
+    'evo\\s*japan',
+    'evo\\s*france',
+    'combo\\s*breaker',
+    'frosty\\s*faustings',
+    'east\\s*coast\\s*throwdown',
+    '\\bECT\\b',
+    'the\\s*mix[- ]?up',
+    'kumite\\s*in\\s*tennessee',
+  ].join('|'),
+  'iu',
+);
+
+/** The online-branding marker. A title carrying it is this channel's daily
+ *  replay output even when an event word also appears, so it vetoes the event
+ *  gate rather than tie-breaking against it. Zero of the 47 uploads carry both
+ *  today; the veto exists so the day one does, it lands on the safe side. */
+const ONLINE_BRAND_RE = /high[\s-]*level\s*(?:match|gameplay|replays?)/iu;
+
 type MissReason =
   | 'not-tokon'
+  | 'not-an-event'
   | 'other-game'
   | 'pre-launch'
   | 'live-or-upcoming'
@@ -108,12 +149,49 @@ interface Miss {
 // channel changing its grammar then shows up as a shift in the mix instead of
 // as a silent drop.
 //
-// The ▰ affixes are cut RELATIVE TO THE PARENS rather than by counting ▰:
-// everything up to the last ▰ that precedes the first "(", and everything from
-// the first ▰ that follows the last ")". That is what makes variant (c) — where
-// ▰ appears only as a suffix — work without a special case, and it can never
-// eat into a side segment.
+//   e  "Marvel Tokon ➤ HANDLE (Chars) vs HANDLE (Chars) ✦ High Level Match"
+//      — and the events form, "HANDLE (Chars) vs HANDLE (Chars) ➤ CEO 2026 …".
+//        marvelTokonYT's older grammar: the SAME shape as (a) and (c), drawn
+//        with different glyphs. It switched to ▰ mid-August and its back
+//        catalogue kept ➤/✦.
+//
+// The affixes are cut RELATIVE TO THE PARENS rather than by counting them:
+// everything up to the last affix that precedes the first "(", and everything
+// from the first affix that follows the last ")". That is what makes variant
+// (c) — where the affix appears only as a suffix — work without a special case,
+// and it can never eat into a side segment.
+//
+// WHY THE AFFIX IS A CLASS AND NOT A CHARACTER. Reading only ▰ does not fail
+// loudly on grammar (e); it fails by leaving the affix INSIDE a side segment,
+// where the remainder-is-the-handle rule then swallows it. Measured on
+// marvelTokonYT's 47 uploads before it was added: 5 CEO titles died at the
+// 40-char bad-handle refusal ("Fenritti ➤ CEO 2026 - MARVEL Tokon - Top 192
+// Winners"), and its EVO titles produced handles like "Marvel Tokon ➤ Nerdjosh"
+// — short enough to pass every check and mint a player page. The first failure
+// is loud, the second is not, and the second is the one that matters.
+//
+// Safe to widen: across the 384 committed records every title uses ▰ and NONE
+// contains ➤ or ✦, so no existing core changes. Verified against
+// data/videos.json before the class was introduced.
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** The affix glyphs channels use to fence the sides off from their branding.
+ *  Add to this only with a measurement: a glyph that also appears mid-handle
+ *  would cut a side segment in half. */
+const AFFIX = ['▰', '➤', '✦'];
+const AFFIX_ANY_RE = /[▰➤✦]/u;
+const AFFIX_SPLIT_RE = /[▰➤✦]/gu;
+
+/** The last affix at or before `from`, searching backwards. -1 when there is
+ *  none — the same contract as String#lastIndexOf, which this replaces. */
+const lastAffixBefore = (s: string, from: number): number =>
+  Math.max(...AFFIX.map((a) => s.lastIndexOf(a, from)));
+
+/** The first affix at or after `from`, or -1. */
+const firstAffixAfter = (s: string, from: number): number => {
+  const hits = AFFIX.map((a) => s.indexOf(a, from)).filter((i) => i >= 0);
+  return hits.length ? Math.min(...hits) : -1;
+};
 
 // BOTH bracket families. hadoukenReplays publishes the same tail two ways — 53
 // titles with 【MARVEL TŌKON: Fighting Souls】 and 17 with the ASCII
@@ -158,22 +236,22 @@ function core(title: string): string | null {
   const anchorStart = firstParen >= 0 && firstParen < vs.index ? firstParen : vs.index;
   const anchorEnd = lastParen > vs.index ? lastParen : vs.index + vs[0].length;
 
-  // Cut the ▰ affixes RELATIVE TO THE ANCHOR rather than by counting them:
-  // everything up to the last ▰ preceding the sides, and everything from the
-  // first ▰ following them. That is what makes the suffix-only variant
+  // Cut the affixes RELATIVE TO THE ANCHOR rather than by counting them:
+  // everything up to the last affix preceding the sides, and everything from
+  // the first affix following them. That is what makes the suffix-only variant
   // ("HANDLE (Char) vs HANDLE (Char) ▰ …") work with no special case, and it
   // can never eat into a side segment.
   let start = 0;
   let end = s.length;
-  const lead = s.lastIndexOf('▰', anchorStart);
+  const lead = lastAffixBefore(s, anchorStart);
   if (lead >= 0) start = lead + 1;
-  const trail = s.indexOf('▰', anchorEnd);
+  const trail = firstAffixAfter(s, anchorEnd);
   if (trail >= 0) end = trail;
 
   s = s.slice(start, end).replace(EMOJI_TAIL_RE, '').trim();
-  // A ▰ still inside the core means a mid-title accolade ("▰ Rank 1 NA ▰") we
-  // have not modelled. Refuse rather than guess where the sides begin.
-  return s.includes('▰') ? null : s;
+  // An affix still inside the core means a mid-title accolade ("▰ Rank 1 NA ▰")
+  // we have not modelled. Refuse rather than guess where the sides begin.
+  return AFFIX_ANY_RE.test(s) ? null : s;
 }
 
 function splitSides(coreText: string): [string, string] | null {
@@ -225,7 +303,7 @@ function parallelLists(
   const segments = title
     .normalize('NFC')
     .replace(BRACKET_TAIL_RE, '')
-    .split('▰')
+    .split(AFFIX_SPLIT_RE)
     .map((s) => s.trim())
     .filter(Boolean);
   if (segments.length < 3) return null;
@@ -407,8 +485,35 @@ async function main() {
         continue;
       }
       if (v.title !== title) decomposedOnly += 1;
-      if (v.publishedAt.slice(0, 10) < LAUNCH) {
+      /**
+       * The date floor. LAUNCH for every channel, unless the channel declares
+       * its own — and only marvelTokonYT does, for its EVO 2026 exhibition set.
+       *
+       * PER CHANNEL, NOT GLOBAL, and that is load-bearing rather than tidy.
+       * Measured on the raw dumps: floored globally at PRE_RELEASE this admits
+       * 212 more records — 204 fightingStationX Open Beta ranked matches and
+       * EVO Las Vegas uploads, and 8 hadoukenReplays from a December 2025
+       * closed test. None of that is launch-comparable footage, and none of it
+       * would announce itself as a problem: it parses, renders and counts
+       * exactly like the rest of the archive.
+       */
+      const floor = ch.preReleaseFrom ?? LAUNCH;
+      if (v.publishedAt.slice(0, 10) < floor) {
         misses.push({ id: v.id, channel: ch.id, title, reason: 'pre-launch' });
+        continue;
+      }
+      /**
+       * Events-only intake. A channel that publishes both kinds of footage but
+       * is claimed for one: no event brand in the title, no record.
+       *
+       * Placed AFTER the game marker and the floor so its miss count means what
+       * it says — "this channel published something we don't recognise as an
+       * event" — rather than absorbing every other channel's rejections. The
+       * online-brand veto runs first so a title carrying both signals is never
+       * guessed at in the direction that publishes.
+       */
+      if (ch.eventsOnly && (ONLINE_BRAND_RE.test(title) || !EVENT_RE.test(title))) {
+        misses.push({ id: v.id, channel: ch.id, title, reason: 'not-an-event' });
         continue;
       }
       if (v.liveBroadcastContent && v.liveBroadcastContent !== 'none') {
@@ -835,7 +940,10 @@ async function main() {
     const raw: RawVideoRecord[] = await readJson(`../raw/${ch.id}.json`, []);
     const n = parsedPerChannel.get(ch.id) ?? 0;
     lines.push(
-      `| ${ch.id}${ch.frozen ? ' _(frozen)_' : ''} | ${raw.length} | ${n} | ${raw.length ? ((n / raw.length) * 100).toFixed(1) : '0.0'}% |`,
+      // The events-only marker is not decoration. This channel's share reads
+      // ~17% by design — 28 of its 47 uploads are online replays we decline —
+      // and an unmarked low share is indistinguishable from a parser regression.
+      `| ${ch.id}${ch.frozen ? ' _(frozen)_' : ''}${ch.eventsOnly ? ' _(events only)_' : ''} | ${raw.length} | ${n} | ${raw.length ? ((n / raw.length) * 100).toFixed(1) : '0.0'}% |`,
     );
   }
   lines.push(`| **total** | | **${withOverrides.length}** | |`, '');
@@ -969,6 +1077,24 @@ async function main() {
     lines.push(`| ${reason} | ${n} |`);
   }
   lines.push('');
+
+  // ── the events-only classifier, per channel ───────────────────────────────
+  // A `not-an-event` count is the ONLY place an unrecognised tournament brand
+  // shows up: EVENT_RE is deliberately tight, so a new event the list does not
+  // know is dropped rather than published under the Tournament chip. Watching
+  // this number is how that stays a two-minute fix instead of a silent gap. It
+  // should track the channel's online output (~28 today) and no higher.
+  for (const ch of CHANNELS.filter((c) => c.eventsOnly)) {
+    const dropped = misses.filter((m) => m.channel === ch.id && m.reason === 'not-an-event');
+    lines.push(
+      `- \`${ch.id}\` events-only gate: **${dropped.length}** upload(s) carried no known event brand.`,
+    );
+    // Name the most recent few. A brand-new event reads as an unfamiliar title
+    // here long before it reads as a missing record anywhere else.
+    for (const m of dropped.slice(0, 5)) lines.push(`  - ${m.title.slice(0, 96)}`);
+    if (dropped.length > 5) lines.push(`  - …and ${dropped.length - 5} more`);
+    lines.push('');
+  }
 
   if (residues.size) {
     lines.push('## Unmatched text in character slots', '');

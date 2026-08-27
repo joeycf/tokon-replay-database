@@ -9,13 +9,13 @@ Fourth game on the platform, and the first at **4v4**.
 
 ## The genericity knobs, deliberately
 
-| knob                              | value                       | why                                                                                                                                                                                                                      |
-| --------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `charactersPerSide`               | **4**                       | The platform's first 4v4 tag game, and the reason engine v0.7.0 exists — the field was typed `1 \| 2 \| 3`. It describes the FORMAT and drives UI affordances; it is **not** a length cap.                               |
-| `filters.coOccurrence`            | **false**                   | At 4 per side a team yields C(4,2) = 6 pairs against a duo's 1 — combinatorially a different feature, not a bigger one. `pairingUsage` is not emitted, and every engine duo panel self-hides on an empty pair set.       |
-| `filters.rank`                    | **unset**                   | The game has a ranked mode, but no source states a ladder tier. What titles carry — `(#2 Ranked Danger)` — is a per-character leaderboard POSITION, which the parser strips. Turning the facet on would render it empty. |
-| `terms` / `characterRouteSegment` | fighter / team / `fighters` | The design spec's nav reads **Fighters**, its chip reads `fighter: storm`, its stats heading reads **Fighter usage**, and a side here is a **team**.                                                                     |
-| `sourceGroups`                    | **unset**                   | All five channels are online replay re-uploaders. One "Online" group would collapse five chips into one that toggles everything. The Online/Tournament split arrives when a tournament channel does.                     |
+| knob                              | value                       | why                                                                                                                                                                                                                                           |
+| --------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `charactersPerSide`               | **4**                       | The platform's first 4v4 tag game, and the reason engine v0.7.0 exists — the field was typed `1 \| 2 \| 3`. It describes the FORMAT and drives UI affordances; it is **not** a length cap.                                                    |
+| `filters.coOccurrence`            | **false**                   | At 4 per side a team yields C(4,2) = 6 pairs against a duo's 1 — combinatorially a different feature, not a bigger one. `pairingUsage` is not emitted, and every engine duo panel self-hides on an empty pair set.                            |
+| `filters.rank`                    | **unset**                   | The game has a ranked mode, but no source states a ladder tier. What titles carry — `(#2 Ranked Danger)` — is a per-character leaderboard POSITION, which the parser strips. Turning the facet on would render it empty.                      |
+| `terms` / `characterRouteSegment` | fighter / team / `fighters` | The design spec's nav reads **Fighters**, its chip reads `fighter: storm`, its stats heading reads **Fighter usage**, and a side here is a **team**.                                                                                          |
+| `sourceGroups`                    | **Online / Tournament**     | Unset until `marvelTokonYT` arrived: a split needs two kinds of footage to be a split, and six online re-uploaders are one kind. Group chips replace the per-channel ones; the badge still names the channel and `?src=` links are unchanged. |
 
 ## The stat unit — side appearances
 
@@ -136,7 +136,7 @@ vendor that shipped twice in its first five days.
 
 | command                     | what it does                                                                |
 | --------------------------- | --------------------------------------------------------------------------- |
-| `npm run data:fetch`        | every upload from the five channels → `raw/`, plus a recon report           |
+| `npm run data:fetch`        | every upload from the seven channels → `raw/`, plus a recon report          |
 | `npm run data:parse`        | gate, parse, bench, merge, emit — the daily path                            |
 | `npm run data:build`        | fetch + parse                                                               |
 | `npm run data:emit`         | re-emit the engine artifacts from the substrate                             |

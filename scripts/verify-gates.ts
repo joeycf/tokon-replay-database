@@ -27,8 +27,8 @@ import { alignBench, readBench } from './bench';
 import { buildBenchList } from '../server/utils/portraitWork';
 import { NOT_A_MATCH_RE } from './parse';
 import { emitGeneric } from './emit';
-import { buildPatchGroups, validatePatches } from './patches';
-import type { MatchVideo, PlayerRecord } from '../types/index';
+import { SEASONS, buildPatchGroups, validatePatches, validateSeasons } from './patches';
+import type { MatchVideo, PlayerRecord, SeasonBoundary } from '../types/index';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -574,7 +574,12 @@ try {
   // ── 3. the patch table ──────────────────────────────────────────────────────
   console.log('\n[3] patch table validators');
   {
+    // Mirrors the committed table's SHAPE, pre-release row included. Without
+    // that row every case below would trip the post-loop "S0 has no opening
+    // patch" check instead of the defect it injects — every control still
+    // throwing, none of them still testing what its label says.
     const good = [
+      { version: '2026-06-26', start: '2026-06-26', announcedOn: 'event' as const },
       { version: '2026-08-06', start: '2026-08-06', announcedOn: 'launch' as const },
       { version: '2026-08-10', start: '2026-08-10', announcedOn: 'steam' as const },
     ];
@@ -588,16 +593,40 @@ try {
       }
     };
     bad((p) => ((p[0]!.version = '1.00'), p), 'a semver token is rejected (the vendor uses dates)');
-    bad((p) => ((p[1]!.version = '2026-08-11'), p), 'token !== start is rejected');
+    bad((p) => ((p[2]!.version = '2026-08-11'), p), 'token !== start is rejected');
     bad(
-      (p) => ((p[1]!.start = '2030-01-01'), (p[1]!.version = '2030-01-01'), p),
+      (p) => ((p[2]!.start = '2030-01-01'), (p[2]!.version = '2030-01-01'), p),
       'a future date is rejected',
     );
+    // The floor, tested with the date it actually exists to keep out: the
+    // December 2025 closed-test footage sitting in hadoukenReplays' dump. The
+    // earlier version of this control injected 2026-08-05, which stopped
+    // testing the floor the moment PRE_RELEASE moved below it — it kept passing
+    // on the strictly-after rule instead, with the same green tick.
     bad(
-      (p) => ((p[1]!.start = '2026-08-05'), (p[1]!.version = '2026-08-05'), p),
-      'a pre-launch date is rejected',
+      (p) => ((p[0]!.start = '2025-12-07'), (p[0]!.version = '2025-12-07'), p),
+      'a date below the pre-release floor is rejected',
     );
-    bad((p) => [p[1]!], 'an era with no opening patch is rejected');
+    bad((p) => [p[1]!, p[2]!], 'an era with no opening patch is rejected');
+    bad(
+      (p) => ((p[0]!.announcedOn = 'rumour' as never), p),
+      'an announcedOn outside the union is rejected',
+    );
+
+    // The season table's own floor, which validatePatches never reaches.
+    const badSeasons = (mut: (x: SeasonBoundary[]) => SeasonBoundary[], label: string) => {
+      try {
+        validateSeasons(mut(structuredClone(SEASONS)));
+        check(label, false, 'DID NOT THROW');
+      } catch (e) {
+        check(label, true, (e as Error).message.slice(0, 62));
+      }
+    };
+    badSeasons(
+      (x) => ((x[0]!.start = '2025-01-01'), x),
+      'an era starting below the pre-release floor is rejected',
+    );
+    badSeasons((x) => [x[1]!, x[0]!], 'eras out of order are rejected');
 
     const ids = new Set<string>();
     let dupe = false;
@@ -733,6 +762,154 @@ try {
         `${tailPlayers.length} players`,
       );
       await writeFile(hadoPath, JSON.stringify(hadoOriginal, null, 1));
+
+      /**
+       * 4e — the marvelTokonYT intake: three gates that only exist together.
+       *
+       * Controlled as one fixture because the failures are not independent. The
+       * events-only gate decides WHETHER a record exists; the affix cut decides
+       * whether its handles are people or branding; the per-channel floor
+       * decides whether pre-launch footage may exist at all. Break any one and
+       * the other two still report green — an online replay published under the
+       * Tournament chip, a player page named "Marvel Tokon ➤ Nerdjosh", or ten
+       * EVO matches silently absent — and none of the three shows up in a count.
+       */
+      const mtPath = join(ROOT, 'raw', 'marvelTokonYT.json');
+      const mtOriginal = JSON.parse(await readFile(mtPath, 'utf8')) as Record<string, unknown>[];
+      const mtFixture = (id: string, title: string, publishedAt: string) => ({
+        id,
+        channel: 'marvelTokonYT',
+        title,
+        description: 'control fixture',
+        publishedAt,
+        durationSec: 600,
+        liveBroadcastContent: 'none',
+      });
+      await writeFile(
+        mtPath,
+        JSON.stringify(
+          [
+            // the ➤ affix, events form — the shape that died as bad-handle
+            mtFixture(
+              'CTLMT01',
+              'CTLALPHA (Magik) vs CTLBETA (Storm) ➤ CEO 2026 - MARVEL Tokon - Top 192 Winners',
+              '2026-08-16T00:00:00Z',
+            ),
+            // the ➤ … ✦ online form — must be DROPPED, not published
+            mtFixture(
+              'CTLMT02',
+              'MARVEL Tokon ➤ CTLGAMMA (Blade) vs CTLDELTA (Hulk) ✦ High Level Match',
+              '2026-08-16T00:00:00Z',
+            ),
+            // pre-launch EVO footage — admitted only because THIS channel
+            // declares preReleaseFrom
+            mtFixture(
+              'CTLMT03',
+              'Marvel Tokon ➤ CTLEPSILON (Loki) VS CTLZETA (Carnage) ➤ EVO 2026 Exhibitions',
+              '2026-06-27T00:00:00Z',
+            ),
+            // an event brand nobody registered — must drop, and be COUNTABLE
+            mtFixture(
+              'CTLMT04',
+              'CTLETA (Danger) vs CTLTHETA (Magneto) ➤ Tokon Invitational 2026 - Grand Final',
+              '2026-08-16T00:00:00Z',
+            ),
+            ...mtOriginal,
+          ],
+          null,
+          1,
+        ),
+      );
+      // …and the floor stays HARD on a channel that declares no preReleaseFrom.
+      const preRawPath = join(ROOT, 'raw', 'replaysHub.json');
+      const preOriginal = JSON.parse(await readFile(preRawPath, 'utf8')) as Record<
+        string,
+        unknown
+      >[];
+      await writeFile(
+        preRawPath,
+        JSON.stringify(
+          [
+            {
+              id: 'CTLPRE01',
+              channel: 'replaysHub',
+              title: 'MARVEL TOKON ▰ CTLIOTA (Magik) vs CTLKAPPA (Storm) ▰ High Level Gameplay',
+              description: 'control fixture',
+              publishedAt: '2026-06-27T00:00:00Z',
+              durationSec: 600,
+              liveBroadcastContent: 'none',
+            },
+            ...preOriginal,
+          ],
+          null,
+          1,
+        ),
+      );
+      parse();
+      const mtVideos = JSON.parse(
+        await readFile(join(ROOT, 'data', 'videos.json'), 'utf8'),
+      ) as MatchVideo[];
+      const mtQueue = JSON.parse(
+        await readFile(join(ROOT, 'data', 'review-queue.json'), 'utf8'),
+      ) as { id: string }[];
+      const mtOf = (id: string) => mtVideos.find((v) => v.id === id);
+      const mtHandles = (id: string) =>
+        mtOf(id)
+          ?.sides.map((sd) => sd.handle)
+          .join(' | ') ?? '(record absent)';
+
+      check(
+        'the ➤ affix is cut, so an event suffix never reaches a handle',
+        mtHandles('CTLMT01') === 'CTLALPHA | CTLBETA',
+        `"${mtHandles('CTLMT01')}"`,
+      );
+      check(
+        'and it publishes under the TOURNAMENT token, not the intake key',
+        mtOf('CTLMT01')?.channel === 'marvelTokonTournament' &&
+          mtOf('CTLMT01')?.intake === 'marvelTokonYT',
+        `${mtOf('CTLMT01')?.channel} / ${mtOf('CTLMT01')?.intake}`,
+      );
+      check(
+        'an online-branded upload on an events-only channel is DROPPED',
+        !mtOf('CTLMT02'),
+        `record ${mtOf('CTLMT02') ? 'present' : 'absent'}`,
+      );
+      check(
+        'an unregistered event brand is dropped, never published as Tournament',
+        !mtOf('CTLMT04'),
+        `record ${mtOf('CTLMT04') ? 'present' : 'absent'}`,
+      );
+      // The floor and the era in one assertion, because passing the floor is
+      // worthless if the record then has no era to file under: emit throws on a
+      // patch token no group accounts for, so a floor without a matching
+      // boundary fails the whole run rather than shipping an undated record.
+      check(
+        'pre-launch event footage passes the channel floor and files under S0',
+        mtOf('CTLMT03')?.season === 0,
+        `season ${mtOf('CTLMT03')?.season ?? '(record absent)'}`,
+      );
+      const mtGroups = JSON.parse(
+        await readFile(join(ROOT, 'data', 'patchGroups.json'), 'utf8'),
+      ) as { id: string; children?: { id: string }[] }[];
+      check(
+        'and the pre-release facet parent appears once the era is non-empty',
+        mtGroups.some((g) => g.id === 'S0' && g.children?.some((c) => c.id === '2026-06-26')),
+        mtGroups.map((g) => g.id).join(','),
+      );
+      check(
+        'the floor stays HARD on a channel with no preReleaseFrom',
+        !mtVideos.some((v) => v.id === 'CTLPRE01') && !mtQueue.some((q) => q.id === 'CTLPRE01'),
+        'CTLPRE01 absent from videos and queue',
+      );
+      check(
+        'no player handle anywhere carries an affix glyph',
+        !(
+          JSON.parse(await readFile(join(ROOT, 'data', 'players.json'), 'utf8')) as PlayerRecord[]
+        ).some((pl) => /[▰➤✦]/u.test(pl.handle)),
+        'clean',
+      );
+      await writeFile(mtPath, JSON.stringify(mtOriginal, null, 1));
+      await writeFile(preRawPath, JSON.stringify(preOriginal, null, 1));
 
       // 4b — the collapse guard. Cut a channel to 20% and the run must refuse to
       // write, BEFORE touching anything.

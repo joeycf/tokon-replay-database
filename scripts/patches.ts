@@ -47,16 +47,50 @@ import type { PatchBoundary, PatchWindow, SeasonBoundary } from '../types/index'
  *  still a launch-build match. */
 export const LAUNCH = '2026-08-06';
 
-/** Balance eras. Uploader descriptions on one channel write "(Season 1)", which
- *  is a weak corroboration of the name but never the authority — the date is.
- *  Season 2 does not exist and is not pre-declared: a childless future era
- *  renders as a chip that filters to nothing. */
+/**
+ * The PRE-RELEASE floor — the earliest date any record may carry.
+ *
+ * Set to the first EVO 2026 exhibition upload and nothing earlier, because this
+ * date is a gate, not a milestone. Raising it is safe; lowering it is not.
+ * Measured on the raw dumps at the time it was chosen: 2026-06-26 admits the 10
+ * EVO exhibition matches and nothing else, while a floor anywhere in 2025 opens
+ * 8 hadoukenReplays uploads from a December 2025 closed-test build.
+ *
+ * NOTHING USES THIS AS A GLOBAL GATE. parse.ts still floors every channel at
+ * LAUNCH unless that channel sets `preReleaseFrom` (see types/index.ts) — a
+ * global move would additionally admit 204 fightingStationX Open Beta and EVO
+ * Las Vegas uploads. This constant only bounds what such a channel may ask for.
+ */
+export const PRE_RELEASE = '2026-06-26';
+
+/**
+ * Balance eras. Uploader descriptions on one channel write "(Season 1)", which
+ * is a weak corroboration of the name but never the authority — the date is.
+ * Season 2 does not exist and is not pre-declared: a childless future era
+ * renders as a chip that filters to nothing.
+ *
+ * SEASON 0 IS NOT A BALANCE ERA and is labelled so it cannot be read as one.
+ * The vendor shipped no pre-release build to the public; what exists is footage
+ * of builds playable at events. It carries `label: 'Pre-release'` because the
+ * facet's default parent label is `Season ${n}`, and a "Season 0" chip would
+ * claim a season the game never had.
+ */
 export const SEASONS: SeasonBoundary[] = [
+  {
+    season: 0,
+    start: PRE_RELEASE,
+    end: LAUNCH,
+    confirmed: true,
+    label: 'Pre-release',
+    note: 'Event builds, before launch',
+  },
   { season: 1, start: LAUNCH, end: null, confirmed: true, note: 'Launch' },
 ];
 
 /**
- * Released patches, oldest first. Every row is a vendor publication.
+ * Released patches, oldest first. Every row but the first is a vendor
+ * publication; the pre-release row says in its own comment why it is not, and
+ * `announcedOn` is what keeps the two kinds distinguishable at a glance.
  *
  * Cadence warning for whoever reads this next: TWO patches shipped in the first
  * five days. scripts/expiries.ts carries a `stale-patch-table` check that goes
@@ -66,6 +100,26 @@ export const SEASONS: SeasonBoundary[] = [
  * every count assertion while being wrong.
  */
 export const PATCHES: PatchBoundary[] = [
+  {
+    /**
+     * NOT A VENDOR PUBLICATION, and the only row here that isn't.
+     *
+     * Arc System Works published nothing for the build shown at the EVO 2026
+     * exhibitions — no post, no notes, no version. What is documented is that
+     * the footage exists and predates every shipped build, so the row records
+     * exactly that and no more: `announcedOn: 'event'` says where it was seen
+     * rather than pretending it was announced. Every era must open on a real
+     * patch (validatePatches, below), so S0 needs this row to exist at all.
+     *
+     * The doctrine it does NOT break: no version was invented to fill a
+     * sequence gap. The token is still the date, derived the same way as every
+     * other row.
+     */
+    version: PRE_RELEASE,
+    start: PRE_RELEASE,
+    announcedOn: 'event',
+    note: 'EVO 2026 exhibition build',
+  },
   {
     version: '2026-08-06',
     start: '2026-08-06',
@@ -89,7 +143,9 @@ export function validateSeasons(seasons: SeasonBoundary[] = SEASONS): void {
   if (seasons.length === 0) throw new Error('SEASONS is empty');
   seasons.forEach((s, i) => {
     if (!ISO_DAY.test(s.start)) throw new Error(`S${s.season}: start "${s.start}" is not ISO`);
-    if (s.start < LAUNCH) throw new Error(`S${s.season}: starts before launch (${LAUNCH})`);
+    if (s.start < PRE_RELEASE) {
+      throw new Error(`S${s.season}: starts before the pre-release floor (${PRE_RELEASE})`);
+    }
     const prev = seasons[i - 1];
     if (prev && s.start <= prev.start) {
       throw new Error(`S${s.season}: starts on/before S${prev.season}`);
@@ -126,7 +182,9 @@ export function validatePatches(
     if (seen.has(p.version)) throw new Error(`patch "${p.version}": duplicate token`);
     seen.add(p.version);
 
-    if (p.start < LAUNCH) throw new Error(`patch "${p.version}": predates launch (${LAUNCH})`);
+    if (p.start < PRE_RELEASE) {
+      throw new Error(`patch "${p.version}": predates the pre-release floor (${PRE_RELEASE})`);
+    }
     // A typo'd year mints an empty future window that filters to nothing and
     // asserts perfectly clean — the exact silent failure this table exists to
     // avoid.
@@ -136,12 +194,12 @@ export function validatePatches(
     if (prev && p.start <= prev.start) {
       throw new Error(`patch "${p.version}": not strictly after "${prev.version}"`);
     }
-    if (seasonForDate(p.start, seasons) === 0) {
-      throw new Error(`patch "${p.version}": start falls in no era`);
-    }
+    // seasonForDate throws on a date in no era, and season 0 is now a real era
+    // rather than the old no-match sentinel — so the check is the call itself.
+    seasonForDate(p.start, seasons);
     // 'announcedOn' is required by the type, but a hand edit can still write a
     // value outside the union at the JSON boundary; assert the intent.
-    if (!['steam', 'x', 'discord', 'launch'].includes(p.announcedOn)) {
+    if (!['steam', 'x', 'discord', 'launch', 'event'].includes(p.announcedOn)) {
       throw new Error(
         `patch "${p.version}": announcedOn "${p.announcedOn}" is not a known channel`,
       );
@@ -161,9 +219,21 @@ export function validatePatches(
   }
 }
 
+/**
+ * The era a date falls in.
+ *
+ * THROWS on a date in no era. It used to return 0 as a no-match sentinel, which
+ * was safe only while no season 0 existed — the moment the pre-release era
+ * became real, that fallback would have quietly filed every out-of-range date
+ * (a typo'd year, a channel reaching past its floor) as pre-release footage,
+ * rendering and asserting perfectly clean the whole way down. Callers reach
+ * this with a date already past a floor gate, so a throw here means a gate is
+ * wrong, and that should stop the run.
+ */
 export function seasonForDate(iso: string, seasons: SeasonBoundary[] = SEASONS): number {
   const s = seasons.find((x) => iso >= x.start && (x.end === null || iso < x.end));
-  return s ? s.season : 0;
+  if (!s) throw new Error(`seasonForDate: "${iso}" falls in no era (floor is ${PRE_RELEASE})`);
+  return s.season;
 }
 
 export const seasonToken = (season: number): string => `S${season}`;
@@ -191,8 +261,10 @@ export function patchForDate(iso: string, windows: PatchWindow[] = patchWindows(
 
 /** The GameConfig.patchGroups payload → data/patchGroups.json.
  *
- *  Parents carry a self-describing "Season N" label because the engine's
- *  default facet heading is "Patch", under which a bare "S1" chip reads wrong.
+ *  Parents carry a self-describing label because the engine's default facet
+ *  heading is "Patch", under which a bare "S1" chip reads wrong. The default is
+ *  "Season N"; a boundary may override it, and S0 does — "Season 0" would name
+ *  a balance era the vendor never shipped (see SEASONS).
  *  Children carry no label: the token IS the display string. */
 export function buildPatchGroups(
   seasons: SeasonBoundary[] = SEASONS,
@@ -205,7 +277,7 @@ export function buildPatchGroups(
       .map((w) => ({ id: w.version, ...(w.note ? { note: w.note } : {}) }));
     return {
       id: seasonToken(s.season),
-      label: `Season ${s.season}`,
+      label: s.label ?? `Season ${s.season}`,
       ...(s.note ? { note: s.note } : {}),
       ...(children.length ? { children } : {}),
     };
