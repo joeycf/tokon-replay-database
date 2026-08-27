@@ -1,36 +1,36 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-27T12:09:05.738Z_
+_Generated 2026-08-27T18:26:09.315Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 93 | 93 | 100.0% |
+| highLevelReplays | 98 | 98 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 766 | 70 | 9.1% |
-| replaysHub | 125 | 121 | 96.8% |
-| fightingStationX | 2683 | 92 | 3.4% |
-| fgcReplaysHub | 2541 | 14 | 0.6% |
-| marvelTokonYT _(events only)_ | 47 | 18 | 38.3% |
-| **total** | | **421** | |
+| hadoukenReplays | 767 | 71 | 9.3% |
+| replaysHub | 128 | 124 | 96.9% |
+| fightingStationX | 2688 | 96 | 3.6% |
+| fgcReplaysHub | 2546 | 17 | 0.7% |
+| marvelTokonYT _(events only)_ | 39 | 11 | 28.2% |
+| **total** | | **430** | |
 
 ## Character provenance
 
-How every one of the 842 sides got its characters.
+How every one of the 860 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 42 | 5.0% |
-| description | 225 | 26.7% |
-| footage | 32 | 3.8% |
-| human | 519 | 61.6% |
-| review | 24 | 2.9% |
+| title | 44 | 5.1% |
+| description | 241 | 28.0% |
+| footage | 32 | 3.7% |
+| human | 519 | 60.3% |
+| review | 24 | 2.8% |
 
-- complete (4/4): **800/842** (95.0%)
+- complete (4/4): **816/860** (94.9%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 216 · character-subset 21 · ambiguous 3
-- title slot order: handle-first 670 · chars-first 68 · parallel-lists 80
+- bench alignment: handle 227 · character-subset 21 · ambiguous 3
+- title slot order: handle-first 687 · chars-first 69 · parallel-lists 80
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -38,30 +38,30 @@ How every one of the 842 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 42 | 5.0% |
-| 4 | 793 | 94.2% |
+| 1 | 44 | 5.1% |
+| 4 | 809 | 94.1% |
 | 5 _(mid-set change)_ | 6 | 0.7% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **42 side(s) awaiting a drain** across 21 record(s) — oldest published **12 day(s)** ago
+- **44 side(s) awaiting a drain** across 22 record(s) — oldest published **11 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **21**
+- bench queue (published, incomplete): **22**
 
 ## Misses
 
 | reason | count |
 | --- | ---: |
-| other-game | 3948 |
+| other-game | 3950 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 107 |
+| not-a-match | 108 |
 | not-an-event | 28 |
 | char-unresolved | 14 |
 | short-duration | 6 |
-| no-vs-title | 4 |
+| no-vs-title | 3 |
 
 - `marvelTokonYT` events-only gate: **28** upload(s) carried no known event brand.
   - MARVEL Tokon ▰ Naire (Spider-Man) vs Roda (Wolverine) ▰ High Level Match
