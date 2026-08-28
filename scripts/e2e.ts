@@ -627,6 +627,15 @@ async function main(): Promise<void> {
   );
   expect(portraitOk, 'no character image 404s on the fighter page');
 
+  // ComboForge cross-link (engine v0.11.0). Every fighter id maps 1:1 to theirs,
+  // but the GAME id does not — ours is 'tokon', theirs is 'marveltokon'.
+  const cfHref = await page.locator('[data-testid="comboforge-link"]').first().getAttribute('href');
+  expect(
+    cfHref ===
+      `https://comboforge.gg/browse?gameId=marveltokon&characterId=marveltokon-${someChar.id}`,
+    `ComboForge band deep-links the fighter (${cfHref})`,
+  );
+
   const somePlayer = players[0];
   if (somePlayer) {
     await gotoIdle(page, server.at(`/players/${somePlayer.id}`));

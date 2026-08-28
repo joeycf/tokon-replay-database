@@ -186,5 +186,9 @@ export default defineAppConfig({
       backgroundColor: '#0a0e17',
     },
     ogImage: '/og-default.png',
+    // ComboForge cross-link on character pages (engine v0.11.0). Their game id
+    // for this one is 'marveltokon', not ours; every character id derives, so
+    // no map is needed. Gated with the engine's `npm run verify:comboforge`.
+    comboforge: { gameId: 'marveltokon' },
   } satisfies GameConfig,
 });
