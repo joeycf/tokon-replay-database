@@ -7,6 +7,56 @@
       "source": "/",
       "destination": "/tokon",
       "permanent": false
+    },
+    {
+      "source": "/tokon/players/balder-berg",
+      "destination": "/tokon/players/balderberg",
+      "permanent": true
+    },
+    {
+      "source": "/tokon/players/blue-sky-guy",
+      "destination": "/tokon/players/blueskyguy",
+      "permanent": true
+    },
+    {
+      "source": "/tokon/players/boy-man-guy",
+      "destination": "/tokon/players/boymanguy",
+      "permanent": true
+    },
+    {
+      "source": "/tokon/players/hulkmash",
+      "destination": "/tokon/players/hulk-mash",
+      "permanent": true
+    },
+    {
+      "source": "/tokon/players/jaazz-rap",
+      "destination": "/tokon/players/jaazzrap",
+      "permanent": true
+    },
+    {
+      "source": "/tokon/players/mr-marben",
+      "destination": "/tokon/players/mrmarben",
+      "permanent": true
+    },
+    {
+      "source": "/tokon/players/nychris-g",
+      "destination": "/tokon/players/nychrisg",
+      "permanent": true
+    },
+    {
+      "source": "/tokon/players/sonic-fox",
+      "destination": "/tokon/players/sonicfox",
+      "permanent": true
+    },
+    {
+      "source": "/tokon/players/to-kon-player",
+      "destination": "/tokon/players/tokon-player",
+      "permanent": true
+    },
+    {
+      "source": "/tokon/players/vividaspiration",
+      "destination": "/tokon/players/vivid-aspiration",
+      "permanent": true
     }
   ]
 }

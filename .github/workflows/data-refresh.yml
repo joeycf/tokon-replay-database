@@ -53,7 +53,7 @@ jobs:
           # review-queue.json and bench-queue.json are parse-regenerated derived
           # state — both are content-only with no timestamp, so a quiet day
           # leaves them byte-identical too.
-          git add data/videos.json data/replays.json data/stats.json data/players.json data/patchGroups.json data/patchBoundaries.json data/summary.json data/seasonBoundaries.json data/review-queue.json data/bench-queue.json data/report.md
+          git add data/videos.json data/replays.json data/stats.json data/players.json data/patchGroups.json data/patchBoundaries.json data/summary.json data/seasonBoundaries.json data/review-queue.json data/bench-queue.json data/player-redirects.json data/report.md
           # report.md's "_Generated <timestamp>_" line changes every run; a diff
           # that is ONLY that line is not a data change — drop it so a no-change
           # day produces no commit (and no deploy). report.md still ships

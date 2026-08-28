@@ -22,12 +22,13 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
-import { buildAliasMatcher, loadCharacters, stripLeaderboard } from './roster';
+import { buildAliasMatcher, idKey, loadCharacters, playerId, stripLeaderboard } from './roster';
 import { alignBench, readBench } from './bench';
 import { buildBenchList } from '../server/utils/portraitWork';
 import { NOT_A_MATCH_RE } from './parse';
 import { emitGeneric } from './emit';
 import { SEASONS, buildPatchGroups, validatePatches, validateSeasons } from './patches';
+import { resolvePlayers } from './players';
 import type { MatchVideo, PlayerRecord, SeasonBoundary } from '../types/index';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -569,6 +570,125 @@ try {
       oversizeOk = false;
     }
     check('a 5-character side is ACCEPTED (>4 is legal, only 0 fails)', oversizeOk, undefined);
+  }
+
+  // ── 2b. player identity ─────────────────────────────────────────────────────
+  console.log('\n[2b] player identity — one player, one page');
+  {
+    const players: PlayerRecord[] = [
+      { id: 'a', handle: 'A' },
+      { id: 'b', handle: 'B' },
+    ];
+    const sources = ['proReplays'];
+    const prov = {
+      tier: 'title' as const,
+      tiers: ['title' as const],
+      fromTitle: ['magik'],
+      complete: false,
+    };
+    const base = (): MatchVideo =>
+      JSON.parse(
+        JSON.stringify({
+          id: 'CTLID1',
+          channel: 'proReplays',
+          intake: 'proReplays',
+          title: 'control',
+          publishedAt: '2026-08-11T00:00:00Z',
+          durationSec: 600,
+          season: 1,
+          sides: [
+            { player: 'a', handle: 'A', characters: ['magik'], provenance: prov },
+            { player: 'b', handle: 'B', characters: ['storm'], provenance: prov },
+          ],
+        }),
+      ) as MatchVideo;
+
+    // The whole point: two spellings, one page. If this ever stops merging, the
+    // symptom is two profiles that each render perfectly.
+    const split = [base(), base()];
+    split[0]!.sides[0].handle = 'SONIC FOX';
+    split[1]!.sides[0].handle = 'SonicFox';
+    split[1]!.id = 'CTLID2';
+    const rep = resolvePlayers(split);
+    check(
+      'two spellings of one handle resolve to ONE id',
+      split[0]!.sides[0].player === split[1]!.sides[0].player,
+      `${split[0]!.sides[0].player} / ${split[1]!.sides[0].player}`,
+    );
+    check(
+      'and the mixed-case spelling wins the display handle',
+      split[0]!.sides[0].handle === 'SonicFox',
+      split[0]!.sides[0].handle,
+    );
+    check(
+      'the retired id is reported, so a redirect can be emitted for it',
+      rep.merged.get('sonicfox')?.includes('sonic-fox') === true,
+      JSON.stringify([...rep.merged]),
+    );
+
+    // Frequency must not beat casing: 3 shouted spellings against 1 written one.
+    const loud = [base(), base(), base(), base()];
+    loud.forEach((r, i) => {
+      r.id = `CTLLOUD${i}`;
+      r.sides[0].handle = i === 3 ? 'MrMarben' : 'MR MARBEN';
+    });
+    resolvePlayers(loud);
+    check(
+      'one mixed-case spelling outranks three ALL-CAPS ones',
+      loud[0]!.sides[0].handle === 'MrMarben',
+      loud[0]!.sides[0].handle,
+    );
+
+    // The tiebreak has to be deterministic or a live URL depends on upload order.
+    const tie = [base(), base()];
+    tie[1]!.id = 'CTLTIE2';
+    tie[0]!.sides[0].handle = 'BALDER BERG';
+    tie[1]!.sides[0].handle = 'BALDERBERG';
+    const reversed = [tie[1]!, tie[0]!].map((r) => JSON.parse(JSON.stringify(r)) as MatchVideo);
+    resolvePlayers(tie);
+    resolvePlayers(reversed);
+    check(
+      'an ALL-CAPS tie resolves the same way regardless of record order',
+      tie[0]!.sides[0].player === reversed[0]!.sides[0].player,
+      `${tie[0]!.sides[0].player} vs ${reversed[0]!.sides[0].player}`,
+    );
+
+    // A curated alias reaches across a letter difference, which no normalisation can.
+    const typo = [base()];
+    typo[0]!.sides[0].handle = 'Crome Alchemist';
+    resolvePlayers(typo);
+    check(
+      'HANDLE_ALIASES fixes a spelling normalisation cannot reach',
+      typo[0]!.sides[0].player === 'chrome-alchemist',
+      typo[0]!.sides[0].player,
+    );
+
+    // Non-Latin handles: a real id, and DISTINCT ids for distinct people.
+    check(
+      'an all-CJK handle gets a usable id rather than an empty one',
+      playerId('シルクちゃん').length > 0,
+      JSON.stringify(playerId('シルクちゃん')),
+    );
+    check(
+      'and two different non-Latin handles do not share a key',
+      idKey('シルクちゃん') !== idKey('ソニック'),
+      `${idKey('シルクちゃん')} vs ${idKey('ソニック')}`,
+    );
+    check(
+      'a punctuation-only handle still has no id, so parse can refuse it',
+      playerId('!!!') === '',
+      JSON.stringify(playerId('!!!')),
+    );
+
+    await throws('emit rejects an empty player id', async () => {
+      const r = base();
+      r.sides[0].player = '';
+      await emitGeneric([r], characters, [{ id: '', handle: 'x' }, ...players], sources);
+    });
+    await throws('emit rejects a duplicate player id', async () => {
+      const r = base();
+      await emitGeneric([r], characters, [...players, players[0]!], sources);
+    });
   }
 
   // ── 3. the patch table ──────────────────────────────────────────────────────

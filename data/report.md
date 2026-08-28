@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-28T01:12:59.218Z_
+_Generated 2026-08-28T02:11:24.598Z_
 
 ## Coverage
 
@@ -50,6 +50,25 @@ How every one of the 870 sides got its characters.
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
 - bench queue (published, incomplete): **27**
 
+## Player identity
+
+10 identity(s) resolved from more than one spelling. The
+retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
+after changing scripts/players.ts, or the old URLs 404.
+
+| canonical | absorbed |
+| --- | --- |
+| `balderberg` | `balder-berg` |
+| `blueskyguy` | `blue-sky-guy` |
+| `boymanguy` | `boy-man-guy` |
+| `hulk-mash` | `hulkmash` |
+| `jaazzrap` | `jaazz-rap` |
+| `mrmarben` | `mr-marben` |
+| `nychrisg` | `nychris-g` |
+| `sonicfox` | `sonic-fox` |
+| `tokon-player` | `to-kon-player` |
+| `vivid-aspiration` | `vividaspiration` |
+
 ## Misses
 
 | reason | count |
@@ -93,10 +112,9 @@ garbled game name gets a human verdict instead of a quiet player page.
 | handle | records | example |
 | --- | ---: | --- |
 | `TOKON` | 3 | 1DTxk-pPeAU |
-| `TOKON PLAYER` | 2 | bNSKCKQXuSo |
+| `TOKON PLAYER` | 3 | bNSKCKQXuSo |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
 | `TOKON DEEZ` | 1 | R8ixtuzZlY4 |
-| `TŌKON PLAYER` | 1 | E3Oy9g9b0T0 |
 | `marvel chokon` | 1 | 8Y6fDQNgFPk |
 | `TOKON J` | 1 | 5yZnENL-6sM |
 | `Marvel Games` | 1 | KbA1UgtZFO0 |

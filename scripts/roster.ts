@@ -363,10 +363,69 @@ export function buildPlateRoster(characters: CharacterRecord[]): PlateRoster {
   }
 }
 
-/** Slug a handle into a stable player id. */
-export const playerId = (handle: string): string =>
-  handle
-    .normalize('NFKD')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
+/**
+ * IDENTITY, not the id: the handle reduced to its alphanumerics.
+ *
+ * This is the key two spellings of one person share. `playerId` turns every run
+ * of punctuation into a hyphen, so "SONIC FOX" and "SonicFox" slug to
+ * `sonic-fox` and `sonicfox` — two profiles, each holding some of that player's
+ * matches, neither of them wrong-looking. Measured on this corpus: 9 players
+ * split that way; on Tekken's, 110.
+ *
+ * Borrowed from sf6-replay-database/scripts/parse.ts, which has carried the
+ * two-stage split since its own recon found "Ending Walker"/"EndingWalker" (333
+ * and 296 sides) and "Problem X"/"ProblemX" (434 and 230). SF6 is the only game
+ * on the platform with ZERO split players, and this function is the reason.
+ *
+ * WHAT IT CANNOT DO, and why scripts/players.ts exists beside it: two handles
+ * that differ by an actual letter ("Crome"/"Chrome") have different
+ * alphanumerics and will never collide here, while two DIFFERENT people whose
+ * handles differ only by punctuation ("T-Ara" and "Tara", both real on Tekken)
+ * collide when they should not. Normalisation gets the common case; the curated
+ * map and the distinct-key declarations get the rest.
+ */
+export const idKey = (handle: string): string => {
+  const nfkd = handle.normalize('NFKD').toLowerCase();
+  const ascii = nfkd.replace(/[^a-z0-9]+/g, '');
+  // Same fallback as playerId, and needed for the same reason in reverse: a
+  // handle in another script reduces to "" here, so WITHOUT this every non-Latin
+  // player shares one key and the collision gate reports them as the same
+  // person. One CJK handle in the corpus today; the bug would arrive with the
+  // second.
+  if (ascii) return ascii;
+  return nfkd.replace(/\p{M}+/gu, '').replace(/[^\p{L}\p{N}]+/gu, '');
+};
+
+/**
+ * Slug a handle into a stable player id — the PUBLIC id, and the URL.
+ *
+ * Keeps the readable hyphenated form, so /players/snake-eyez stays what it has
+ * always been. Which SPELLING gets slugged is decided by resolvePlayers() in
+ * scripts/players.ts, not here.
+ *
+ * THE NON-LATIN FALLBACK, and why it is a fallback rather than the rule.
+ *
+ * The ASCII path strips to [a-z0-9], which returns "" for a handle written
+ * entirely in another script — "シルクちゃん" is a real player here (LxwV1YO7eGE,
+ * whose bench a person read off the HUD by hand). That empty id shipped once:
+ * data/players.json carried {"id": "", "handle": "シルクちゃん"} and nuxt.config
+ * seeded a prerender route for `/players/` that collided with the index.
+ *
+ * The obvious repair — guard on the slug and drop the record, which is what SF6
+ * and Tekken do — trades a real, hand-verified match for a clean registry. So
+ * the empty case falls back to Unicode letters and digits instead: combining
+ * marks are dropped first (NFKD splits "é" into "e" + U+0301, and a bare
+ * combining mark is not \p{L}), and what survives is a genuine id.
+ *
+ * Applied ONLY when the ASCII slug is empty, so no existing id moves. A handle
+ * that is pure punctuation still returns "" and is still refused at parse.
+ */
+export const playerId = (handle: string): string => {
+  const nfkd = handle.normalize('NFKD').toLowerCase();
+  const ascii = nfkd.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  if (ascii) return ascii;
+  return nfkd
+    .replace(/\p{M}+/gu, '')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '');
+};

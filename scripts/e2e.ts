@@ -27,6 +27,8 @@ import { fileURLToPath } from 'node:url';
 
 import { chromium, type Page } from 'playwright-core';
 
+import { idKey } from './roster';
+import { DISTINCT_KEYS } from './players';
 import { CHANNELS } from './channels';
 import { PATCHES, SEASONS, seasonToken } from './patches';
 import type {
@@ -167,6 +169,33 @@ function testSubstrate(): void {
     'app.config carries an accent for every roster id',
   );
 
+  // ── player identity ───────────────────────────────────────────────────────
+  // One player, one page. idKey collapses spelling variants at parse time; this
+  // asserts the result, because the failure is invisible from the site — two
+  // profiles for one person both render correctly, each holding some of the
+  // matches, and nothing looks broken from either one.
+  expect(
+    players.every((p) => p.id.length > 0),
+    'every player id is non-empty',
+  );
+  expect(
+    new Set(players.map((p) => p.id)).size === players.length,
+    'player ids are unique',
+  );
+  const keyCollisions = new Map<string, string[]>();
+  for (const p of players) {
+    const k = idKey(p.handle);
+    keyCollisions.set(k, [...(keyCollisions.get(k) ?? []), p.handle]);
+  }
+  const undeclared = [...keyCollisions.entries()].filter(
+    ([k, hs]) => hs.length > 1 && !DISTINCT_KEYS.has(k),
+  );
+  expect(
+    undeclared.length === 0,
+    `no two players share a normalised key undeclared${
+      undeclared.length ? ` (${undeclared.map(([k, hs]) => `${k}: ${hs.join('/')}`).join(', ')})` : ''
+    }`,
+  );
   // union round-trip: videos.json → replays.json, IN ORDER
   const drift = videos.filter((v, i) =>
     v.sides.some(
@@ -407,20 +436,17 @@ function testCronGuard(): void {
   const write = (p: string, s: string) => writeFileSync(join(dir, p), s);
   // The fixture must carry EVERY file the workflow's `git add` names, or the
   // add fails and the whole guard mis-reports.
-  for (const f of [
-    'videos.json',
-    'replays.json',
-    'stats.json',
-    'players.json',
-    'patchGroups.json',
-    'patchBoundaries.json',
-    'seasonBoundaries.json',
-    'review-queue.json',
-    'bench-queue.json',
-    'summary.json',
-  ]) {
-    write(`data/${f}`, '[]\n');
-  }
+  // The seed list is READ OUT OF THE WORKFLOW, not restated here. `git add`
+  // fails on a path that does not exist, which aborts the guard and produces no
+  // commit — so a hand-maintained copy of this list turns "someone staged a new
+  // artifact" into "case B: real change commits" going red, with nothing in the
+  // failure naming the actual cause. Adding data/player-redirects.json to the
+  // workflow is exactly how that was found.
+  const staged = (guard.match(/git add ((?:data\/\S+\s*)+)/)?.[1] ?? '')
+    .split(/\s+/)
+    .filter((f) => f.startsWith('data/') && f.endsWith('.json'));
+  expect(staged.length > 0, `workflow's git add names data files (${staged.length})`);
+  for (const f of staged) write(f, '[]\n');
   write('data/report.md', '# r\n\n_Generated 2026-01-01T00:00:00.000Z_\n');
   // Written to a FILE and run as `bash guard.sh`: passing it via `bash -c` puts
   // it through /bin/sh first, which mangles the newlines and $(…) forms.

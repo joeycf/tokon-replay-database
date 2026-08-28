@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { alignBench, readBench } from './bench';
 import { ACTIVE_CHANNELS, CHANNELS } from './channels';
 import { applyOverrides, emitGeneric } from './emit';
+import { resolvePlayers, undeclaredCollisions } from './players';
 import { dueExpiries, expiryBlock } from './expiries';
 import { LAUNCH, SEASONS, seasonForDate } from './patches';
 import { buildAliasMatcher, loadCharacters, playerId, stripLeaderboard } from './roster';
@@ -604,13 +605,21 @@ async function main() {
         : (slots as [Slot, Slot]);
 
       const handles = [cleanHandle(s0.handle), cleanHandle(s1.handle)] as [string, string];
-      if (handles.some((h) => !h || h.length > 40)) {
+      // The length guard is on the CLEANED handle; the emptiness guard is on the
+      // SLUG, which is not the same test. `playerId` strips to [a-z0-9] after
+      // NFKD, so an all-CJK handle — "シルクちゃん", real, on record LxwV1YO7eGE —
+      // is a perfectly good 6-character string here and slugs to "". That
+      // shipped: data/players.json carried {"id": "", "handle": "シルクちゃん"},
+      // nuxt.config seeded a prerender route for `/players/` (colliding with the
+      // index), and stats grew a "" key. SF6 and Tekken have always guarded on
+      // the slug (sf6/parse.ts:398). This is that guard.
+      if (handles.some((h) => !h || h.length > 40 || !playerId(h))) {
         misses.push({
           id: v.id,
           channel: ch.id,
           title,
           reason: 'bad-handle',
-          detail: handles.join(' | '),
+          detail: handles.map((h) => `${h} → ${playerId(h) || '(empty slug)'}`).join(' | '),
         });
         continue;
       }
@@ -947,21 +956,65 @@ async function main() {
   }
 
   const playerMap = new Map<string, PlayerRecord>();
+  /**
+   * ONE PLAYER, ONE PAGE. Runs over the post-override records, so a hand verdict
+   * that spells a handle differently is folded in like any other observation
+   * rather than escaping the rule — applyOverrides replaces `sides` wholesale,
+   * which is exactly how two override-authored spellings could otherwise mint a
+   * second profile with nothing to catch it.
+   *
+   * This REPLACES the inline "prefer the mixed-case spelling" tiebreak that used
+   * to live here. That rule was right about casing and blind to the split it was
+   * choosing between: it picked the nicest spelling per ID, and two spellings of
+   * one player have two ids, so it never compared them.
+   */
+  const mergeReport = resolvePlayers(withOverrides);
+
   for (const r of withOverrides) {
     for (const s of r.sides) {
-      const existing = playerMap.get(s.player);
-      if (!existing) playerMap.set(s.player, { id: s.player, handle: s.handle });
-      else if (s.handle !== existing.handle && /[a-z]/.test(s.handle)) {
-        // Prefer the mixed-case spelling; ALL CAPS titles are the noisy source.
-        existing.handle = s.handle;
-      }
+      if (!playerMap.has(s.player)) playerMap.set(s.player, { id: s.player, handle: s.handle });
     }
   }
   const players = [...playerMap.values()].sort((a, b) => a.id.localeCompare(b.id));
+  const collisions = undeclaredCollisions(players);
 
   // ── write ──────────────────────────────────────────────────────────────────
+  /**
+   * THE RETIRED-ID LEDGER — append-only, and that is the whole point.
+   *
+   * A merged spelling's id is only observable at the moment of the merge: once
+   * data/videos.json is canonicalised, the old spelling is gone from the corpus
+   * and nothing can rediscover it. Recomputing this set from the committed data
+   * therefore yields nothing, which is how the first attempt at the redirect
+   * emitter silently produced zero.
+   *
+   * Worse, it decays. If the last record carrying the old spelling is deleted
+   * upstream — the Tōkon channels unlist videos routinely — a recomputed set
+   * would drop that redirect and the indexed URL would 404 again months later,
+   * with no diff to explain it.
+   *
+   * So the ledger MERGES with what is already committed and never shrinks. It is
+   * the input to `npm run data:redirects`, and a row leaves it only by hand.
+   */
+  const priorRedirects: Record<string, string> = await readJson('player-redirects.json', {});
+  const proposed: Record<string, string> = { ...priorRedirects };
+  for (const [canonical, absorbed] of mergeReport.merged) {
+    for (const old of absorbed) proposed[old] = canonical;
+  }
+  // Two rows are dropped rather than carried: one pointing at itself (a spelling
+  // that later won the id back — Vercel serves a self-redirect as a loop), and
+  // one whose target no longer exists (the whole player left the corpus, so the
+  // redirect would land on a 404 of its own).
+  const redirects = Object.fromEntries(
+    Object.entries(proposed).filter(([from, to]) => from !== to && playerMap.has(to)),
+  );
+
   await write('videos.json', withOverrides);
   await write('players.json', players);
+  await write(
+    'player-redirects.json',
+    Object.fromEntries(Object.entries(redirects).sort(([a], [b]) => a.localeCompare(b))),
+  );
   await write('review-queue.json', review);
   await write('bench-queue.json', benchQueue);
   await write('seasonBoundaries.json', SEASONS);
@@ -1116,6 +1169,22 @@ async function main() {
   lines.push(`- bench queue (published, incomplete): **${benchQueue.length}**`);
   lines.push('');
 
+  // ── player identity ───────────────────────────────────────────────────────
+  if (mergeReport.merged.size) {
+    lines.push('## Player identity', '');
+    lines.push(
+      `${mergeReport.merged.size} identity(s) resolved from more than one spelling. The`,
+      'retired ids are 301-redirected from vercel.json — run `npm run data:redirects`',
+      'after changing scripts/players.ts, or the old URLs 404.',
+      '',
+    );
+    lines.push('| canonical | absorbed |', '| --- | --- |');
+    for (const [canonical, absorbed] of [...mergeReport.merged].sort()) {
+      lines.push(`| \`${canonical}\` | ${absorbed.map((a) => `\`${a}\``).join(' · ')} |`);
+    }
+    lines.push('');
+  }
+
   lines.push('## Misses', '');
   lines.push('| reason | count |', '| --- | ---: |');
   for (const [reason, n] of Object.entries(byReason).sort((a, b) => b[1] - a[1])) {
@@ -1201,6 +1270,19 @@ async function main() {
   const bigResidue = [...residues].filter(([, e]) => e.n >= 3);
   const actionRequired: string[] = [];
   if (due.length) actionRequired.push(...expiryBlock(due));
+  if (collisions.length) {
+    actionRequired.push(
+      ...(due.length ? [] : ['## ⚠ ACTION REQUIRED', '']),
+      `${collisions.length} normalised player key(s) still hold more than one player:`,
+      ...collisions.map((c) => `- \`${c.key}\` — ${c.handles.join(' · ')}`),
+      '',
+      'Either they are one person (add a HANDLE_ALIASES entry in scripts/players.ts)',
+      'or they are two (add the key to DISTINCT_KEYS). Both answers are cheap; leaving',
+      'it undecided means one player reads as two, or two read as one, and the page',
+      'looks correct either way.',
+      '',
+    );
+  }
   if (bigResidue.length) {
     actionRequired.push(
       ...(due.length ? [] : ['## ⚠ ACTION REQUIRED', '']),
@@ -1225,8 +1307,14 @@ async function main() {
       `  ·  conflicts ${conflicts}`,
   );
   console.log(`  queues: review ${review.length} · bench ${benchQueue.length}`);
+  if (mergeReport.merged.size) {
+    const absorbed = [...mergeReport.merged.values()].reduce((n, a) => n + a.length, 0);
+    console.log(`  identity: ${absorbed} spelling(s) merged into ${mergeReport.merged.size} player(s)`);
+  }
   if (bigResidue.length)
     console.log(`  ⚠ ACTION REQUIRED: ${bigResidue.length} residue string(s) on 3+ records`);
+  if (collisions.length)
+    console.log(`  ⚠ ACTION REQUIRED: ${collisions.length} undeclared player key collision(s)`);
   if (due.length) {
     // Loud, but NOT fatal — see the note above the block. The workflow's final
     // step is what turns this red, after the data is safely pushed.

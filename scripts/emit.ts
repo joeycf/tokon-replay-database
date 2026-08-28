@@ -193,6 +193,30 @@ export async function emitGeneric(
 
   const charIds = new Set(characters.map((c) => c.id));
   const playerIds = new Set(players.map((p) => p.id));
+
+  /**
+   * THE REGISTRY'S OWN INVARIANTS, which nothing checked until a `""` id shipped.
+   *
+   * data/players.json carried {"id": "", "handle": "シルクちゃん"} — playerId strips
+   * to [a-z0-9] after NFKD, so an all-CJK handle reduced to nothing. Every gate
+   * downstream passed: the id was IN the registry, so the unknown-player check
+   * below was satisfied by it; nuxt.config seeded a prerender route for
+   * `/players/` that collided with the index; stats grew a "" key. An empty id
+   * is not an edge case in a slug function, it is a page with no address.
+   *
+   * Uniqueness has never been asserted for players either, in any of the four
+   * games — patchGroups ids are checked, sitemap locs are checked, players are
+   * not. Cheap to state, and the identity resolution in scripts/players.ts is
+   * exactly the kind of change that could break it.
+   */
+  for (const p of players) {
+    if (!p.id) throw new Error(`emit: player '${p.handle}' has an empty id`);
+  }
+  if (playerIds.size !== players.length) {
+    const seen = new Set<string>();
+    const dupe = players.find((p) => seen.size === seen.add(p.id).size);
+    throw new Error(`emit: duplicate player id '${dupe?.id}' in the registry`);
+  }
   const sourceIds = new Set(sources);
   const patchTokens = new Set<string>([
     ...PATCHES.map((p) => p.version),
@@ -395,9 +419,26 @@ if (isMain) {
   const players = await read<PlayerRecord[]>('players.json', []);
   const overrides = await read<Record<string, VideoOverride>>('overrides.json', {});
   const { CHANNELS } = await import('./channels');
+  const { resolvePlayers } = await import('./players');
+
+  /**
+   * RESOLVE AFTER OVERRIDES, exactly as parse.ts does, and for a reason that is
+   * easy to miss: an override stores a whole `sides` array, INCLUDING the
+   * derived `player` id. That id is a snapshot of whatever the handle slugged to
+   * on the day a person wrote the verdict, and it goes stale the moment identity
+   * resolution changes which spelling is canonical.
+   *
+   * It did. A verdict written when "JAAZZ RAP" was its own player carries
+   * `player: 'jaazz-rap'`; the registry now says `jaazzrap`, and this entry
+   * point — which reads committed data rather than re-parsing — reintroduced the
+   * dead id and emit threw on its own contract. The handle is the authority; the
+   * id is derived from it, here as everywhere.
+   */
+  const records = applyOverrides(videos, overrides);
+  resolvePlayers(records);
 
   await emitGeneric(
-    applyOverrides(videos, overrides),
+    records,
     characters,
     players,
     CHANNELS.map((c) => c.source),
