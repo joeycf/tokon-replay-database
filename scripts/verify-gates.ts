@@ -1118,6 +1118,104 @@ try {
       !q.some((r) => r.id === ID),
       undefined,
     );
+
+    /**
+     * 5d — BENCH CONFLICT, the kind that used to publish while queued.
+     *
+     * The fixture states Magik in the title and a bench that omits her, on a
+     * channel whose descriptions ARE read ('prose-comma'). The old behaviour
+     * kept the union — Magik plus the whole bench — and shipped it, so the
+     * record was pending and published at once. Nothing caught it for as long
+     * as no channel produced a conflict; when fgcReplaysHub finally did, two
+     * e2e assertions went red on data alone. A control belongs here so the next
+     * regression fails at the gate instead of waiting on the corpus.
+     */
+    const CID = 'CTLCONFLICT1';
+    const conflictBait = {
+      id: CID,
+      channel: 'proReplays',
+      // Affix-fenced, unlike the 5a bait above: this control needs the HANDLES
+      // to come out clean, because alignBench matches the description to the
+      // title by handle correspondence first. Without the fence the game-name
+      // tail rides into the second handle (38 chars — under the guard), the
+      // alignment refuses, no bench is read, and the record publishes with no
+      // conflict at all: a control that passes by never reaching its gate.
+      title: 'Marvel Tokon ▰ CTLGAMMA (Magik) vs CTLDELTA (Storm) ▰ Pro level replays',
+      // the bench for side 0 contradicts the title: no Magik
+      description:
+        'CTLGAMMA (Hulk, Blade, Carnage, Loki) vs CTLDELTA (Storm, Magneto, Danger, Doctor Doom)',
+      publishedAt: '2026-08-11T00:00:00Z',
+      durationSec: 600,
+      viewCount: 10,
+      liveBroadcastContent: 'none',
+    };
+    await writeFile(rawPath, JSON.stringify([...original, conflictBait]));
+    await writeFile(ovPath, JSON.stringify(baseOv, null, 2));
+    parse();
+    q = await readQueue();
+    vids = await readVideos();
+    const queued = q.find((r) => r.id === CID) as
+      | { conflict?: { fromTitle: string[]; fromDescription: string[] } }
+      | undefined;
+    check(
+      'a title/description disagreement queues as bench-conflict',
+      !!queued,
+      queued ? 'queued' : 'ABSENT',
+    );
+    check(
+      'and it is WITHHELD — the union never reaches videos.json',
+      !vids.some((r) => r.id === CID),
+      vids.some((r) => r.id === CID) ? 'PUBLISHED (the old bug)' : 'absent',
+    );
+    check(
+      'the queue entry carries both tiers, so the reviewer sees the disagreement',
+      queued?.conflict?.fromTitle.includes('magik') === true &&
+        queued?.conflict?.fromDescription.includes('magik') === false,
+      `title=${queued?.conflict?.fromTitle.join('/')} desc=${queued?.conflict?.fromDescription.join('/')}`,
+    );
+
+    /**
+     * 5e — the OTHER char-completion branch, which had no control.
+     *
+     * parse.ts holds records back at three points: a title with no parens at
+     * all (5a covers it), a title whose character slot resolves to NOTHING on
+     * the roster, and a bench conflict (5d). Only the first was controlled.
+     * Found by deleting the second's `continue` while proving 5d could fail —
+     * every gate still reported green, which is the exact condition this file
+     * exists to make impossible.
+     *
+     * "Sentinel" is the fixture on purpose: an unknown name is also what a real
+     * DLC fighter looks like on the day it ships, so this doubles as the
+     * control for the record NOT being published under a half-empty side while
+     * the roster catches up.
+     */
+    const UID = 'CTLUNRESOLVED1';
+    await writeFile(
+      rawPath,
+      JSON.stringify([
+        ...original,
+        {
+          id: UID,
+          channel: 'proReplays',
+          title: 'Marvel Tokon ▰ CTLEPSILON (Sentinel) vs CTLZETA (Storm) ▰ Pro level replays',
+          description: 'MARVEL TOKON high level replay',
+          publishedAt: '2026-08-11T00:00:00Z',
+          durationSec: 600,
+          liveBroadcastContent: 'none',
+        },
+      ]),
+    );
+    await writeFile(ovPath, JSON.stringify(baseOv, null, 2));
+    parse();
+    q = await readQueue();
+    vids = await readVideos();
+    check(
+      'a title naming an unknown fighter queues rather than publishing a short side',
+      q.some((r) => r.id === UID) && !vids.some((r) => r.id === UID),
+      `queued=${q.some((r) => r.id === UID)} published=${vids.some((r) => r.id === UID)}`,
+    );
+
+    await writeFile(rawPath, JSON.stringify(original, null, 1));
   }
 } finally {
   await restoreAll();

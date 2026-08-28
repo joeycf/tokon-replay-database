@@ -118,6 +118,7 @@ type MissReason =
   | 'live-or-upcoming'
   | 'short-duration'
   | 'not-a-match'
+  | 'bench-conflict'
   | 'no-vs-title'
   | 'slot-ambiguous'
   | 'char-unresolved'
@@ -688,7 +689,8 @@ async function main() {
           } else {
             // The bench omits something the title stated. Keep the union in
             // first-appearance order — never silently drop what the title said —
-            // and send it to a human.
+            // and send it to a human. The union is what the REVIEWER sees, not
+            // what ships: the record is withheld below until a verdict lands.
             chars = [...fromTitle, ...benchIds.filter((x) => !fromTitle.includes(x))];
             conflict = true;
             recordConflict = true;
@@ -726,23 +728,66 @@ async function main() {
         built.push({ player: playerId(handle), handle, characters: chars, provenance });
       }
 
+      /**
+       * A BENCH CONFLICT WITHHOLDS THE RECORD. It used to publish one.
+       *
+       * The union above is built for the reviewer to look at, not for the site:
+       * when the description omits a fighter the title stated, the two tiers
+       * disagree about WHO WAS ON THE TEAM, and a union answers that by
+       * asserting both. That is a guess wearing the shape of data — it renders,
+       * filters and counts exactly like a read side, and it inflates
+       * characterUsage for a fighter no source is sure appeared.
+       *
+       * It also broke the one invariant this project asserts hardest, in the
+       * only way that could stay hidden: a queued record reaching replays.json.
+       * The contradiction sat in types/index.ts the whole time — "pending items
+       * NEVER reach videos.json or replays.json" beside "the union is kept and
+       * the record is queued for review" — and nothing collided until
+       * fgcReplaysHub published 7LQbkltIzso, the first bench conflict this
+       * corpus ever produced. Two e2e assertions caught it the same day.
+       *
+       * So the review queue's contract wins and the record waits. The verdict
+       * is consulted HERE, before queuing, exactly as the two
+       * character-completion branches do it — the queue's own page writes the
+       * answer, and the next parse adopts it.
+       *
+       * Note this is NOT the bench queue's case. A 2-of-4 side is true partial
+       * data and publishes; a side whose tiers contradict each other is not
+       * partial, it is unresolved.
+       */
       if (recordConflict) {
         conflicts += 1;
-        review.push({
-          id: v.id,
-          kind: 'bench-conflict',
-          channel: ch.id,
-          title,
-          publishedAt: v.publishedAt,
-          durationSec: v.durationSec,
-          handles,
-          conflict: {
-            side: built[0]!.provenance.conflict ? 0 : 1,
-            fromTitle: built[built[0]!.provenance.conflict ? 0 : 1]!.provenance.fromTitle,
-            fromDescription:
-              built[built[0]!.provenance.conflict ? 0 : 1]!.provenance.fromDescription ?? [],
-          },
-        });
+        const conflictSide = built[0]!.provenance.conflict ? 0 : 1;
+        const verdict = applyVerdict(v, ch, title, handles);
+        if (verdict === null) {
+          misses.push({
+            id: v.id,
+            channel: ch.id,
+            title,
+            reason: 'bench-conflict',
+            detail: [
+              `title=${built[conflictSide]!.provenance.fromTitle.join('/')}`,
+              `desc=${(built[conflictSide]!.provenance.fromDescription ?? []).join('/')}`,
+            ].join(' | '),
+          });
+          review.push({
+            id: v.id,
+            kind: 'bench-conflict',
+            channel: ch.id,
+            title,
+            publishedAt: v.publishedAt,
+            durationSec: v.durationSec,
+            handles,
+            conflict: {
+              side: conflictSide,
+              fromTitle: built[conflictSide]!.provenance.fromTitle,
+              fromDescription: built[conflictSide]!.provenance.fromDescription ?? [],
+            },
+          });
+        } else if (verdict === 'adopted') {
+          parsed += 1;
+        }
+        continue;
       }
 
       // Publishable but incomplete → the extractor's worklist. NOT the review

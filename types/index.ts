@@ -193,7 +193,10 @@ export interface CharProvenance {
   slotOrder?: SlotOrder;
   /** Tiers disagreed — a title-stated id absent from the bench, or vice versa.
    *  The union is kept (never silently drop what the title said) and the record
-   *  is queued for review. */
+   *  is queued for review — WITHHELD, not published. This flag therefore only
+   *  ever appears on a queue entry the reviewer is looking at, never on a side
+   *  in videos.json: a union is what the two tiers *might* mean, and publishing
+   *  it asserts a team neither source actually stated. */
   conflict?: boolean;
   /** characters.length === 4, i.e. the side's bench is fully known. */
   complete: boolean;
@@ -305,7 +308,10 @@ export type VideoOverride = Partial<Pick<MatchVideo, 'season' | 'sides' | 'chann
  *
  *  Kinds:
  *   'character-completion' — match-shaped footage whose characters no text states.
- *   'bench-conflict'       — title and description disagree about a side.
+ *   'bench-conflict'       — title and description disagree about a side. Held
+ *                            like the rest: a union of two disagreeing tiers is
+ *                            unresolved data, not partial data, so it is not
+ *                            the bench queue's case.
  *   'slot-ambiguous'       — a side segment carried 2+ parens, so which one names
  *                            the characters is a guess. Never guessed. */
 export interface ReviewQueueItem {
