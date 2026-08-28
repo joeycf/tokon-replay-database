@@ -99,7 +99,12 @@ export function resolvePlayers(records: MatchVideo[]): MergeReport {
   for (const r of records) {
     for (const s of r.sides) {
       const key = keyOf(s.handle);
-      if (!key) continue; // an all-CJK handle keys to nothing; guarded at parse
+      // A DECLARED-DISTINCT KEY IS NOT RESOLVED AT ALL — skipping it here is what
+      // makes the declaration mean "these are two people" rather than merely
+      // "stop asking me about this". Leaving it in the ballot would merge them
+      // anyway and only silence the gate: the failure the set exists to prevent,
+      // wearing the exact shape of the fix.
+      if (!key || DISTINCT_KEYS.has(key)) continue;
       const variants = casing.get(key) ?? new Map<string, number>();
       // The alias's canonical spelling enters the ballot too, and wins it —
       // it is a human verdict, not another observation.
@@ -134,6 +139,7 @@ export function resolvePlayers(records: MatchVideo[]): MergeReport {
   for (const r of records) {
     for (const s of r.sides) {
       const key = keyOf(s.handle);
+      if (DISTINCT_KEYS.has(key)) continue;
       const handle = best.get(key);
       if (!handle) continue;
       s.handle = handle;
