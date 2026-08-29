@@ -341,7 +341,13 @@ async function main() {
   const characters = await loadCharacters();
   const matcher = buildAliasMatcher(characters);
   const overrides: Record<string, VideoOverride> = await readJson('overrides.json', {});
-  const committed: MatchVideo[] = await readJson('videos.json', []);
+  // NOT readJson: its catch-all fallback is wrong for this one file. `committed`
+  // is the baseline for the freeze carry, the local-first carry AND the collapse
+  // guard, so a truncated or half-written videos.json silently becoming [] would
+  // carry nothing and disarm the guard for every channel at once (`before > 0`
+  // false everywhere) — a total loss with every gate green. Absent is fine and
+  // means a first run; unreadable is a hard stop.
+  const committed: MatchVideo[] = await readCommitted();
 
   const misses: Miss[] = [];
   const review: ReviewQueueItem[] = [];
@@ -900,7 +906,22 @@ async function main() {
   }
 
   // ── registries ─────────────────────────────────────────────────────────────
-  records.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+  // Newest first, ties broken by id. THE TIE-BREAK IS LOAD-BEARING, not tidiness.
+  // `(a, b) => (a.publishedAt < b.publishedAt ? 1 : -1)` stood here and returns
+  // -1 in BOTH directions for two equal timestamps, which is not a valid
+  // comparator: sort() is then free to return a different permutation every
+  // call. It was inert only because all 455 committed publishedAt values happen
+  // to be distinct — one record per video, one video per moment.
+  //
+  // An index source ends that. It publishes many records per VOD and they all
+  // carry the VOD's own publish time, so a handful of timestamps repeat a dozen
+  // times each. Measured on this corpus plus one such intake: the old comparator
+  // never converged (four successive sorts of the same array gave four different
+  // orders) and a shuffled input gave a fifth. That makes data/videos.json a
+  // different file on every run, which defeats the no-change-day commit guard,
+  // and makes the carry path and the rebuild path disagree — the exact
+  // byte-identity a local-first carry has to be able to prove.
+  records.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt) || a.id.localeCompare(b.id));
   const withOverrides = applyOverrides(records, overrides);
 
   // THE PROVENANCE TALLY IS RECOMPUTED FROM THE FINAL RECORDS.
@@ -1330,6 +1351,25 @@ async function readJson<T>(rel: string, fallback: T): Promise<T> {
   } catch {
     return fallback;
   }
+}
+
+/** data/videos.json, read strictly. ENOENT is a legitimate first run and yields
+ *  []; anything else — a truncated file, a bad merge, a half-written flush —
+ *  throws. See the call site for why this one file cannot take readJson's
+ *  fallback. */
+async function readCommitted(): Promise<MatchVideo[]> {
+  let text: string;
+  try {
+    text = await readFile(join(DATA, 'videos.json'), 'utf8');
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw e;
+  }
+  const parsed: unknown = JSON.parse(text);
+  if (!Array.isArray(parsed)) {
+    throw new Error('data/videos.json is not an array — refusing to treat it as an empty corpus.');
+  }
+  return parsed as MatchVideo[];
 }
 const write = (name: string, value: unknown) =>
   writeFile(join(DATA, name), JSON.stringify(value, null, 2) + '\n', 'utf8');
