@@ -636,6 +636,35 @@ async function main(): Promise<void> {
     `ComboForge band deep-links the fighter (${cfHref})`,
   );
 
+  // ComboForge nav item + leaving-site dialog (engine v0.12.0). The nav link is
+  // a REAL <a href> — the interstitial is a click handler, not a replacement —
+  // so the raw url must survive into the prerendered HTML for crawlers.
+  const navCombos = page.locator('[data-testid="nav-combos"]');
+  expect((await navCombos.count()) > 0, 'nav carries the Combos item');
+  expect(
+    (await navCombos.first().getAttribute('href')) ===
+      'https://comboforge.gg/browse?gameId=marveltokon',
+    'nav Combos points at this game on ComboForge',
+  );
+  const urlBeforeCombos = page.url();
+  await navCombos.first().click();
+  await page.waitForSelector('[data-testid="leaving-site-dialog"]', { timeout: 5000 });
+  expect(page.url() === urlBeforeCombos, 'clicking Combos shows the dialog instead of navigating');
+  expect(
+    ((await page.textContent('[data-testid="leaving-site-dialog"]')) ?? '').includes('ComboForge'),
+    'the dialog names the partner',
+  );
+  expect(
+    (await page.getAttribute('[data-testid="leaving-site-continue"]', 'href')) ===
+      'https://comboforge.gg/browse?gameId=marveltokon',
+    'the dialog continues to the same url the link carried',
+  );
+  await page.click('text=Stay here');
+  await page.waitForSelector('[data-testid="leaving-site-dialog"]', {
+    state: 'detached',
+    timeout: 5000,
+  });
+  expect(page.url() === urlBeforeCombos, '"Stay here" closes it and stays put');
   const somePlayer = players[0];
   if (somePlayer) {
     await gotoIdle(page, server.at(`/players/${somePlayer.id}`));
