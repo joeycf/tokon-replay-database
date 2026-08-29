@@ -660,8 +660,24 @@ async function main(): Promise<void> {
   // URL the engine builds for it goes through `videoId ?? id`. This asserts the
   // three places that matters — the derived thumbnail, the embed and the watch
   // link — on a record chosen from the committed data rather than hardcoded.
-  const segment = replays.find((r) => r.videoId && (r.startSeconds ?? 0) > 0);
-  if (segment) {
+  // A SAMPLE, not one record: one per source VOD plus the two shapes most
+  // likely to break — the @0 case, whose startSeconds is omitted as falsy, and
+  // the largest offset in the corpus. Computed, so it grows with the catalogue.
+  const segmentsAll = replays.filter((r) => r.videoId);
+  const perVodPick = new Map<string, (typeof replays)[number]>();
+  for (const r of segmentsAll) if (!perVodPick.has(r.videoId!)) perVodPick.set(r.videoId!, r);
+  const sample = [
+    ...new Map(
+      [
+        ...perVodPick.values(),
+        ...segmentsAll.filter((r) => (r.startSeconds ?? 0) === 0).slice(0, 1),
+        ...[...segmentsAll]
+          .sort((a, b) => (b.startSeconds ?? 0) - (a.startSeconds ?? 0))
+          .slice(0, 1),
+      ].map((r) => [r.id, r]),
+    ).values(),
+  ];
+  for (const segment of sample) {
     await gotoIdle(page, server.at(`/?v=${encodeURIComponent(segment.id)}`));
     await page.waitForSelector('[data-testid="video-modal"], dialog, [role="dialog"]', {
       timeout: 8000,
@@ -700,27 +716,36 @@ async function main(): Promise<void> {
         shown.watch.includes(`v=${segment.videoId}`) || shown.watch.includes(`/${segment.videoId}`),
         `the watch link points at the VOD (${shown.watch.slice(0, 70)})`,
       );
+      // A zero offset is the whole video, and its record omits startSeconds
+      // entirely — so the correct link has NO t= at all. Asserting its absence
+      // is the check that matters here: a link reading "t=undefineds" would
+      // still open the video and still look right in a screenshot.
+      const secs = segment.startSeconds ?? 0;
       expect(
-        shown.watch.includes(`t=${segment.startSeconds}`),
-        `the watch link carries the offset (t=${segment.startSeconds}s)`,
+        secs > 0 ? shown.watch.includes(`t=${secs}s`) : !/[?&]t=/.test(shown.watch),
+        secs > 0
+          ? `the watch link carries the offset (t=${secs}s)`
+          : 'a zero-offset record links to the VOD with no t= at all',
       );
       expect(
         !shown.img.includes('@'),
         `the derived thumbnail uses videoId, never the composite id (${shown.img.slice(0, 70)})`,
       );
     }
-
-    // and it is reachable by browsing, not only by deep link
-    await gotoIdle(page, server.at('/'));
-    await page.waitForSelector('[data-replay-id]');
-    const reachable = await page.evaluate(
-      (id: string) => document.querySelector(`[data-replay-id="${id}"]`) !== null,
-      segment.id,
-    );
+  }
+  if (sample.length > 0) {
+    console.log(`  … ${sample.length} segment record(s) checked, one per source VOD`);
+    // and reachable by browsing, not only by deep link. Asserted on the newest
+    // record overall when that record is a segment — otherwise its absence from
+    // the first page is paging, not a bug.
     const newest = [...replays].sort((a, b) => (a.date < b.date ? 1 : -1))[0];
-    // Only assert presence on the first page when the segment IS newest —
-    // otherwise its absence is paging, not a bug.
-    if (newest && newest.id === segment.id) {
+    if (newest?.videoId) {
+      await gotoIdle(page, server.at('/'));
+      await page.waitForSelector('[data-replay-id]');
+      const reachable = await page.evaluate(
+        (id: string) => document.querySelector(`[data-replay-id="${id}"]`) !== null,
+        newest.id,
+      );
       expect(reachable, 'the newest segment record renders a card on the first browse page');
     }
   }
