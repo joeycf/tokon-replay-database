@@ -57,6 +57,11 @@ export interface GenericReplay {
   title: string;
   views?: number;
   durationSec?: number;
+  /** The YouTube id, when `id` is not it (engine v0.10.0). A record is not
+   *  required to be a whole video: an index intake publishes many per VOD. */
+  videoId?: string;
+  /** Where this record's footage starts inside `videoId`, in seconds. */
+  startSeconds?: number;
 }
 
 /**
@@ -76,9 +81,10 @@ function patchToken(v: MatchVideo, windows = patchWindows()): string {
   return w && w.season === v.season ? w.version : seasonToken(v.season);
 }
 
-/** `thumb` is deliberately NEVER emitted: Replay.id is a YouTube id and the
- *  engine derives the thumbnail URL at render time. Emitting it would add
- *  ~1 MB to the whale for a string every client can compute. */
+/** `thumb` is deliberately NEVER emitted: the engine derives the thumbnail URL
+ *  at render time from `videoId ?? id`. Emitting it would add ~1 MB to the whale
+ *  for a string every client can compute — and that stays true for a segment
+ *  record, whose id is composite, precisely because of the `??`. */
 function toReplay(v: MatchVideo, windows = patchWindows()): GenericReplay {
   return {
     id: v.id,
@@ -92,6 +98,14 @@ function toReplay(v: MatchVideo, windows = patchWindows()): GenericReplay {
     title: v.title,
     ...(v.viewCount !== undefined ? { views: v.viewCount } : {}),
     ...(v.durationSec ? { durationSec: v.durationSec } : {}),
+    // GUARDED INDEPENDENTLY, and that is not tidiness. startSeconds 0 is
+    // falsy, so the first segment of every VOD would lose `videoId` too under a
+    // single combined spread — and the engine resolves `videoId ?? id`, so that
+    // record would render a thumbnail and an embed for the literal string
+    // "abc@0". A 404 and a dead player, on exactly one record per VOD, which is
+    // the shape most likely to be missed in a spot-check.
+    ...(v.videoId ? { videoId: v.videoId } : {}),
+    ...(v.startSeconds ? { startSeconds: v.startSeconds } : {}),
   };
 }
 

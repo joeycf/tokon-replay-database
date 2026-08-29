@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-29T16:23:21.099Z_
+_Generated 2026-08-29T16:41:22.092Z_
 
 ## Coverage
 
@@ -13,23 +13,31 @@ _Generated 2026-08-29T16:23:21.099Z_
 | fightingStationX | 2704 | 105 | 3.9% |
 | fgcReplaysHub | 2561 | 23 | 0.9% |
 | marvelTokonYT _(events only)_ | 40 | 11 | 27.5% |
-| replayTheater | 0 | 0 | 0.0% |
-| **total** | | **472** | |
+| replayTheater _(index)_ | 44 | 44 | 100.0% |
+| **total** | | **516** | |
+
+## Local-first intakes
+
+| intake | records | pin | this run |
+| --- | ---: | ---: | --- |
+| `replayTheater` | 44 | 44 | rebuilt from a local dump |
+
+_Entries skipped as already-known: **0**. The catalogue indexes no video this repo has fetched, published or ruled on._
 
 ## Character provenance
 
-How every one of the 944 sides got its characters.
+How every one of the 1032 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 98 | 10.4% |
-| description | 271 | 28.7% |
-| index | 0 | 0.0% |
-| footage | 32 | 3.4% |
-| human | 519 | 55.0% |
-| review | 24 | 2.5% |
+| title | 98 | 9.5% |
+| description | 271 | 26.3% |
+| index | 88 | 8.5% |
+| footage | 32 | 3.1% |
+| human | 519 | 50.3% |
+| review | 24 | 2.3% |
 
-- complete (4/4): **846/944** (89.6%)
+- complete (4/4): **934/1032** (90.5%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
 - bench alignment: handle 254 · character-subset 21 · ambiguous 4
 - title slot order: handle-first 767 · chars-first 75 · parallel-lists 80
@@ -40,8 +48,8 @@ How every one of the 944 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 98 | 10.4% |
-| 4 | 839 | 88.9% |
+| 1 | 98 | 9.5% |
+| 4 | 927 | 89.8% |
 | 5 _(mid-set change)_ | 6 | 0.6% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
