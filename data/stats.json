@@ -1,35 +1,35 @@
 {
   "totals": {
-    "replays": 467,
+    "replays": 472,
     "characters": 21,
-    "players": 343,
+    "players": 345,
     "byPatch": {
       "S0": 10,
-      "S1": 457
+      "S1": 462
     }
   },
   "characterUsage": {
-    "black-panther": 171,
-    "blade": 359,
-    "captain-america": 72,
+    "black-panther": 172,
+    "blade": 360,
+    "captain-america": 73,
     "carnage": 213,
-    "champion": 111,
-    "danger": 49,
+    "champion": 113,
+    "danger": 50,
     "deadpool": 132,
     "doctor-doom": 182,
-    "ghost-rider": 104,
-    "green-goblin": 151,
+    "ghost-rider": 105,
+    "green-goblin": 153,
     "hulk": 127,
-    "iron-man": 117,
+    "iron-man": 118,
     "loki": 157,
-    "magik": 357,
-    "magneto": 330,
+    "magik": 360,
+    "magneto": 332,
     "ms-marvel": 63,
     "peni-parker": 51,
-    "spider-man": 349,
-    "star-lord": 129,
-    "storm": 153,
-    "wolverine": 91
+    "spider-man": 352,
+    "star-lord": 130,
+    "storm": 155,
+    "wolverine": 92
   },
   "byPatchUsage": {
     "S0": {
@@ -49,27 +49,27 @@
       "wolverine": 1
     },
     "S1": {
-      "black-panther": 170,
-      "blade": 359,
-      "captain-america": 70,
+      "black-panther": 171,
+      "blade": 360,
+      "captain-america": 71,
       "carnage": 213,
-      "champion": 111,
-      "danger": 38,
+      "champion": 113,
+      "danger": 39,
       "deadpool": 132,
       "doctor-doom": 176,
-      "ghost-rider": 97,
-      "green-goblin": 151,
+      "ghost-rider": 98,
+      "green-goblin": 153,
       "hulk": 127,
-      "iron-man": 111,
+      "iron-man": 112,
       "loki": 157,
-      "magik": 345,
-      "magneto": 323,
+      "magik": 348,
+      "magneto": 325,
       "ms-marvel": 60,
       "peni-parker": 41,
-      "spider-man": 346,
-      "star-lord": 124,
-      "storm": 147,
-      "wolverine": 90
+      "spider-man": 349,
+      "star-lord": 125,
+      "storm": 149,
+      "wolverine": 91
     }
   },
   "playerCharacters": {
@@ -492,10 +492,10 @@
     },
     "ekram": {
       "blade": 4,
-      "captain-america": 1,
-      "champion": 5,
-      "ghost-rider": 5,
-      "magneto": 5
+      "captain-america": 2,
+      "champion": 6,
+      "ghost-rider": 6,
+      "magneto": 6
     },
     "el-maza": {
       "blade": 2,
@@ -857,7 +857,10 @@
       "star-lord": 1
     },
     "inzem": {
-      "spider-man": 2
+      "green-goblin": 1,
+      "magneto": 1,
+      "spider-man": 3,
+      "storm": 1
     },
     "iovrthk-ttv": {
       "ms-marvel": 1
@@ -878,11 +881,11 @@
       "black-panther": 2,
       "blade": 3,
       "doctor-doom": 1,
-      "green-goblin": 2,
-      "magik": 2,
+      "green-goblin": 3,
+      "magik": 3,
       "magneto": 6,
-      "spider-man": 5,
-      "storm": 3,
+      "spider-man": 6,
+      "storm": 4,
       "wolverine": 1
     },
     "jaxzen": {
@@ -951,6 +954,9 @@
       "carnage": 1,
       "ghost-rider": 1,
       "spider-man": 1
+    },
+    "joueur": {
+      "danger": 1
     },
     "jouwwi": {
       "peni-parker": 1
@@ -1717,13 +1723,14 @@
     "sasukedavid": {
       "carnage": 1,
       "ghost-rider": 1,
-      "magik": 1,
+      "magik": 2,
       "star-lord": 1
     },
     "save-the-queen": {
-      "black-panther": 3,
-      "magik": 3,
-      "star-lord": 4,
+      "black-panther": 4,
+      "magik": 4,
+      "spider-man": 1,
+      "star-lord": 5,
       "storm": 3
     },
     "schiacci": {
@@ -1832,7 +1839,7 @@
       "wolverine": 1
     },
     "snake-eyez": {
-      "champion": 51,
+      "champion": 52,
       "doctor-doom": 31,
       "green-goblin": 9,
       "hulk": 36,
@@ -1851,7 +1858,7 @@
     },
     "soap-eater": {
       "black-panther": 1,
-      "blade": 1,
+      "blade": 2,
       "loki": 1,
       "spider-man": 1
     },
@@ -1995,7 +2002,7 @@
       "deadpool": 1,
       "doctor-doom": 1,
       "hulk": 1,
-      "iron-man": 1,
+      "iron-man": 2,
       "peni-parker": 1,
       "spider-man": 2,
       "wolverine": 1
@@ -2141,6 +2148,9 @@
       "deadpool": 1,
       "doctor-doom": 1,
       "magneto": 1
+    },
+    "wolver-lean": {
+      "wolverine": 1
     },
     "xilef": {
       "captain-america": 2,
