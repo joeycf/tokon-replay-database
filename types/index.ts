@@ -14,7 +14,8 @@ export type SourceId =
   | 'replaysHub'
   | 'fightingStationX'
   | 'fgcReplaysHub'
-  | 'marvelTokonTournament';
+  | 'marvelTokonTournament'
+  | 'replayTheater';
 
 /**
  * Per-YouTube-channel intake key: names raw/<key>.json and the coverage
@@ -37,7 +38,8 @@ export type ChannelKey =
   | 'replaysHub'
   | 'fightingStationX'
   | 'fgcReplaysHub'
-  | 'marvelTokonYT';
+  | 'marvelTokonYT'
+  | 'replayTheater';
 
 /** How a channel's descriptions state the bench, when they do at all. Measured
  *  per channel on the launch corpus; see scripts/bench.ts.
@@ -49,6 +51,29 @@ export type ChannelKey =
  *  Absent  ⇒ the description is boilerplate and is not read at all. */
 export type DescriptionBench = 'prose-comma' | 'prose-and' | 'prose-with' | 'player-lines';
 
+/**
+ * An INDEX source: a third-party catalogue that points AT video rather than
+ * hosting it. Its entries are (videoId, startSeconds) pairs plus players,
+ * characters and an event tag, so a record here is a SEGMENT of a longform VOD
+ * and several records share one video. There is no channel, no uploads
+ * playlist, and nothing to resolve.
+ */
+export interface ChannelIndex {
+  /** Catalogue endpoint, paged with &page=N. */
+  endpoint: string;
+  /** The index's own token for this game, used as the ?game= query value. */
+  slug: string;
+  /** The game string each ENTRY states about itself. Checked per entry, because
+   *  ?game= is a filter someone else answers and a mistagged submission arrives
+   *  looking exactly like a real one. */
+  gameLabel: string;
+  /** Entries per page. Theirs, not ours — the API ignores per_page/limit, so
+   *  this only computes the page count. */
+  pageSize: number;
+  /** ms between requests — politeness, not rate-limit avoidance. */
+  pacingMs: number;
+}
+
 export interface ChannelConfig {
   /** Raw-dump key / report row (unique per YouTube channel). */
   id: ChannelKey;
@@ -56,11 +81,31 @@ export interface ChannelConfig {
   source: SourceId;
   /** Display name (mirrors app/app.config.ts sourceChannels[].name). */
   name: string;
-  /** YouTube channel id. */
-  channelId: string;
+  /** YouTube channel id. Absent on an `index` source, which has no channel. */
+  channelId?: string;
   /** The channel's uploads playlist (UU + channelId.slice(2), pinned — saves a
-   *  quota unit per channel per run, and the id is stable where a handle is not). */
-  uploadsPlaylist: string;
+   *  quota unit per channel per run, and the id is stable where a handle is not).
+   *  Absent on an `index` source. */
+  uploadsPlaylist?: string;
+  /** This intake is a third-party INDEX, not a YouTube channel. Its dump is
+   *  built by scripts/fetch-theater.ts, its records are not built by a title
+   *  parse, and data:fetch skips it. Mutually exclusive with channelId. */
+  index?: ChannelIndex;
+  /**
+   * LOCAL-FIRST: deliberately not part of the daily cron.
+   *
+   * raw/ is gitignored and the cron fetches remotely into a fresh checkout, so
+   * a source only ever fetched by hand has no dump there. Without this flag
+   * parse would either exit (missing dump) or, worse, drop every one of its
+   * records. So when the dump is ABSENT its committed records are CARRIED, the
+   * same mechanism `frozen` uses; when the dump is PRESENT they are rebuilt.
+   *
+   * The carry needs a pin for the reason `frozen.records` does — data/videos.json
+   * is both source and target — but it cannot be a constant here, because a
+   * local-first source GROWS. It lives in data/source-pins.json, written by the
+   * local rebuild and asserted by every parse.
+   */
+  localFirst?: boolean;
   /** Where the is-Tōkon game marker may appear. Default 'title'. Only
    *  fightingStationX needs the widened gate: it is a general FGC channel whose
    *  Tōkon uploads are a minority and whose titles are inconsistent. */
@@ -127,6 +172,37 @@ export interface RawVideoRecord {
   tags?: string[];
 }
 
+/**
+ * One record in raw/replayTheater.json — an index entry already joined to its
+ * VOD's YouTube metadata. Extends RawVideoRecord so the dump reads like any
+ * other, but the fields below are what the record is actually BUILT from:
+ * nothing here is recovered by parsing the title.
+ */
+export interface TheaterRawRecord extends RawVideoRecord {
+  /** `${videoId}@${startSeconds}` — the record id, not a YouTube id. */
+  id: string;
+  /** The catalogue's own entry id. Provenance, and the fetch resume key. */
+  theaterId: number;
+  /** The YouTube id this segment lives inside. */
+  videoId: string;
+  /** Offset into videoId, in seconds. */
+  startSeconds: number;
+  /** The catalogue's event tag. Non-empty by construction — an untagged entry
+   *  is online play and never reaches the dump. */
+  tag: string;
+  /** The VOD's own uploader, for the report. The 5 source VODs belong to
+   *  different organisers, so this is per record, not per intake. */
+  uploader: string;
+  /** [side0, side1] handles, exactly as the catalogue spells them — sponsor
+   *  prefixes intact, for the parser to strip. */
+  players: [string, string];
+  /** [side0, side1] character names, exactly as the catalogue spells them.
+   *  Tōkon is 4v4 and the catalogue carries four columns per side, so a side
+   *  here is normally 4 long — but the length is OBSERVED, never assumed, and
+   *  `complete` is derived from it downstream like every other tier's. */
+  characters: [string[], string[]];
+}
+
 /** Which stage produced a side's characters. Ordered weakest → strongest. */
 /**
  * `human` sits above every automatic tier and is the tier this game ends on.
@@ -139,7 +215,30 @@ export interface RawVideoRecord {
  * and 1080p moved none of it. So the bench's assist-only third is read by a
  * person, and the machine's job is to pre-sort for them.
  */
-export type CharTier = 'title' | 'description' | 'footage' | 'human' | 'review';
+/**
+ * `index` is a third-party CATALOGUE's statement of a side's fighters, arriving
+ * already complete (scripts/fetch-theater.ts). It sits above `description` and
+ * below `footage`, and both halves are arguments:
+ *
+ *  · ABOVE description, because it is not prose. A description bench is
+ *    extracted from a sentence a re-uploader typed and has to be aligned to a
+ *    side and split on a separator — which is the entire failure surface of
+ *    that tier (see DescAlign). An index entry is discrete fields; nothing is
+ *    aligned and nothing can be mis-split.
+ *  · BELOW footage and human, because it is still somebody's transcription of a
+ *    screen we can read ourselves. A curator watching at speed can swap two
+ *    sides or miss a fourth pick, and the pixels settle that.
+ *
+ * THE ORDER OF THIS UNION IS DOCUMENTATION, NOT CONTROL FLOW. There is no rank
+ * array and no index-of comparison anywhere in this repo: precedence is the
+ * order of application in code (parse seeds `title` and overwrites with
+ * `description`; complete-characters appends `footage`; the /dev endpoints
+ * append `human`), and nothing ever downgrades a side. Adding a member here
+ * therefore does NOT wire it up.
+ */
+export const CHAR_TIERS = ['title', 'description', 'index', 'footage', 'human', 'review'] as const;
+
+export type CharTier = (typeof CHAR_TIERS)[number];
 
 /** How the description's two sides were matched to the title's two sides.
  *  NEVER positional: hadoukenReplays reverses its second title slot on 27 of 34
@@ -174,10 +273,16 @@ export interface CharProvenance {
   tier: CharTier;
   /** Every tier that contributed, in the order applied. */
   tiers: CharTier[];
-  /** Ids the TITLE stated. Always present — the seed of every record. */
+  /** Ids the TITLE stated. The seed of every TITLE-PARSED record, and so
+   *  always present on one. An index intake parses no title — its title is
+   *  synthesized FROM the catalogue's own character fields, so citing it as a
+   *  source would be circular — and those sides carry `[]` here. */
   fromTitle: string[];
   /** Ids the DESCRIPTION bench stated for this side, once aligned. */
   fromDescription?: string[];
+  /** Ids a third-party INDEX stated for this side, as discrete fields. No
+   *  alignment step applies: the catalogue names the side. */
+  fromIndex?: string[];
   /** Ids read from FOOTAGE for this side. */
   fromFootage?: string[];
   /** Ids a PERSON read off the HUD's bench-portrait cluster.
@@ -251,8 +356,23 @@ export interface MatchVideo {
    *  report. A label that contradicts the calendar is an uploader's typo, not
    *  a boundary. */
   season: number;
+  /** The YouTube id, when `id` is not it. A record is not required to be a
+   *  whole video: an index intake publishes many records per VOD, so their ids
+   *  are `${videoId}@${startSeconds}` and the YouTube id lives here. Every
+   *  YouTube-shaped URL the engine builds resolves `videoId ?? id`. */
+  videoId?: string;
+  /** Where this record's footage starts inside `videoId`, in seconds. Absent
+   *  (or 0) means the whole video. */
+  startSeconds?: number;
   sides: [MatchSide, MatchSide];
 }
+
+/** data/source-pins.json — the carry pin for every `localFirst` intake, keyed
+ *  by ChannelKey. Written by the rebuild, hard-asserted by every parse. A
+ *  frozen channel pins in channels.ts instead, because its count never moves
+ *  again; a local-first source grows, so hand-editing a constant every refresh
+ *  would be friction that teaches people to skip the check. */
+export type SourcePins = Partial<Record<ChannelKey, number>>;
 
 /** data/players.json entry (mirrors the engine's Player). */
 export interface PlayerRecord {

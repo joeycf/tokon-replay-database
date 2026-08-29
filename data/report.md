@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-29T16:16:59.349Z_
+_Generated 2026-08-29T16:23:21.099Z_
 
 ## Coverage
 
@@ -13,6 +13,7 @@ _Generated 2026-08-29T16:16:59.349Z_
 | fightingStationX | 2704 | 105 | 3.9% |
 | fgcReplaysHub | 2561 | 23 | 0.9% |
 | marvelTokonYT _(events only)_ | 40 | 11 | 27.5% |
+| replayTheater | 0 | 0 | 0.0% |
 | **total** | | **472** | |
 
 ## Character provenance
@@ -23,6 +24,7 @@ How every one of the 944 sides got its characters.
 | --- | ---: | ---: |
 | title | 98 | 10.4% |
 | description | 271 | 28.7% |
+| index | 0 | 0.0% |
 | footage | 32 | 3.4% |
 | human | 519 | 55.0% |
 | review | 24 | 2.5% |

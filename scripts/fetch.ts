@@ -114,6 +114,17 @@ interface VideosResponse {
 }
 
 async function fetchChannel(ch: ChannelConfig): Promise<RawVideoRecord[]> {
+  // An index source has no channel and no playlist; it is pulled by
+  // `npm run data:theater` and skipped by the caller. Asserted rather than
+  // assumed, because reaching here with one would otherwise page YouTube for
+  // `playlistId=undefined` and return an empty dump that looks like a dead
+  // channel.
+  if (!ch.uploadsPlaylist) {
+    throw new Error(
+      `${ch.id} has no uploadsPlaylist — an index source must be skipped before fetchChannel.`,
+    );
+  }
+
   // 1) every videoId from the uploads playlist (50/page)
   const ids: string[] = [];
   let pageToken: string | undefined;

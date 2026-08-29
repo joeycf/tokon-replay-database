@@ -28,6 +28,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium, type Page } from 'playwright-core';
 
 import { idKey } from './roster';
+import { CHAR_TIERS } from '../types/index';
 import { DISTINCT_KEYS } from './players';
 import { CHANNELS } from './channels';
 import { PATCHES, SEASONS, seasonToken } from './patches';
@@ -256,7 +257,7 @@ function testSubstrate(): void {
   );
   const tiers = new Set(videos.flatMap((v) => v.sides.map((s) => s.provenance.tier)));
   expect(
-    [...tiers].every((t) => ['title', 'description', 'footage', 'human', 'review'].includes(t)),
+    [...tiers].every((t) => (CHAR_TIERS as readonly string[]).includes(t)),
     `every provenance tier is in the union (${[...tiers].sort().join(', ')})`,
   );
 

@@ -144,6 +144,12 @@ export default defineAppConfig({
       // Events". Index 6, so it shares the warning outline with 2..5; the label
       // is what disambiguates.
       { id: 'marvelTokonTournament', name: 'Marvel Tokon Events' },
+      // Appended at index 7 — same warning outline again, the label
+      // disambiguates. Named for what the footage IS, not for the catalogue
+      // that indexed it: these are tournament sets cut out of event
+      // organisers' own longform uploads (Boston Blue Beat, Tampa Never
+      // Sleeps), and each record carries its VOD's uploader in the title.
+      { id: 'replayTheater', name: 'Tournament VODs' },
     ],
     // Filter chips consolidate to two groups (engine v0.5.5). Group ids appear
     // NOWHERE else — not in Replay.source, not in a URL: toggling a group
@@ -163,7 +169,11 @@ export default defineAppConfig({
           'fgcReplaysHub',
         ],
       },
-      { id: 'tournament', name: 'Tournament', sources: ['marvelTokonTournament'] },
+      {
+        id: 'tournament',
+        name: 'Tournament',
+        sources: ['marvelTokonTournament', 'replayTheater'],
+      },
     ],
     // Era → patch hierarchy. PIPELINE-EMITTED (scripts/emit.ts →
     // data/patchGroups.json) from the same boundary authority that derives every

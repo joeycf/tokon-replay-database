@@ -241,12 +241,89 @@ export const CHANNELS: ChannelConfig[] = [
      */
     preReleaseFrom: PRE_RELEASE,
   },
+  {
+    /**
+     * THE FIRST INDEX SOURCE IN THIS REPO. replaytheater.app is a fan-curated
+     * match catalogue: it hosts no video, it points AT video with a start
+     * offset. An entry is a (videoId, startSeconds) pair plus players,
+     * characters and an event tag, so a record here is a SEGMENT — the 44
+     * tagged Tōkon matches are cut from just 5 longform VODs, a median of 8
+     * per video — which is why these records are keyed `${videoId}@${start}`
+     * and not by video id.
+     *
+     * WHY IT IS WORTH A SOURCE. Segmenting longform tournament streams is work
+     * this repo has no way to do, and these are 44 sets from 5 events it holds
+     * none of. They also arrive BENCH-COMPLETE: the catalogue carries four
+     * character columns per side and Tōkon fills all four, so unlike every
+     * other intake here these records need no bench drain at all. Measured
+     * against the source VODs' own chapter markers: 44/44 offsets land on a
+     * chapter and 25/25 chapters that name a matchup agree on both handles.
+     *
+     * LAST IN THE ARRAY, deliberately. Array order is the dedupe precedence
+     * (see this file's header), and lowest is right for a source that
+     * re-indexes other people's uploads: where it and a channel describe the
+     * same set, the channel's own upload should win.
+     *
+     * NO channelId, NO uploadsPlaylist, NO tokonSignal: there is no channel and
+     * no title to gate. The game is checked per ENTRY against `gameLabel`,
+     * because ?game= is a filter the catalogue answers, not one we control.
+     */
+    id: 'replayTheater',
+    source: 'replayTheater',
+    name: 'Tournament VODs',
+    index: {
+      endpoint: 'https://replaytheater.app/api/matches',
+      slug: 'tokon',
+      gameLabel: 'Marvel Tokon: Fighting Souls',
+      pageSize: 50,
+      pacingMs: 1200,
+    },
+    localFirst: true,
+    /**
+     * 18 of the 44 sit on one VOD published 2026-07-26 — the TNS Beta
+     * Tournament, eleven days before launch. They are real competitive footage
+     * on the pre-release build, exactly like marvelTokonYT's EVO uploads, and
+     * they file under the same S0 era and `2026-06-26` patch token. Without
+     * this the builder's floor is LAUNCH and 40% of the ingest disappears.
+     */
+    preReleaseFrom: PRE_RELEASE,
+  },
 ];
 
 export const CHANNEL_BY_ID = new Map(CHANNELS.map((c) => [c.id, c]));
 
-/** Channels the daily fetch actually contacts. A frozen channel is skipped
- *  entirely and its committed records are carried forward byte-stable by
- *  parse.ts, which also hard-asserts the pinned count. Nothing is frozen yet;
- *  the mechanism ships on day one so it is tested before it is needed. */
-export const ACTIVE_CHANNELS = CHANNELS.filter((c) => !c.frozen);
+/**
+ * Sponsor/team prefix on a catalogue handle: "NP | Senshi", "BBB | Aerodat".
+ * STRIPPED, never split — "|" is not a duo delimiter here, and treating it as
+ * one would mint a player called "BBB" with a page of its own.
+ *
+ * APPLIED REPEATEDLY, and that is not defensive coding. The catalogue carries
+ * doubly-prefixed handles — "Sweet | BBB | Aerodat" — and a single .replace()
+ * leaves "BBB | Aerodat", which is a worse outcome than not stripping at all:
+ * it mints a player whose name contains a sponsor tag rather than one that is
+ * merely wrong. Loop until stable.
+ */
+export const THEATER_SPONSOR = /^[^|]{1,12}\s*\|\s*/;
+
+export const stripTheaterSponsor = (handle: string): string => {
+  let out = handle.trim();
+  // Bounded: each pass removes at least one "|", and a handle carries few.
+  for (let i = 0; i < 4; i++) {
+    const next = out.replace(THEATER_SPONSOR, '').trim();
+    if (next === out || next === '') break;
+    out = next;
+  }
+  return out;
+};
+
+/** Channels the daily fetch actually contacts, and the channels whose records
+ *  are built by a TITLE PARSE — the two happen to be the same set.
+ *
+ *  A frozen channel is skipped: its committed records are carried forward
+ *  byte-stable by parse.ts, which also hard-asserts the pinned count. Nothing
+ *  is frozen yet; the mechanism ships on day one so it is tested before it is
+ *  needed. An INDEX source is skipped for a different reason — it has no
+ *  channel to fetch and no title to parse, and its records are built by their
+ *  own function. Note it is still in CHANNELS, so the collapse guard and the
+ *  report both still see it; only these two jobs skip it. */
+export const ACTIVE_CHANNELS = CHANNELS.filter((c) => !c.frozen && !c.index);

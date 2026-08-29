@@ -48,6 +48,7 @@ interface SideRec {
   provenance: {
     fromTitle?: string[];
     fromDescription?: string[];
+    fromIndex?: string[];
     fromFootage?: string[];
     fromHuman?: string[];
   };
@@ -71,6 +72,9 @@ export function crossTier(): { rows: CrossTier[]; scanned: number } {
       for (const [tier, claimed] of [
         ['title', p.fromTitle],
         ['description', p.fromDescription],
+        // A catalogue's fields are a claim like any other, and a human read
+        // that contradicts one is exactly the row this panel exists to show.
+        ['index', p.fromIndex],
         ['footage', p.fromFootage],
       ] as [string, string[] | undefined][]) {
         const missing = (claimed ?? []).filter((c) => !seen.has(c));

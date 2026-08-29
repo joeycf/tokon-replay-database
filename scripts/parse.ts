@@ -370,9 +370,13 @@ async function main() {
     'chars-first': 0,
     'parallel-lists': 0,
   };
+  // Record<CharTier, …> makes adding a tier and forgetting it here a COMPILE
+  // ERROR, and the report below reads this object's keys rather than repeating
+  // the list — so a new tier can no longer go missing from report.md silently.
   const tierCount: Record<CharTier, number> = {
     title: 0,
     description: 0,
+    index: 0,
     footage: 0,
     human: 0,
     review: 0,
@@ -1070,7 +1074,12 @@ async function main() {
   lines.push('## Character provenance', '');
   lines.push(`How every one of the ${sideTotal} sides got its characters.`, '');
   lines.push('| tier | sides | share |', '| --- | ---: | ---: |');
-  for (const t of ['title', 'description', 'footage', 'human', 'review'] as CharTier[]) {
+  // Derived from tierCount, never re-listed. A hand-written array here is a
+  // second copy of the union that the `as CharTier[]` cast stops the compiler
+  // from checking, so adding a tier and forgetting this line would drop a whole
+  // tier out of report.md — the precise regression the re-tally above exists to
+  // have already fixed once.
+  for (const t of Object.keys(tierCount) as CharTier[]) {
     lines.push(
       `| ${t} | ${tierCount[t]} | ${sideTotal ? ((tierCount[t] / sideTotal) * 100).toFixed(1) : '0.0'}% |`,
     );
@@ -1330,7 +1339,9 @@ async function main() {
   console.log(`  queues: review ${review.length} · bench ${benchQueue.length}`);
   if (mergeReport.merged.size) {
     const absorbed = [...mergeReport.merged.values()].reduce((n, a) => n + a.length, 0);
-    console.log(`  identity: ${absorbed} spelling(s) merged into ${mergeReport.merged.size} player(s)`);
+    console.log(
+      `  identity: ${absorbed} spelling(s) merged into ${mergeReport.merged.size} player(s)`,
+    );
   }
   if (bigResidue.length)
     console.log(`  ⚠ ACTION REQUIRED: ${bigResidue.length} residue string(s) on 3+ records`);
