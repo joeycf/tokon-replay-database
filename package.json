@@ -18,6 +18,7 @@
     "data:fetch": "tsx --env-file-if-exists=.env scripts/fetch.ts",
     "data:parse": "tsx scripts/parse.ts",
     "data:build": "npm run data:fetch && npm run data:parse",
+    "data:theater": "tsx --env-file-if-exists=.env scripts/fetch-theater.ts",
     "data:emit": "tsx scripts/emit.ts",
     "data:bench": "tsx scripts/bench.ts",
     "data:characters": "tsx scripts/characters.ts",
