@@ -103,14 +103,32 @@ console.log(
 // so those records are excluded rather than guessed at. The audit's reach
 // grows as the bench tier and the extractor fill sides in; until then this
 // number is a floor, not a finding.
-const unkeyable = videos.length - keyable.length;
-if (unkeyable) {
+// The two exclusions are counted SEPARATELY because they have opposite causes
+// and opposite cures. A thin side is missing information and fills in over
+// time; a record with no duration has the strongest signature in the archive
+// and will never gain a length, because its source does not publish one.
+// Rolling them together is not a rounding error — it printed "a side with <2
+// known characters" over records carrying four a side, which is the reverse of
+// true and is exactly the line a reader trusts to know what was not checked.
+const noDuration = new Set(videos.filter((v) => v.durationSec <= 0).map((v) => v.id));
+const thinOnly = videos.filter(
+  (v) => !noDuration.has(v.id) && !v.sides.every((s) => s.characters.length >= KEYABLE_MIN),
+).length;
+if (thinOnly) {
   console.log(
-    `  ⓘ ${unkeyable} record(s) excluded as unkeyable (a side with <${KEYABLE_MIN} known characters).\n` +
-      `    This audit sees ${((keyable.length / videos.length) * 100).toFixed(0)}% of the archive today; ` +
-      `coverage rises as sides fill in.\n`,
+    `  ⓘ ${thinOnly} record(s) excluded as unkeyable (a side with <${KEYABLE_MIN} known characters).\n` +
+      `    Coverage rises as sides fill in.`,
   );
 }
+if (noDuration.size) {
+  console.log(
+    `  ⓘ ${noDuration.size} record(s) excluded for having NO DURATION — see the third pass below.\n` +
+      `    These are not thin: an index intake publishes four fighters a side and no length.`,
+  );
+}
+console.log(
+  `    This audit adjudicates ${((keyable.length / videos.length) * 100).toFixed(0)}% of the archive today.\n`,
+);
 
 /**
  * ── SECOND PASS: THE THIN-SIDE AUDIT ─────────────────────────────────────────
@@ -193,6 +211,73 @@ console.log(
     `keyed on players + duration only: ${thinPairs.length} candidate(s)\n`,
 );
 for (const p of thinPairs) show(p);
+
+/**
+ * ── THIRD PASS: NO-DURATION RECORDS, REPORTED AND NEVER ADJUDICATED ──────────
+ *
+ * Both passes above gate on `durationSec > 0`, because duration is the
+ * INDEPENDENT signal: two different matches between the same players on the
+ * same teams almost never land within a second of each other. An INDEX source
+ * publishes no per-match duration — the catalogue records a (videoId,
+ * startSeconds) pair and says nothing about length, and the gap to the next set
+ * includes the downtime between them — so every one of its records is invisible
+ * to both. Invisible in the worst possible way: those are the records with the
+ * STRONGEST signature here, four fighters on both sides against a corpus mean
+ * of 3.7.
+ *
+ * Duration is replaced by the only other independent signal available: the
+ * PUBLISH DAY. Two sources covering one tournament upload it the same day; a
+ * rematch weeks later does not. That is weaker, and the difference is the whole
+ * reason this section exists separately.
+ *
+ * IT PROPOSES NOTHING AND PRINTS NO OVERRIDES FRAGMENT, which is what separates
+ * it from the two passes above. A drop needs the independent signal; a shared
+ * publish day is corroboration, not proof. This section names what the audit
+ * CANNOT decide, so that "0 candidates" upstairs keeps meaning what it says.
+ */
+const byPlayersAll = new Map<string, MatchVideo[]>();
+for (const v of videos) {
+  const k = v.sides
+    .map((s) => s.player)
+    .sort()
+    .join('~');
+  byPlayersAll.set(k, [...(byPlayersAll.get(k) ?? []), v]);
+}
+const unadjudicated: { a: MatchVideo; b: MatchVideo; sameDay: boolean }[] = [];
+for (const list of byPlayersAll.values()) {
+  if (list.length < 2) continue;
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      const a = list[i]!;
+      const b = list[j]!;
+      if (a.intake === b.intake) continue; // not a cross-post
+      if (!noDuration.has(a.id) && !noDuration.has(b.id)) continue; // passes 1-2 own these
+      unadjudicated.push({
+        a,
+        b,
+        sameDay: a.publishedAt.slice(0, 10) === b.publishedAt.slice(0, 10),
+      });
+    }
+  }
+}
+if (noDuration.size) {
+  const sameDay = unadjudicated.filter((u) => u.sameDay).length;
+  console.log(
+    `No-duration pass — ${noDuration.size} record(s) with no length to compare, keyed on ` +
+      `players only: ${unadjudicated.length} cross-intake pair(s), ${sameDay} of them same-day.\n` +
+      `  REPORTED, NEVER ADJUDICATED — no drop is proposed for any of these.\n`,
+  );
+  for (const u of [...unadjudicated].sort((x, y) => Number(y.sameDay) - Number(x.sameDay))) {
+    console.log(`  ${u.sameDay ? '⚠ same day' : '· different days'}`);
+    for (const r of [u.a, u.b]) {
+      console.log(
+        `    ${r.id} (${r.intake}) ${r.publishedAt.slice(0, 10)} ${r.durationSec || '—'}s`,
+      );
+      console.log(`       ${r.title.slice(0, 88)}`);
+    }
+    console.log('');
+  }
+}
 
 const all = [...pairs, ...thinPairs];
 if (!all.length) process.exit(0);

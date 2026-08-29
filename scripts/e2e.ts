@@ -64,6 +64,10 @@ const replays = read<
     sides: { player: string; characters: string[] }[];
     patch?: string;
     source: string;
+    date: string;
+    /** Present only on a segment record — see the segment blocks below. */
+    videoId?: string;
+    startSeconds?: number;
   }[]
 >('replays.json');
 const characters = read<CharacterRecord[]>('characters.json');
@@ -179,10 +183,7 @@ function testSubstrate(): void {
     players.every((p) => p.id.length > 0),
     'every player id is non-empty',
   );
-  expect(
-    new Set(players.map((p) => p.id)).size === players.length,
-    'player ids are unique',
-  );
+  expect(new Set(players.map((p) => p.id)).size === players.length, 'player ids are unique');
   const keyCollisions = new Map<string, string[]>();
   for (const p of players) {
     const k = idKey(p.handle);
@@ -194,7 +195,9 @@ function testSubstrate(): void {
   expect(
     undeclared.length === 0,
     `no two players share a normalised key undeclared${
-      undeclared.length ? ` (${undeclared.map(([k, hs]) => `${k}: ${hs.join('/')}`).join(', ')})` : ''
+      undeclared.length
+        ? ` (${undeclared.map(([k, hs]) => `${k}: ${hs.join('/')}`).join(', ')})`
+        : ''
     }`,
   );
   // union round-trip: videos.json → replays.json, IN ORDER
@@ -377,6 +380,96 @@ function testSubstrate(): void {
     `summary.updated is the newest replay date, not build time (${summary.updated})`,
   );
 
+  // ── segment records ───────────────────────────────────────────────────────
+  // An INDEX intake publishes many records per VOD, so its ids are composite
+  // and its records are the only ones here whose `id` is not a YouTube id.
+  // Every number below is COMPUTED from the committed data — there is no
+  // hardcoded 44 — so the block keeps meaning the same thing as the catalogue
+  // grows, and it self-skips if the intake is ever removed.
+  const segments = videos.filter((v) => v.videoId !== undefined);
+  if (segments.length > 0) {
+    const COMPOSITE = /^([A-Za-z0-9_-]{11})@(\d+)$/;
+    const malformed = segments.filter((v) => {
+      const m = COMPOSITE.exec(v.id);
+      return !m || m[1] !== v.videoId || Number(m[2]) !== (v.startSeconds ?? 0);
+    });
+    expect(
+      malformed.length === 0,
+      `every segment id is \`videoId@startSeconds\` and agrees with its own fields (${malformed
+        .slice(0, 3)
+        .map((v) => v.id)
+        .join(', ')})`,
+    );
+
+    // A composite id can never equal an 11-character YouTube id, which is what
+    // makes the ignore-if-known rule key on videoId rather than id — assert the
+    // property that reasoning rests on rather than trusting it.
+    const wholeVideoIds = new Set(videos.filter((v) => v.videoId === undefined).map((v) => v.id));
+    const clashing = segments.filter((v) => wholeVideoIds.has(v.id));
+    expect(clashing.length === 0, 'no segment id collides with a whole-video record id');
+
+    const perVod = new Map<string, number>();
+    for (const v of segments) perVod.set(v.videoId!, (perVod.get(v.videoId!) ?? 0) + 1);
+    expect(
+      [...perVod.values()].some((n) => n > 1),
+      `at least one VOD is shared by several records (max ${Math.max(...perVod.values())})`,
+    );
+
+    // The whole point of the intake: these VODs are NOT in the corpus as
+    // records of their own. If one ever is, ignore-if-known should have
+    // dropped its segments.
+    const vodAlsoARecord = [...perVod.keys()].filter((id) => wholeVideoIds.has(id));
+    expect(
+      vodAlsoARecord.length === 0,
+      `no source VOD is also a record in its own right (${vodAlsoARecord.join(', ') || 'clean'})`,
+    );
+
+    // ROUND-TRIP INTO THE EMITTED CONTRACT. videoId must survive independently
+    // of startSeconds: 0 is falsy, and the engine resolves `videoId ?? id`, so
+    // a first-segment record that lost videoId would derive its thumbnail and
+    // its embed from the literal string "abc@0".
+    const byId = new Map(replays.map((r) => [r.id, r]));
+    const missingVideoId = segments.filter((v) => byId.get(v.id)?.videoId !== v.videoId);
+    expect(
+      missingVideoId.length === 0,
+      `every segment carries videoId into replays.json (${missingVideoId.length} missing)`,
+    );
+    const badStart = segments.filter((v) => {
+      const r = byId.get(v.id);
+      return (v.startSeconds ?? 0) > 0
+        ? r?.startSeconds !== v.startSeconds
+        : r?.startSeconds !== undefined;
+    });
+    expect(
+      badStart.length === 0,
+      'startSeconds is emitted when non-zero and omitted when zero (the falsy-0 contract)',
+    );
+
+    // The pin is the carry's only check on a cron run, so a pin that has
+    // drifted from the committed corpus is the failure the carry cannot see.
+    const pins = JSON.parse(readFileSync(join(ROOT, 'data/source-pins.json'), 'utf8')) as Record<
+      string,
+      number
+    >;
+    for (const ch of CHANNELS.filter((c) => c.localFirst)) {
+      const n = videos.filter((v) => v.intake === ch.id).length;
+      expect(
+        pins[ch.id] === n,
+        `data/source-pins.json pins ${ch.id} at its committed count (${pins[ch.id]} vs ${n})`,
+      );
+    }
+
+    // Duration-less records are exactly the index intakes, and the dupe audit
+    // knows it. If a fetched channel ever starts emitting 0s durations, the
+    // third pass in replay-dupes.ts silently becomes the wrong tool for them.
+    const indexIntakes = new Set(CHANNELS.filter((c) => c.index).map((c) => c.id));
+    const zeroDurOutside = videos.filter((v) => v.durationSec <= 0 && !indexIntakes.has(v.intake));
+    expect(
+      zeroDurOutside.length === 0,
+      `only an index intake publishes records with no duration (${zeroDurOutside.length} outside)`,
+    );
+  }
+
   // dupe audit — the signature MUST stay semantically identical to
   // scripts/replay-dupes.ts, or this gate stops checking what that finds
   const signature = (v: MatchVideo) =>
@@ -445,8 +538,28 @@ function testCronGuard(): void {
   // workflow is exactly how that was found.
   const staged = (guard.match(/git add ((?:data\/\S+\s*)+)/)?.[1] ?? '')
     .split(/\s+/)
-    .filter((f) => f.startsWith('data/') && f.endsWith('.json'));
+    // .md as well as .json: report.md is a pipeline output like any other and
+    // the .json-only filter silently exempted it from the staging check below.
+    .filter((f) => f.startsWith('data/') && (f.endsWith('.json') || f.endsWith('.md')));
   expect(staged.length > 0, `workflow's git add names data files (${staged.length})`);
+  // Every file the pipeline WRITES must be staged, or the cron regenerates it
+  // and throws it away. Checked by name rather than by count so adding a
+  // pipeline output and forgetting the workflow is a failure here, not a
+  // mystery three weeks later. source-pins.json is the case that prompted it:
+  // the cron only ever reads it, but an unstaged file that does change is a
+  // change discarded in silence.
+  for (const f of [
+    'videos.json',
+    'replays.json',
+    'summary.json',
+    'report.md',
+    'source-pins.json',
+  ]) {
+    expect(
+      staged.some((p) => p.endsWith(f)),
+      `workflow stages data/${f}`,
+    );
+  }
   for (const f of staged) write(f, '[]\n');
   write('data/report.md', '# r\n\n_Generated 2026-01-01T00:00:00.000Z_\n');
   // Written to a FILE and run as `bash guard.sh`: passing it via `bash -c` puts
@@ -542,6 +655,76 @@ async function main(): Promise<void> {
   );
   expect(body.includes('fighter'), 'vocabulary reads "fighter", not "character"');
 
+  // ── segment playback ──────────────────────────────────────────────────────
+  // A segment record is the only kind whose id is not a YouTube id, so every
+  // URL the engine builds for it goes through `videoId ?? id`. This asserts the
+  // three places that matters — the derived thumbnail, the embed and the watch
+  // link — on a record chosen from the committed data rather than hardcoded.
+  const segment = replays.find((r) => r.videoId && (r.startSeconds ?? 0) > 0);
+  if (segment) {
+    await gotoIdle(page, server.at(`/?v=${encodeURIComponent(segment.id)}`));
+    await page.waitForSelector('[data-testid="video-modal"], dialog, [role="dialog"]', {
+      timeout: 8000,
+    });
+    const shown = await page.evaluate(() => {
+      const root = document.querySelector('[data-testid="video-modal"], dialog, [role="dialog"]');
+      if (!root) return null;
+      const iframe = root.querySelector('iframe');
+      const watch = [...root.querySelectorAll('a')]
+        .map((a) => a.getAttribute('href') ?? '')
+        .find((h) => h.includes('youtube.com/watch') || h.includes('youtu.be/'));
+      const img = root.querySelector('img');
+      return {
+        iframe: iframe?.getAttribute('src') ?? '',
+        watch: watch ?? '',
+        img: img?.getAttribute('src') ?? '',
+        text: (root as HTMLElement).innerText,
+      };
+    });
+    expect(shown !== null, `?v=${segment.id} opens the modal for a segment record`);
+    if (shown) {
+      // The embed may be lazy (LiteYouTube renders a facade until clicked), so
+      // an absent iframe is not a failure — an iframe pointing at the WRONG
+      // video is. Same for the poster image.
+      if (shown.iframe) {
+        expect(
+          shown.iframe.includes(`/embed/${segment.videoId}`),
+          `the embed loads videoId, not the composite id (${shown.iframe.slice(0, 60)})`,
+        );
+        expect(
+          shown.iframe.includes(`start=${segment.startSeconds}`),
+          `the embed starts at the record's offset (start=${segment.startSeconds})`,
+        );
+      }
+      expect(
+        shown.watch.includes(`v=${segment.videoId}`) || shown.watch.includes(`/${segment.videoId}`),
+        `the watch link points at the VOD (${shown.watch.slice(0, 70)})`,
+      );
+      expect(
+        shown.watch.includes(`t=${segment.startSeconds}`),
+        `the watch link carries the offset (t=${segment.startSeconds}s)`,
+      );
+      expect(
+        !shown.img.includes('@'),
+        `the derived thumbnail uses videoId, never the composite id (${shown.img.slice(0, 70)})`,
+      );
+    }
+
+    // and it is reachable by browsing, not only by deep link
+    await gotoIdle(page, server.at('/'));
+    await page.waitForSelector('[data-replay-id]');
+    const reachable = await page.evaluate(
+      (id: string) => document.querySelector(`[data-replay-id="${id}"]`) !== null,
+      segment.id,
+    );
+    const newest = [...replays].sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+    // Only assert presence on the first page when the segment IS newest —
+    // otherwise its absence is paging, not a bug.
+    if (newest && newest.id === segment.id) {
+      expect(reachable, 'the newest segment record renders a card on the first browse page');
+    }
+  }
+
   // ── source chips: TWO GROUPS, not seven channels ──────────────────────────
   // Inverted when marvelTokonYT arrived and app.config.ts declared
   // sourceGroups. It used to assert the opposite ("chips render per channel,
@@ -581,10 +764,7 @@ async function main(): Promise<void> {
   // Its label is asserted rather than its token: `buildPatchGroups` would
   // otherwise default it to "Season 0", naming a balance era the game never had.
   expect(chipText.includes('Pre-release'), 'patch facet shows the S0 Pre-release parent label');
-  expect(
-    !chipText.includes('Season 0'),
-    'the pre-release era is never labelled "Season 0"',
-  );
+  expect(!chipText.includes('Season 0'), 'the pre-release era is never labelled "Season 0"');
 
   // deep link round-trip
   const topChar = Object.entries(stats.characterUsage).sort((a, b) => b[1] - a[1])[0];
