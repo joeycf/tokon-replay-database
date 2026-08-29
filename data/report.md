@@ -1,20 +1,28 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-29T16:41:22.092Z_
+## ⚠ ACTION REQUIRED
+
+1 unmatched character-slot string(s) appear on 3+ records:
+- `Doc.` × 3 (e.g. afb0QEfdkxM)
+
+A new fighter has probably shipped. Add it to scripts/characters.ts and
+get an accent token before it silently shortens every side it appears on.
+
+_Generated 2026-08-29T22:32:43.717Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 107 | 107 | 100.0% |
+| highLevelReplays | 108 | 108 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 773 | 77 | 10.0% |
-| replaysHub | 140 | 136 | 97.1% |
-| fightingStationX | 2704 | 105 | 3.9% |
-| fgcReplaysHub | 2561 | 23 | 0.9% |
-| marvelTokonYT _(events only)_ | 40 | 11 | 27.5% |
+| hadoukenReplays | 774 | 78 | 10.1% |
+| replaysHub | 142 | 138 | 97.2% |
+| fightingStationX | 2707 | 107 | 4.0% |
+| fgcReplaysHub | 2563 | 24 | 0.9% |
+| marvelTokonYT _(events only)_ | 41 | 11 | 26.8% |
 | replayTheater _(index)_ | 44 | 44 | 100.0% |
-| **total** | | **516** | |
+| **total** | | **523** | |
 
 ## Local-first intakes
 
@@ -26,21 +34,21 @@ _Entries skipped as already-known: **0**. The catalogue indexes no video this re
 
 ## Character provenance
 
-How every one of the 1032 sides got its characters.
+How every one of the 1046 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 98 | 9.5% |
-| description | 271 | 26.3% |
-| index | 88 | 8.5% |
+| title | 108 | 10.3% |
+| description | 275 | 26.3% |
+| index | 88 | 8.4% |
 | footage | 32 | 3.1% |
-| human | 519 | 50.3% |
+| human | 519 | 49.6% |
 | review | 24 | 2.3% |
 
-- complete (4/4): **934/1032** (90.5%)
+- complete (4/4): **938/1046** (89.7%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 254 · character-subset 21 · ambiguous 4
-- title slot order: handle-first 767 · chars-first 75 · parallel-lists 80
+- bench alignment: handle 258 · character-subset 21 · ambiguous 4
+- title slot order: handle-first 780 · chars-first 76 · parallel-lists 80
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -48,21 +56,21 @@ How every one of the 1032 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 98 | 9.5% |
-| 4 | 927 | 89.8% |
+| 1 | 108 | 10.3% |
+| 4 | 931 | 89.0% |
 | 5 _(mid-set change)_ | 6 | 0.6% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **98 side(s) awaiting a drain** across 49 record(s) — oldest published **13 day(s)** ago
+- **108 side(s) awaiting a drain** across 54 record(s) — oldest published **13 day(s)** ago
 
-> The bench queue is at 49 (nudge threshold 40).
+> The bench queue is at 54 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **49**
+- bench queue (published, incomplete): **54**
 
 ## Player identity
 
@@ -87,23 +95,23 @@ after changing scripts/players.ts, or the old URLs 404.
 
 | reason | count |
 | --- | ---: |
-| other-game | 3958 |
+| other-game | 3959 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 114 |
-| not-an-event | 29 |
+| not-a-match | 115 |
+| not-an-event | 30 |
 | char-unresolved | 14 |
 | short-duration | 6 |
 | no-vs-title | 4 |
 | bench-conflict | 1 |
 
-- `marvelTokonYT` events-only gate: **29** upload(s) carried no known event brand.
+- `marvelTokonYT` events-only gate: **30** upload(s) carried no known event brand.
+  - MARVEL Tokon ▰ ImnoDeag (Spider-Man) vs Nieve (Champion) ▰ High Level Match
   - MARVEL Tokon ▰ ChrisG (Black Panther) vs Snake Eyes (Champion) ▰ High Level Match
   - MARVEL Tokon ▰ Naire (Spider-Man) vs Roda (Wolverine) ▰ High Level Match
   - MARVEL Tokon ▰ Harampool Crazy DEADPOOL ▰ High Level Match
   - MARVEL Tokon ▰ HaramPool (#1 Deadpool) vs Opal (Magik) ▰ High Level Match
-  - MARVEL Tokon ▰ K7 (Doctor Doom) vs Yamii (Spider-Man) ▰ High Level Match
-  - …and 24 more
+  - …and 25 more
 
 ## Unmatched text in character slots
 
@@ -111,8 +119,8 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
+| `Doc.` | 3 | afb0QEfdkxM |
 | `P.Parker` | 2 | cAjt5HIKDyI |
-| `Doc.` | 2 | PsrOeas920s |
 | `C.America` | 1 | RAsu7I_i-fk |
 | `B.Panther` | 1 | -KobHCx2Pvc |
 | `Raked` | 1 | f_RPQ0HmHXE |
