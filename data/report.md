@@ -8,47 +8,47 @@
 A new fighter has probably shipped. Add it to scripts/characters.ts and
 get an accent token before it silently shortens every side it appears on.
 
-_Generated 2026-08-29T22:32:43.717Z_
+_Generated 2026-08-30T13:21:17.354Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 108 | 108 | 100.0% |
+| highLevelReplays | 110 | 110 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 774 | 78 | 10.1% |
-| replaysHub | 142 | 138 | 97.2% |
-| fightingStationX | 2707 | 107 | 4.0% |
-| fgcReplaysHub | 2563 | 24 | 0.9% |
+| hadoukenReplays | 776 | 80 | 10.3% |
+| replaysHub | 145 | 141 | 97.2% |
+| fightingStationX | 2711 | 108 | 4.0% |
+| fgcReplaysHub | 2571 | 29 | 1.1% |
 | marvelTokonYT _(events only)_ | 41 | 11 | 26.8% |
-| replayTheater _(index)_ | 44 | 44 | 100.0% |
-| **total** | | **523** | |
+| replayTheater _(carried)_ | — | 44 | — |
+| **total** | | **536** | |
 
 ## Local-first intakes
 
 | intake | records | pin | this run |
 | --- | ---: | ---: | --- |
-| `replayTheater` | 44 | 44 | rebuilt from a local dump |
+| `replayTheater` | 44 | 44 | carried (no dump) |
 
 _Entries skipped as already-known: **0**. The catalogue indexes no video this repo has fetched, published or ruled on._
 
 ## Character provenance
 
-How every one of the 1046 sides got its characters.
+How every one of the 1072 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 108 | 10.3% |
-| description | 275 | 26.3% |
-| index | 88 | 8.4% |
-| footage | 32 | 3.1% |
-| human | 519 | 49.6% |
-| review | 24 | 2.3% |
+| title | 120 | 11.2% |
+| description | 289 | 27.0% |
+| index | 88 | 8.2% |
+| footage | 32 | 3.0% |
+| human | 519 | 48.4% |
+| review | 24 | 2.2% |
 
-- complete (4/4): **938/1046** (89.7%)
+- complete (4/4): **952/1072** (88.8%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 258 · character-subset 21 · ambiguous 4
-- title slot order: handle-first 780 · chars-first 76 · parallel-lists 80
+- bench alignment: handle 267 · character-subset 22 · ambiguous 4
+- title slot order: handle-first 804 · chars-first 78 · parallel-lists 80
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -56,25 +56,25 @@ How every one of the 1046 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 108 | 10.3% |
-| 4 | 931 | 89.0% |
+| 1 | 120 | 11.2% |
+| 4 | 945 | 88.2% |
 | 5 _(mid-set change)_ | 6 | 0.6% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **108 side(s) awaiting a drain** across 54 record(s) — oldest published **13 day(s)** ago
+- **120 side(s) awaiting a drain** across 60 record(s) — oldest published **14 day(s)** ago
 
-> The bench queue is at 54 (nudge threshold 40).
+> The bench queue is at 60 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
-- review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **54**
+- review queue (never published): **4** — character-completion 3 · bench-conflict 1
+- bench queue (published, incomplete): **60**
 
 ## Player identity
 
-10 identity(s) resolved from more than one spelling. The
+11 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -83,6 +83,7 @@ after changing scripts/players.ts, or the old URLs 404.
 | `balderberg` | `balder-berg` |
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
+| `chrisg` | `chris-g` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
 | `mrmarben` | `mr-marben` |
@@ -95,12 +96,12 @@ after changing scripts/players.ts, or the old URLs 404.
 
 | reason | count |
 | --- | ---: |
-| other-game | 3959 |
+| other-game | 3962 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 115 |
+| not-a-match | 117 |
 | not-an-event | 30 |
-| char-unresolved | 14 |
+| char-unresolved | 15 |
 | short-duration | 6 |
 | no-vs-title | 4 |
 | bench-conflict | 1 |
