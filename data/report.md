@@ -1,54 +1,46 @@
 # Tōkon pipeline report
 
-## ⚠ ACTION REQUIRED
-
-1 unmatched character-slot string(s) appear on 3+ records:
-- `Doc.` × 3 (e.g. afb0QEfdkxM)
-
-A new fighter has probably shipped. Add it to scripts/characters.ts and
-get an accent token before it silently shortens every side it appears on.
-
-_Generated 2026-08-30T13:21:17.354Z_
+_Generated 2026-08-30T16:20:31.751Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 110 | 110 | 100.0% |
+| highLevelReplays | 112 | 112 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 776 | 80 | 10.3% |
-| replaysHub | 145 | 141 | 97.2% |
-| fightingStationX | 2711 | 108 | 4.0% |
-| fgcReplaysHub | 2571 | 29 | 1.1% |
+| replaysHub | 146 | 142 | 97.3% |
+| fightingStationX | 2712 | 109 | 4.0% |
+| fgcReplaysHub | 2572 | 29 | 1.1% |
 | marvelTokonYT _(events only)_ | 41 | 11 | 26.8% |
-| replayTheater _(carried)_ | — | 44 | — |
-| **total** | | **536** | |
+| replayTheater _(index)_ | 44 | 44 | 100.0% |
+| **total** | | **540** | |
 
 ## Local-first intakes
 
 | intake | records | pin | this run |
 | --- | ---: | ---: | --- |
-| `replayTheater` | 44 | 44 | carried (no dump) |
+| `replayTheater` | 44 | 44 | rebuilt from a local dump |
 
 _Entries skipped as already-known: **0**. The catalogue indexes no video this repo has fetched, published or ruled on._
 
 ## Character provenance
 
-How every one of the 1072 sides got its characters.
+How every one of the 1080 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 120 | 11.2% |
-| description | 289 | 27.0% |
-| index | 88 | 8.2% |
+| title | 124 | 11.5% |
+| description | 293 | 27.1% |
+| index | 88 | 8.1% |
 | footage | 32 | 3.0% |
-| human | 519 | 48.4% |
+| human | 519 | 48.1% |
 | review | 24 | 2.2% |
 
-- complete (4/4): **952/1072** (88.8%)
+- complete (4/4): **956/1080** (88.5%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 267 · character-subset 22 · ambiguous 4
-- title slot order: handle-first 804 · chars-first 78 · parallel-lists 80
+- bench alignment: handle 270 · character-subset 22 · ambiguous 4
+- title slot order: handle-first 812 · chars-first 78 · parallel-lists 80
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -56,21 +48,21 @@ How every one of the 1072 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 120 | 11.2% |
-| 4 | 945 | 88.2% |
+| 1 | 124 | 11.5% |
+| 4 | 949 | 87.9% |
 | 5 _(mid-set change)_ | 6 | 0.6% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **120 side(s) awaiting a drain** across 60 record(s) — oldest published **14 day(s)** ago
+- **124 side(s) awaiting a drain** across 62 record(s) — oldest published **14 day(s)** ago
 
-> The bench queue is at 60 (nudge threshold 40).
+> The bench queue is at 62 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **4** — character-completion 3 · bench-conflict 1
-- bench queue (published, incomplete): **60**
+- bench queue (published, incomplete): **62**
 
 ## Player identity
 
@@ -96,7 +88,7 @@ after changing scripts/players.ts, or the old URLs 404.
 
 | reason | count |
 | --- | ---: |
-| other-game | 3962 |
+| other-game | 3963 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
 | not-a-match | 117 |
@@ -120,7 +112,6 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
-| `Doc.` | 3 | afb0QEfdkxM |
 | `P.Parker` | 2 | cAjt5HIKDyI |
 | `C.America` | 1 | RAsu7I_i-fk |
 | `B.Panther` | 1 | -KobHCx2Pvc |

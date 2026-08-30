@@ -16,7 +16,7 @@
  * Run: npm run verify:gates
  */
 
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -1037,12 +1037,23 @@ try {
       // this game launched days ago, so slicing off the tail would retain every
       // Tōkon upload and the guard would (correctly) stay silent — a control that
       // passes for the wrong reason is worse than no control.
-      const big = JSON.parse(
-        await readFile(join(ROOT, 'raw', 'hadoukenReplays.json'), 'utf8'),
-      ) as unknown[];
+      const hadPath = join(ROOT, 'raw', 'hadoukenReplays.json');
+      const big = JSON.parse(await readFile(hadPath, 'utf8')) as unknown[];
+      // KEEP THE CHANNEL'S NEWEST UPLOAD, then the oldest fifth.
+      //
+      // The oldest fifth is the load-bearing part: raw/ is sorted newest-first
+      // and this game launched days ago, so slicing off the TAIL would retain
+      // every Tōkon upload and the collapse guard would (correctly) stay silent
+      // — a control that passes for the wrong reason is worse than none.
+      //
+      // big[0] is prepended because the stale-raw guard added below reads the
+      // newest upload in the dump, and a fixture that removes it is stale by
+      // that predicate as well as collapsed by this one. Without the newest
+      // upload this control stops isolating the collapse guard and starts
+      // measuring whichever guard runs first. Each control proves one thing.
       await writeFile(
-        join(ROOT, 'raw', 'hadoukenReplays.json'),
-        JSON.stringify(big.slice(-Math.floor(big.length * 0.2)), null, 1),
+        hadPath,
+        JSON.stringify([big[0], ...big.slice(-Math.floor(big.length * 0.2))], null, 1),
       );
       const collapsed = parse();
       check(
@@ -1056,6 +1067,81 @@ try {
         allowed.code === 0,
         `exit ${allowed.code}`,
       );
+
+      // 4c — the stale-raw guard, and specifically its PREDICATE.
+      //
+      // Two earlier versions of this guard were silent on the failure they were
+      // built for. A 24-hour wall-clock window let a day-old dump write 435
+      // records over a committed 455 (2026-08-29). Replacing the window with a
+      // sharper comparison but keeping mtime let a 13-hour-old dump write 523
+      // over a committed 536 (2026-08-30) — because mtime is not a record of
+      // when a dump was fetched, and THIS SCRIPT is one of the things that
+      // forges it: restoreAll() rewrites raw/ with `cp`, stamping every dump
+      // with the current time.
+      //
+      // So the control manipulates DATA, never timestamps: drop the newest
+      // uploads from a dump and the committed corpus is left holding a record
+      // that dump provably cannot produce.
+      // Restore the collapse fixture first — 4b leaves it truncated for the
+      // global finally, and a parse below must fail on THIS guard or none.
+      await writeFile(hadPath, JSON.stringify(big, null, 1));
+
+      const hlPath = join(ROOT, 'raw', 'highLevelReplays.json');
+      const hlRows = JSON.parse(await readFile(hlPath, 'utf8')) as { publishedAt: string }[];
+      const committedNow = JSON.parse(
+        await readFile(join(ROOT, 'data', 'videos.json'), 'utf8'),
+      ) as MatchVideo[];
+      let hlNewest = '';
+      for (const v of committedNow) {
+        if (v.intake === 'highLevelReplays' && v.publishedAt > hlNewest) hlNewest = v.publishedAt;
+      }
+      if (hlNewest) {
+        // Everything published strictly before the newest COMMITTED record —
+        // i.e. exactly the dump a fetch taken before that upload would return.
+        const trimmed = hlRows.filter((r) => r.publishedAt < hlNewest);
+        check(
+          'the control actually removes something (else it proves nothing)',
+          trimmed.length < hlRows.length,
+          `${hlRows.length} → ${trimmed.length} uploads`,
+        );
+        await writeFile(hlPath, JSON.stringify(trimmed, null, 1));
+        const stale = parse();
+        check(
+          'stale guard refuses a dump that cannot contain a committed upload',
+          stale.code !== 0 && /is stale/.test(stale.out),
+          `exit ${stale.code}`,
+        );
+
+        // NEGATIVE 1 — file age must never fire on its own. Restore the dump and
+        // backdate it hard: mtime is not an input any more, so a dump stamped
+        // last year is still fresh if its contents are.
+        await writeFile(hlPath, JSON.stringify(hlRows, null, 1));
+        const ancient = new Date('2025-01-01T00:00:00Z');
+        await utimes(hlPath, ancient, ancient);
+        const quiet = parse();
+        check(
+          'and stays quiet on a dump backdated a year, because mtime is not an input',
+          quiet.code === 0,
+          `exit ${quiet.code}`,
+        );
+
+        // NEGATIVE 2 — a DELETED upload must stay legal. Remove a record from the
+        // middle of the dump: the committed corpus still holds it, but the
+        // dump's newest is unchanged, so this is a prune and not staleness. The
+        // pipeline exists to publish exactly this.
+        const mid = Math.floor(hlRows.length / 2);
+        await writeFile(
+          hlPath,
+          JSON.stringify([...hlRows.slice(0, mid), ...hlRows.slice(mid + 1)], null, 1),
+        );
+        const pruned = parse();
+        check(
+          'and stays quiet when an upload was deleted rather than never fetched',
+          pruned.code === 0,
+          `exit ${pruned.code}`,
+        );
+        await writeFile(hlPath, JSON.stringify(hlRows, null, 1));
+      }
     } finally {
       // restored by the global finally
     }
@@ -1275,8 +1361,7 @@ try {
     q = await readQueue();
     vids = await readVideos();
     const queued = q.find((r) => r.id === CID) as
-      | { conflict?: { fromTitle: string[]; fromDescription: string[] } }
-      | undefined;
+      { conflict?: { fromTitle: string[]; fromDescription: string[] } } | undefined;
     check(
       'a title/description disagreement queues as bench-conflict',
       !!queued,

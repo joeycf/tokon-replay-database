@@ -5,7 +5,7 @@
  * Run: npm run data:parse
  */
 
-import { readFile, writeFile, stat } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -35,7 +35,6 @@ import type {
 } from '../types/index';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const RAW = join(ROOT, 'raw');
 const DATA = join(ROOT, 'data');
 
 const args = process.argv.slice(2);
@@ -642,7 +641,7 @@ async function main() {
     }
     // Stale-raw guard: parsing a raw dump older than the committed catalogue
     // silently republishes yesterday's world as today's.
-    await assertRawIsFresh(ch.id);
+    assertRawIsFresh(ch.id, raw, committed);
     for (const v of raw) if (!rawSeen.has(v.id)) rawSeen.set(v.id, `raw/${ch.id}.json`);
 
     let parsed = 0;
@@ -1722,20 +1721,74 @@ async function readCommitted(): Promise<MatchVideo[]> {
 const write = (name: string, value: unknown) =>
   writeFile(join(DATA, name), JSON.stringify(value, null, 2) + '\n', 'utf8');
 
-async function assertRawIsFresh(id: ChannelKey): Promise<void> {
-  try {
-    const rawStat = await stat(join(RAW, `${id}.json`));
-    const videosStat = await stat(join(DATA, 'videos.json'));
-    if (rawStat.mtimeMs < videosStat.mtimeMs - 86_400_000) {
-      throw new Error(
-        `raw/${id}.json is more than a day older than data/videos.json.\n` +
-          `  Parsing it would republish a stale world. Run \`npm run data:fetch\` first.`,
-      );
-    }
-  } catch (e) {
-    if (e instanceof Error && e.message.includes('stale world')) throw e;
-    // videos.json absent on a first run — nothing to be stale against.
+/**
+ * Refuse to parse a dump that provably predates the committed corpus.
+ *
+ * WALL-CLOCK AGE WAS A PROXY, AND THE PROXY LEAKED. This compared raw's mtime
+ * against data/videos.json's with a 24-hour tolerance, and on 2026-08-29 a dump
+ * one day old parsed 435 records over a committed 455 — inside the tolerance,
+ * so the guard stayed silent. That is the same failure the sibling Tekken repo
+ * lost 373 records to, wearing the guard built to prevent it. Tightening the
+ * number only moves the leak: no fixed window is right for a corpus the cron
+ * rewrites daily and a human refetches on no schedule.
+ *
+ * MTIME WAS A PROXY TOO, AND IT LEAKED THE SAME WAY. The first replacement kept
+ * the clock and only sharpened the comparison — dump mtime against the newest
+ * committed publishedAt. It is a sound relation and it still failed in practice,
+ * because mtime is not a record of when a dump was FETCHED: `npm run
+ * verify:gates` restores raw/ with `cp`, a fresh clone writes every file at
+ * checkout time, and both stamp a months-old dump as new. Caught live on
+ * 2026-08-30, when a 13-hour-old dump whose mtime had been reset by a gates run
+ * parsed 523 records over a committed 536 with the guard silent.
+ *
+ * SO THE TEST READS ONLY DATA. A dump cannot contain an upload published after
+ * it was taken, so if the committed corpus holds a record for this intake that
+ * is NEWER than the newest upload anywhere in the dump, that record cannot have
+ * come from this dump and parsing would drop it. Both sides of that comparison
+ * are publish timestamps written by YouTube and carried in the files
+ * themselves; no filesystem metadata is consulted, so `cp`, `git checkout` and
+ * a fresh clone cannot forge it.
+ *
+ * What it buys:
+ *  · fires at ANY age. A dump taken two minutes before the cron's is caught,
+ *    where a 24-hour window never would be.
+ *  · never fires on age alone. A months-old dump for a channel that has
+ *    published nothing since is not stale, and re-parsing in the same session
+ *    is always allowed — the committed corpus can only hold what this dump
+ *    produced.
+ *  · a DELETED upload stays legal. Committed holds it, the dump does not, but
+ *    the dump's newest is unchanged — which is the prune this pipeline exists
+ *    to publish, and the guard must not block it.
+ *
+ * Scoped per intake, because a stale telly dump says nothing about ranked.
+ */
+function assertRawIsFresh(id: ChannelKey, dump: RawVideoRecord[], committed: MatchVideo[]): void {
+  let newestInDump = '';
+  for (const r of dump) if (r.publishedAt > newestInDump) newestInDump = r.publishedAt;
+  if (!newestInDump) return; // empty dump: the caller already refuses that
+
+  let newestCommitted: MatchVideo | undefined;
+  for (const v of committed) {
+    if (v.intake !== id) continue;
+    if (!newestCommitted || v.publishedAt > newestCommitted.publishedAt) newestCommitted = v;
   }
+  if (!newestCommitted) return; // nothing committed for this intake yet
+  if (newestCommitted.publishedAt <= newestInDump) return;
+
+  throw new Error(
+    [
+      `raw/${id}.json is stale: the committed corpus holds an upload it cannot contain.`,
+      ``,
+      `  newest upload in the dump   ${newestInDump}`,
+      `  newest committed record     ${newestCommitted.publishedAt}  ${newestCommitted.id}`,
+      ``,
+      `  A dump cannot contain an upload published after it was taken, so parsing`,
+      `  now would drop that record and every one like it — and the next run would`,
+      `  treat the smaller archive as the new baseline.`,
+      ``,
+      `  Refresh first:  npm run data:fetch`,
+    ].join('\n'),
+  );
 }
 
 const tally = <T extends string>(xs: T[]): Record<string, number> =>

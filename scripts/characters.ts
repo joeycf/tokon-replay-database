@@ -102,13 +102,7 @@ const ROSTER: RosterEntry[] = [
     // phanter' is a SECOND, independent misspelling of the same name, used
     // consistently by marvelTokonYT (dO0h9Iwub4U, dQFLnW2moiU). Two of its
     // eight CEO 2026 matches would otherwise be char-unresolved.
-    aliases: [
-      'black panther',
-      'black-panther',
-      'b. panther',
-      'black phanther',
-      'black phanter',
-    ],
+    aliases: ['black panther', 'black-panther', 'b. panther', 'black phanther', 'black phanter'],
   },
 
   // ── Amazing Guardians ──────────────────────────────────────────────────────
@@ -159,7 +153,20 @@ const ROSTER: RosterEntry[] = [
     name: 'Doctor Doom',
     team: 'Knights of Doom',
     leader: true,
-    aliases: ['doctor doom', 'doctor-doom', 'dr. doom', 'dr doom', 'd. doom', 'doom'],
+    // "doc. doom" / "doc doom": highLevelReplays' own abbreviation, surfaced by
+    // the residue gate on 2026-08-29 after a third upload used it. A bare "doc"
+    // is deliberately absent — it is a plausible handle, and the shortening
+    // rule above only admits forms that cannot collide with one.
+    aliases: [
+      'doctor doom',
+      'doctor-doom',
+      'dr. doom',
+      'dr doom',
+      'd. doom',
+      'doc. doom',
+      'doc doom',
+      'doom',
+    ],
   },
   { id: 'magneto', name: 'Magneto', team: 'Knights of Doom', aliases: ['magneto'] },
   {
