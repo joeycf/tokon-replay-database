@@ -247,6 +247,35 @@ function testSubstrate(): void {
     v.sides.some((s) => !s.provenance || !s.provenance.fromTitle),
   );
   expect(provDrift.length === 0, 'every side carries provenance');
+
+  // `complete` MUST be `length >= charactersPerSide`, never `=== `. `characters`
+  // is a union of 1..N in first-appearance order, so a mid-set team change
+  // legitimately pushes a side past the cap — this corpus carries 7 such sides
+  // and emit.ts accepts them by design. A side above the cap is MORE than
+  // complete; calling it incomplete puts finished work back in the bench queue
+  // and tells /dev a reviewer still owes it a bench.
+  //
+  // Latent rather than historical: every oversize side here arrived through a
+  // /dev override, and those endpoints already said `>= 4`. parse.ts said
+  // `=== 4`, so the same side meant different things depending on which path
+  // last touched it, and a title+description union that overshot the cap on its
+  // own — fromTitle naming a fighter the description bench omits — would have
+  // been born incomplete. This is the invariant, checked over what is committed
+  // rather than over which writer happened to run.
+  const miscounted = videos.flatMap((v) =>
+    v.sides
+      .filter((s) => s.characters.length >= 4 && s.provenance?.complete === false)
+      .map((s) => `${v.id} (${s.characters.length} chars)`),
+  );
+  expect(
+    miscounted.length === 0,
+    `no side at or above the cap is marked incomplete${miscounted.length ? ` — ${miscounted.slice(0, 3).join(', ')}` : ''}`,
+  );
+  const oversize = videos.flatMap((v) => v.sides.filter((s) => s.characters.length > 4));
+  expect(
+    oversize.every((s) => s.provenance?.complete === true),
+    `every oversize side (${oversize.length}) is complete, not incomplete`,
+  );
   const conflictFree = videos.filter((v) =>
     v.sides.some(
       (s) =>

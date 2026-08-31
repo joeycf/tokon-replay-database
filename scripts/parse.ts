@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { alignBench, readBench } from './bench';
 import { ACTIVE_CHANNELS, CHANNELS, stripTheaterSponsor } from './channels';
 import { applyOverrides, emitGeneric } from './emit';
+import { CHARACTERS_PER_SIDE } from './stats';
 import { resolvePlayers, undeclaredCollisions } from './players';
 import { dueExpiries, expiryBlock } from './expiries';
 import { LAUNCH, SEASONS, seasonForDate } from './patches';
@@ -475,7 +476,20 @@ function buildTheaterRecords(
         // The catalogue happens to fill all four slots for this game, and that
         // is a measurement that belongs in report.md, not an invariant to bake
         // into the builder.
-        complete: ids.length === 4,
+        //
+        // `>=`, NOT `===`. `characters` is a union of 1..N in first-appearance
+        // order, not a fixed-length tuple, so a mid-set team change legitimately
+        // pushes a side past the cap — 7 sides in this corpus carry 5 or 6, and
+        // emit.ts accepts them by design (verify-gates: "a 5-character side is
+        // ACCEPTED (>4 is legal, only 0 fails)"). Under `===` every one of them
+        // read `complete: false` while being MORE than complete, which put them
+        // in the bench queue's population and told /dev they still needed work.
+        // Every other writer of this field — complete-characters.ts:211,
+        // bench-review.post.ts:249,262, review-queue.post.ts:150 and
+        // disagreements.post.ts:107 — already said `>= 4`, so parse was the only
+        // disagreeing voice and the same side changed meaning depending on which
+        // path last touched it.
+        complete: ids.length >= CHARACTERS_PER_SIDE,
       };
       sides.push({ player: playerId(handle), handle, characters: ids, provenance });
     }
@@ -904,7 +918,9 @@ async function main() {
           ...(aligned ? { descAlign: aligned.how } : {}),
           slotOrder: i === 0 ? s0.order : s1.order,
           ...(conflict ? { conflict: true } : {}),
-          complete: chars.length === 4,
+          // `>=` for the same reason as the index builder above: the union can
+          // legitimately exceed the cap on a mid-set team change.
+          complete: chars.length >= CHARACTERS_PER_SIDE,
         };
         tierCount[tier] += 1;
         if (provenance.complete) completeSides += 1;

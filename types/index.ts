@@ -303,7 +303,10 @@ export interface CharProvenance {
    *  in videos.json: a union is what the two tiers *might* mean, and publishing
    *  it asserts a team neither source actually stated. */
   conflict?: boolean;
-  /** characters.length === 4, i.e. the side's bench is fully known. */
+  /** characters.length >= charactersPerSide, i.e. the side's bench is fully
+   *  known. `>=` and not `===`: `characters` is a union of 1..N in
+   *  first-appearance order, so a mid-set team change can push a side past the
+   *  cap and such a side is complete, not incomplete. */
   complete: boolean;
   /** Extractor confidence, when tier === 'footage'. */
   confidence?: number;
