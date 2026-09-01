@@ -92,20 +92,28 @@ export interface ChannelConfig {
    *  parse, and data:fetch skips it. Mutually exclusive with channelId. */
   index?: ChannelIndex;
   /**
-   * LOCAL-FIRST: deliberately not part of the daily cron.
+   * CRON-FETCHED, WITH A CARRY FALLBACK.
    *
-   * raw/ is gitignored and the cron fetches remotely into a fresh checkout, so
-   * a source only ever fetched by hand has no dump there. Without this flag
-   * parse would either exit (missing dump) or, worse, drop every one of its
-   * records. So when the dump is ABSENT its committed records are CARRIED, the
-   * same mechanism `frozen` uses; when the dump is PRESENT they are rebuilt.
+   * This flag was called `localFirst` and meant the opposite: the intake was
+   * deliberately kept OUT of the daily cron, because a third party's uptime
+   * should not become a cron dependency on day one of an integration. It is in
+   * the cron as of 2026-08-31, so the name changed rather than being left to lie
+   * — a flag whose name states a policy the code no longer follows is worse than
+   * no flag.
+   *
+   * WHAT THE FLAG STILL BUYS is the fallback. raw/ is gitignored and the cron
+   * works from a fresh checkout, so a run whose pull failed has no dump. Without
+   * this flag parse would either exit (missing dump) or, worse, drop every one
+   * of its records. So when the dump is ABSENT OR EMPTY its committed records
+   * are CARRIED, the same mechanism `frozen` uses; when the dump has rows they
+   * are rebuilt and merged over the committed set add-only.
    *
    * The carry needs a pin for the reason `frozen.records` does — data/videos.json
-   * is both source and target — but it cannot be a constant here, because a
-   * local-first source GROWS. It lives in data/source-pins.json, written by the
-   * local rebuild and asserted by every parse.
+   * is both source and target — but it cannot be a constant here, because this
+   * kind of source GROWS. It lives in data/source-pins.json, written by every
+   * rebuilding run, asserted by every carry, and refused if it would move down.
    */
-  localFirst?: boolean;
+  cronFetchedWithCarry?: boolean;
   /** Where the is-Tōkon game marker may appear. Default 'title'. Only
    *  fightingStationX needs the widened gate: it is a general FGC channel whose
    *  Tōkon uploads are a minority and whose titles are inconsistent. */
@@ -370,11 +378,13 @@ export interface MatchVideo {
   sides: [MatchSide, MatchSide];
 }
 
-/** data/source-pins.json — the carry pin for every `localFirst` intake, keyed
- *  by ChannelKey. Written by the rebuild, hard-asserted by every parse. A
+/** data/source-pins.json — the carry pin for every `cronFetchedWithCarry`
+ *  intake, keyed by ChannelKey. Written by every rebuilding run, hard-asserted
+ *  by every carry, and refused if a rebuild would move it DOWN — the intake is
+ *  add-only, so a falling count means records were dropped inside the run. A
  *  frozen channel pins in channels.ts instead, because its count never moves
- *  again; a local-first source grows, so hand-editing a constant every refresh
- *  would be friction that teaches people to skip the check. */
+ *  again; an index source grows, so hand-editing a constant every refresh would
+ *  be friction that teaches people to skip the check. */
 export type SourcePins = Partial<Record<ChannelKey, number>>;
 
 /** data/players.json entry (mirrors the engine's Player). */

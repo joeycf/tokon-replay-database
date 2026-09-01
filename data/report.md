@@ -1,6 +1,13 @@
 # Tōkon pipeline report
 
-_Generated 2026-08-30T16:20:31.751Z_
+## ⚠ ACTION REQUIRED
+
+1 self-expiring gate(s) are due:
+
+- **patch-table** (stale-patch-table, due 2026-08-10)
+  The newest patch in scripts/patches.ts is 2026-08-10, 22 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
+
+_Generated 2026-09-01T18:39:11.769Z_
 
 ## Coverage
 
@@ -16,11 +23,18 @@ _Generated 2026-08-30T16:20:31.751Z_
 | replayTheater _(index)_ | 44 | 44 | 100.0% |
 | **total** | | **540** | |
 
-## Local-first intakes
+## Index intakes
 
-| intake | records | pin | this run |
-| --- | ---: | ---: | --- |
-| `replayTheater` | 44 | 44 | rebuilt from a local dump |
+Fetched by the daily cron since 2026-08-31, and ADD-ONLY: a committed record is
+carried whether or not the catalogue still lists it, so this count can only rise.
+The cron does not depend on the pull succeeding — on any failure there is no dump,
+the committed records are carried, and the run stays green.
+
+| intake | records | pin | this run | pages | new | not in this pull |
+| --- | ---: | ---: | --- | ---: | ---: | ---: |
+| `replayTheater` | 44 | 44 | rebuilt from a full sweep | 6 | 44 | 0 |
+
+Entries **collapsed as double-submitted**: **0** of 44 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
 
 _Entries skipped as already-known: **0**. The catalogue indexes no video this repo has fetched, published or ruled on._
 
@@ -53,7 +67,7 @@ How every one of the 1080 sides got its characters.
 | 5 _(mid-set change)_ | 6 | 0.6% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **124 side(s) awaiting a drain** across 62 record(s) — oldest published **14 day(s)** ago
+- **124 side(s) awaiting a drain** across 62 record(s) — oldest published **16 day(s)** ago
 
 > The bench queue is at 62 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
@@ -83,6 +97,36 @@ after changing scripts/players.ts, or the old URLs 404.
 | `sonicfox` | `sonic-fox` |
 | `tokon-player` | `to-kon-player` |
 | `vivid-aspiration` | `vividaspiration` |
+
+## Replay Theater cross-check
+
+An independent reading of **120** of our own records, from the catalogue's
+UNTAGGED entries — online replays it indexes that we also parse from a tracked
+channel. Neither side saw the other, so this is the only accuracy number on this
+page the pipeline did not produce about itself. It changes nothing: a disagreement
+is recorded in data/theater-disagreements.json with both claims and is never
+written into a record. The catalogue does not outrank a confident parse and never
+outranks a human override.
+
+_Measured this run against a full pull. 107 catalogue entr(ies) point at videos_
+_we do not hold; 0 are VODs the catalogue segments, which the index intake owns._
+
+| field | population | agree | partial | disagree | cannot witness |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| players (both handles) | 120 | 120 (100.00%) | 0 | 0 | — |
+| fighters (per side) | 240 | 239 (99.58%) | 0 | 0 (0.00%) | 1 |
+
+**Cannot witness** is not disagreement. The catalogue holds four character columns
+a side; a side of ours that is longer — a mid-set team change — is something it
+could not have said, and a catalogue string no roster alias covers is a witness we
+decline to read rather than guess at. Both are counted here and neither is scored
+against the parser.
+
+Side order differed on **3** record(s); the comparison realigns on the
+handles before reading fighters, so a swapped pair is not counted twice — here,
+eight times — as a character disagreement.
+
+No disagreements this run.
 
 ## Misses
 

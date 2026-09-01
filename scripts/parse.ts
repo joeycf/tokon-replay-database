@@ -12,8 +12,9 @@ import { fileURLToPath } from 'node:url';
 import { alignBench, readBench } from './bench';
 import { ACTIVE_CHANNELS, CHANNELS, stripTheaterSponsor } from './channels';
 import { applyOverrides, emitGeneric } from './emit';
+import { crossCheck, formatCrossCheck, type WitnessFile } from './crosscheck';
 import { CHARACTERS_PER_SIDE } from './stats';
-import { resolvePlayers, undeclaredCollisions } from './players';
+import { resolveKey, resolvePlayers, undeclaredCollisions } from './players';
 import { dueExpiries, expiryBlock } from './expiries';
 import { LAUNCH, SEASONS, seasonForDate } from './patches';
 import { buildAliasMatcher, loadCharacters, playerId, stripLeaderboard } from './roster';
@@ -529,11 +530,12 @@ async function main() {
   const matcher = buildAliasMatcher(characters);
   const overrides: Record<string, VideoOverride> = await readJson('overrides.json', {});
   // NOT readJson: its catch-all fallback is wrong for this one file. `committed`
-  // is the baseline for the freeze carry, the local-first carry AND the collapse
-  // guard, so a truncated or half-written videos.json silently becoming [] would
-  // carry nothing and disarm the guard for every channel at once (`before > 0`
-  // false everywhere) — a total loss with every gate green. Absent is fine and
-  // means a first run; unreadable is a hard stop.
+  // is the baseline for the freeze carry, the index intake's add-only merge AND
+  // the collapse guard, so a truncated or half-written videos.json silently
+  // becoming [] would carry nothing, leave the add-only merge with nothing to
+  // preserve, and disarm the guard for every channel at once (`before > 0` false
+  // everywhere) — a total loss with every gate green. Absent is fine and means a
+  // first run; unreadable is a hard stop.
   const committed: MatchVideo[] = await readCommitted();
 
   const misses: Miss[] = [];
@@ -1046,10 +1048,14 @@ async function main() {
 
   // ── the index intake: rebuild from a dump, or carry ───────────────────────
   //
-  // An INDEX source is LOCAL-FIRST. raw/ is gitignored and the cron fetches
-  // remotely into a fresh checkout, so on every cron run there is no dump and
-  // the committed records are CARRIED — the same mechanism `frozen` uses.
-  // On a local run that did fetch, they are REBUILT from the dump.
+  // An INDEX source is fetched by the daily cron since 2026-08-31, and the carry
+  // is now its FALLBACK rather than its normal state. raw/ is gitignored and the
+  // cron works from a fresh checkout, so before that there was never a dump here
+  // and the committed records were CARRIED every single run — the same mechanism
+  // `frozen` uses. Now the cron pulls, so most runs rebuild, and the carry is
+  // what happens on the mornings the catalogue is unreachable, unparseable or
+  // hands back nothing. That is the whole of "the cron never depends on Replay
+  // Theater succeeding".
   //
   // Both paths must publish identical bytes from identical inputs, which is why
   // there is no separate merge for either: applyOverrides below is the only
@@ -1061,24 +1067,70 @@ async function main() {
   // index record and cannot silently outrank the catalogue on anything else.
   const theaterSkippedKnown: { videoId: string; tag: string; where: string }[] = [];
   const theaterResidue: { id: string; raw: string }[] = [];
-  const carriedLocalFirst: ChannelKey[] = [];
+  const carriedWithFallback: ChannelKey[] = [];
+  /** intake → committed records this run's dump did not mention. Kept so
+   *  report.md can STATE them; what the number means depends on the pull's mode,
+   *  which is why the report only prints it after a full sweep. */
+  const theaterSurvivors = new Map<ChannelKey, MatchVideo[]>();
 
-  for (const ch of CHANNELS.filter((c) => c.localFirst)) {
+  for (const ch of CHANNELS.filter((c) => c.cronFetchedWithCarry)) {
     const dump: TheaterRawRecord[] = await readJson(`../raw/${ch.id}.json`, []);
+    const mine = committed.filter((r) => r.intake === ch.id);
     if (dump.length === 0) {
-      // The normal state on the cron, and not an error. Carry.
-      const carried = committed.filter((r) => r.intake === ch.id);
-      records.push(...carried);
+      // AN EMPTY OR ABSENT DUMP IS A CARRY, NOT A REBUILD TO ZERO — and this
+      // repo has always said so, which is worth keeping rather than restating:
+      // `readJson` returns its fallback for a missing file AND `JSON.parse`
+      // succeeds on an empty array, so both the failed-pull case and the
+      // pulled-nothing case land here instead of falling through to a rebuild
+      // that produces 0 records. The sibling repo reached a rebuild on the empty
+      // case and tripped its collapse guard at n → 0: a red cron for a reason
+      // nothing in the failure named.
+      //
+      // A pull returning no TAGGED entries is the ORDINARY case here — 44
+      // tournament records against a 248-entry catalogue — so this branch runs
+      // on most quiet mornings, not only on broken ones.
+      records.push(...mine);
       // WRITE THE COUNT BACK, do not `continue` past the guard. The reference
       // skips the collapse guard for a carried source and says so in its
       // report; this repo's guard is already documented asleep below 20
       // records, so an exclusion here would be the hole rather than a
       // concession. With the write-back a healthy carry reads n → n and a
       // broken one reads n → 0, and the guard stays armed alongside the pin.
-      parsedPerChannel.set(ch.id, carried.length);
-      carriedLocalFirst.push(ch.id);
+      parsedPerChannel.set(ch.id, mine.length);
+      carriedWithFallback.push(ch.id);
+      theaterSurvivors.set(ch.id, []);
       continue;
     }
+    // ── ADD-ONLY, and this is where the rule is mechanical ──────────────────
+    // A rebuild used to REPLACE this intake with whatever the dump produced.
+    // That was safe while the dump was always the whole catalogue, taken by a
+    // human who would notice. It is not safe now, for two independent reasons,
+    // either sufficient on its own:
+    //
+    //  · THE DUMP IS USUALLY A DELTA. The cron runs the cursor, which reads the
+    //    front of the feed and stops, so `dump` holds the last few days of
+    //    submissions rather than the catalogue. Replacing on that would delete
+    //    the committed intake every morning.
+    //  · A VOD GOING PRIVATE DELETES EVERY SEGMENT CUT FROM IT. These records
+    //    are segments: the 44 committed here sit on just 5 source VODs, and the
+    //    largest holds 18 of them — 40.9% of the intake. THE COLLAPSE GUARD IS
+    //    BLIND TO THAT: the loss clears its >10% arm and FAILS its >20 arm, so
+    //    the guard waves it through in silence and the pin would then be
+    //    rewritten downward to match.
+    //
+    //    Two other things are not blind to it, and neither is this merge. On a
+    //    FULL sweep the floor in scripts/fetch-theater.ts catches it first: at
+    //    pin 44 the threshold is 39.6, a sweep missing that VOD produces 26, and
+    //    data:theater exits 1 without writing a dump at all. What add-only is
+    //    the LAST line for is the paths that floor does not cover — the cursor
+    //    delta, where a small dump is the ordinary case and the floor is
+    //    deliberately skipped, and a dump placed by hand. On those, this merge
+    //    and the only-grows re-pin below are the whole of the protection.
+    //
+    // So: BUILT WINS WHERE THE DUMP SPEAKS, COMMITTED SURVIVES WHERE IT DOES
+    // NOT. An entry still in the catalogue is re-derived exactly as before,
+    // which is what keeps a carry and a rebuild byte-identical; an id the dump
+    // does not mention is carried untouched rather than dropped.
     const built = buildTheaterRecords(ch, dump, {
       committed,
       overrides,
@@ -1088,15 +1140,41 @@ async function main() {
       residue: theaterResidue,
       byIdForQueue,
     });
-    records.push(...built);
-    parsedPerChannel.set(ch.id, built.length);
+    const builtIds = new Set(built.map((v) => v.id));
+    const survivors = mine.filter((v) => !builtIds.has(v.id));
+    theaterSurvivors.set(ch.id, survivors);
+    const merged = [...built, ...survivors];
+    records.push(...merged);
+    parsedPerChannel.set(ch.id, merged.length);
   }
+
+  // ── what the pull did, read from its own self-report ──────────────────────
+  // scripts/fetch-theater.ts clears this file before its first request and
+  // rewrites it only on success, so its PRESENCE means "a pull happened this
+  // run" and its absence means "none did". That distinction is load-bearing
+  // twice below: report.md says "no pull this run" rather than "found nothing",
+  // and the cursor advances only off a number this run actually observed.
+  const theaterStats = await readJson<{
+    /** 'cursor' = this dump is a DELTA off the front of the feed; 'full' = it
+     *  claims to be the whole catalogue. Only a full sweep can say a committed
+     *  record is gone from upstream. */
+    mode?: 'cursor' | 'full';
+    maxEntryId?: number;
+    pagesRead?: number;
+    hitBound?: boolean;
+    tagged?: number;
+    collapsed?: number;
+    collapsedTags?: Record<string, number>;
+    unresolvableVods?: number;
+  } | null>('../raw/.replayTheater.stats.json', null);
+  /** The committed cursor, read here and rewritten below. */
+  const theaterCursor: Record<string, number> = await readJson('theater-cursor.json', {});
 
   // ── the carry pin (data/source-pins.json) ─────────────────────────────────
   // The carry needs a pin for the reason `frozen.records` does: data/videos.json
   // is both the source and the target, so one bad run would poison the next
   // run's baseline permanently and silently. It cannot be a constant in
-  // channels.ts the way frozen's is, because a local-first source GROWS —
+  // channels.ts the way frozen's is, because a cron-fetched index source GROWS —
   // hand-editing a number on every refresh is friction that teaches people to
   // skip the check.
   //
@@ -1109,7 +1187,7 @@ async function main() {
   // guarded on `carried.length > 0`. That guard would make total loss the one
   // case that passes, which is the case the pin exists for.
   const pins: SourcePins = await readJson('source-pins.json', {});
-  for (const key of carriedLocalFirst) {
+  for (const key of carriedWithFallback) {
     const got = records.filter((r) => r.intake === key).length;
     const want = pins[key];
     if (want === undefined) {
@@ -1204,7 +1282,7 @@ async function main() {
   // orders) and a shuffled input gave a fifth. That makes data/videos.json a
   // different file on every run, which defeats the no-change-day commit guard,
   // and makes the carry path and the rebuild path disagree — the exact
-  // byte-identity a local-first carry has to be able to prove.
+  // byte-identity the index intake's carry has to be able to prove.
   records.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt) || a.id.localeCompare(b.id));
   const withOverrides = applyOverrides(records, overrides);
 
@@ -1283,22 +1361,151 @@ async function main() {
   const players = [...playerMap.values()].sort((a, b) => a.id.localeCompare(b.id));
   const collisions = undeclaredCollisions(players);
 
-  // ── re-pin every local-first intake rebuilt from a dump this run ──────────
+  // ── re-pin every index intake rebuilt from a dump this run — AND IT ONLY
+  //    GROWS ───────────────────────────────────────────────────────────────
   // From the FINAL count, so the number the next carrying run checks against is
   // the number actually published — exclusions and all.
-  const rebuiltLocalFirst = CHANNELS.filter(
-    (c) => c.localFirst && !carriedLocalFirst.includes(c.id),
+  //
+  // THE ONLY-GROWS REFUSAL IS NEW, and it replaces a guarantee this move
+  // removes rather than adding a belt on top of one. Until 2026-08-31 every cron
+  // run was a carry, so the pin was ASSERTED daily at exact equality — the
+  // strongest check this intake had. From today most runs rebuild, and a
+  // rebuilding run does not assert the pin at all; it overwrites it.
+  //
+  // The only remaining check would have been the collapse guard, and this repo's
+  // collapse guard cannot see the loss that actually happens here: the largest
+  // source VOD holds 18 of the 44 records, so losing it is 40.9% — over the >10%
+  // arm and nowhere near the >20 absolute one, which is the same blind spot this
+  // file already documents for every intake under 20 records.
+  //
+  // A pin that can only rise turns "records left quietly" into a refusal. When
+  // the drop is real — an event genuinely withdrawn — the operator says so once,
+  // with --allow-shrink, and the new number is committed deliberately.
+  const rebuiltThisRun = CHANNELS.filter(
+    (c) => c.cronFetchedWithCarry && !carriedWithFallback.includes(c.id),
   );
-  if (rebuiltLocalFirst.length > 0) {
+  if (rebuiltThisRun.length > 0) {
     const next: SourcePins = { ...pins };
-    for (const ch of rebuiltLocalFirst) {
-      next[ch.id] = withOverrides.filter((r) => r.intake === ch.id).length;
+    for (const ch of rebuiltThisRun) {
+      const got = withOverrides.filter((r) => r.intake === ch.id).length;
+      const was = pins[ch.id] ?? 0;
+      if (got < was && !args.includes('--allow-shrink')) {
+        console.error(
+          [
+            `\n✖ ${ch.id} would re-pin DOWNWARD: ${was} → ${got}.`,
+            ``,
+            `  This intake is add-only: a committed record is carried whether or not the`,
+            `  catalogue still lists it, so the published count cannot fall on its own.`,
+            `  ${was - got} record(s) were dropped by something inside this run, and the`,
+            `  collapse guard is not sensitive enough to have caught it — the largest`,
+            `  single source VOD here is 18 records (40.9%) and the guard needs >20.`,
+            ``,
+            `  Nothing has been written. If the drop is genuine and deliberate:`,
+            `    npm run data:parse -- --allow-shrink`,
+          ].join('\n'),
+        );
+        process.exit(1);
+      }
+      next[ch.id] = got;
     }
     const ordered = Object.fromEntries(
       Object.entries(next).sort(([a], [b]) => a.localeCompare(b)),
     ) as SourcePins;
     await write('source-pins.json', ordered);
   }
+
+  // ── the cursor (data/theater-cursor.json) ─────────────────────────────────
+  // One integer per index intake: the highest catalogue entry id ever seen. It
+  // is what lets tomorrow's fetch read two pages instead of the catalogue, so it
+  // has to survive into the repository — raw/ is gitignored and CI starts from a
+  // fresh checkout with no memory but data/.
+  //
+  // CONTENT ONLY, no timestamp. report.md's "_Generated_" line already costs the
+  // cron a suppression rule; a second file that changed every morning would
+  // defeat that rule from the other side and produce a commit — and a deploy —
+  // on days when nothing happened.
+  //
+  // ONLY GROWS, for the reason the pin does, and here it matters more: a cursor
+  // that moved BACKWARD would silently re-admit entries as "new", and one that
+  // moved back to 0 would turn every cron run into a bounded sweep that never
+  // goes quiet.
+  //
+  // THE SEED IS EXACT, NOT A GUESS. data/theater-cursor.json was committed at
+  // 488095, which is the highest entry id on `?game=tokon&page=1` — verified
+  // live 2026-08-31. A seed that overshot would skip real entries permanently
+  // (nothing ever re-reads behind the cursor on the daily path); one that
+  // undershot only costs pages. It is stated here because the file itself is
+  // JSON and cannot carry the provenance of its own number.
+  //
+  // NOT STAGED WHEN IT IS THE ONLY THING THAT MOVED — see the commit guard in
+  // .github/workflows/data-refresh.yml. The catalogue takes new entries most
+  // days whether or not any are ours, so a cursor staged unconditionally would
+  // produce a commit, and a deploy, every morning forever.
+  //
+  // KEYED ON THE PULL HAVING HAPPENED, NOT ON RECORDS HAVING BEEN REBUILT, and
+  // that distinction is the whole reason this block reads `theaterStats` rather
+  // than `rebuiltThisRun`. A cursor pass that returns no TAGGED entries is the
+  // ordinary case here — 44 tournament records against a 248-entry catalogue —
+  // and it writes an empty dump, which the carry above correctly treats as a
+  // carry. `rebuiltThisRun` is then empty. Driving the cursor off that list means
+  // the most common successful pull on the calendar advances the cursor in
+  // memory and never persists it, so every following morning re-reads the same
+  // pages and the cursor only ever moves on the days a tournament happened to be
+  // added. The pull happening is what moves the cursor; whether it produced
+  // records is a different question. (Found in the reference, where it was live.)
+  if (theaterStats && typeof theaterStats.maxEntryId === 'number') {
+    const nextCursor: Record<string, number> = { ...theaterCursor };
+    for (const ch of CHANNELS.filter((c) => c.index && c.cronFetchedWithCarry)) {
+      nextCursor[ch.id] = Math.max(theaterCursor[ch.id] ?? 0, theaterStats.maxEntryId);
+    }
+    await write(
+      'theater-cursor.json',
+      Object.fromEntries(Object.entries(nextCursor).sort(([a], [b]) => a.localeCompare(b))),
+    );
+  }
+
+  // ── the second witness (scripts/crosscheck.ts) ────────────────────────────
+  // Reads raw/replayTheater.witness.json — EVERY entry the pull saw, including
+  // the untagged online rows the index intake deliberately ignores — and
+  // compares the catalogue's claim to ours on the videos both sides hold. It
+  // writes no field, gates nothing, and is skipped entirely when there is no
+  // witness file, the same way the carry note above says "no pull this run"
+  // rather than printing a zero.
+  //
+  // MEASURED AGAINST THE PUBLISHED RECORDS, not the pre-override ones. A
+  // disagreement names a row a visitor can open, and the e2e gate asserts
+  // exactly that — so the comparison has to be against what videos.json will
+  // actually hold, overrides and exclusions included.
+  //
+  // WHY THE DISAGREEMENTS DO NOT GO IN data/review-queue.json: in this repo that
+  // queue means WITHHELD. scripts/e2e.ts asserts `queue.every((q) =>
+  // !videoIds.has(q.id))` — "pending review items never reach videos.json" — and
+  // the bench queue beside it carries the opposite invariant for records that
+  // ARE published. A cross-check disagreement is a record we have already
+  // published from a tracked channel and are not proposing to unpublish on a
+  // third party's say-so, so filing it in the review queue would either break
+  // that gate or quietly pull a good record off the site. It is not bench work
+  // either: the bench queue means "incomplete, 1..3 on a side", and a contested
+  // side is complete and disputed, which is a different fact. So it gets its own
+  // artifact — published, contested, both claims recorded — and e2e gates the
+  // MIRROR of the review-queue rule.
+  //
+  // There is no /dev surface for these yet. The report block and the committed
+  // artifact are the working surface; the first measurement (2026-08-31, 111
+  // records compared) found zero rows, so that is the right amount of
+  // machinery, and the count is what would justify more.
+  const witness = await readJson<WitnessFile | null>('../raw/replayTheater.witness.json', null);
+  // The SAME exact-alias table the index intake builds, from the same file. A
+  // second copy that drifted would make the witness disagree with the parser
+  // over a spelling the roster had already ruled on.
+  const byAliasForWitness = new Map<string, string>();
+  for (const c of characters) {
+    byAliasForWitness.set(c.name.trim().toLowerCase(), c.id);
+    for (const a of c.extra?.aliases ?? []) byAliasForWitness.set(a.trim().toLowerCase(), c.id);
+  }
+  const witnessResult = witness
+    ? crossCheck(witness, withOverrides, byAliasForWitness, resolveKey, stripTheaterSponsor)
+    : null;
 
   // ── write ──────────────────────────────────────────────────────────────────
   /**
@@ -1338,6 +1545,10 @@ async function main() {
     Object.fromEntries(Object.entries(redirects).sort(([a], [b]) => a.localeCompare(b))),
   );
   await write('review-queue.json', review);
+  // Only on a run that HAD a witness. A carrying run leaves the committed file
+  // exactly as it is rather than overwriting it with [] — the absence of a pull
+  // is not evidence that the disagreements were resolved.
+  if (witnessResult) await write('theater-disagreements.json', witnessResult.disagreements);
   await write('bench-queue.json', benchQueue);
   await write('seasonBoundaries.json', SEASONS);
 
@@ -1368,9 +1579,13 @@ async function main() {
       // intake has no uploads at all this run — a bare "0 | 44" row would read
       // as a channel that died.
       `| ${ch.id}${ch.frozen ? ' _(frozen)_' : ''}${ch.eventsOnly ? ' _(events only)_' : ''}${
-        ch.index ? (carriedLocalFirst.includes(ch.id) ? ' _(carried)_' : ' _(index)_') : ''
-      } | ${carriedLocalFirst.includes(ch.id) ? '—' : raw.length} | ${n} | ${
-        carriedLocalFirst.includes(ch.id)
+        ch.index ? (carriedWithFallback.includes(ch.id) ? ' _(carried)_' : ' _(index)_') : ''
+      } | ${carriedWithFallback.includes(ch.id) ? '—' : raw.length} | ${n} | ${
+        // A SHARE IS ONLY MEANINGFUL WHEN `parsed` CAME OUT OF `uploads`. On a
+        // cursor run the dump is a delta of a few entries while `n` counts the
+        // whole merged intake, so the division would read several hundred per
+        // cent — a number that is not wrong so much as meaningless.
+        carriedWithFallback.includes(ch.id) || (ch.index && theaterStats?.mode === 'cursor')
           ? '—'
           : `${raw.length ? ((n / raw.length) * 100).toFixed(1) : '0.0'}%`
       } |`,
@@ -1378,25 +1593,103 @@ async function main() {
   }
   lines.push(`| **total** | | **${withOverrides.length}** | |`, '');
 
-  // ── the local-first intakes ───────────────────────────────────────────────
-  // Stated rather than assumed. A carried intake is the normal cron state, and
-  // the reader needs to know which number is holding it: the pin, not the
-  // collapse guard, which this file already documents as asleep below 20
-  // records — though the carry writes its count back so the guard is at least
-  // armed rather than skipped.
-  const localFirst = CHANNELS.filter((c) => c.localFirst);
-  if (localFirst.length > 0) {
-    lines.push('## Local-first intakes', '');
-    lines.push('| intake | records | pin | this run |', '| --- | ---: | ---: | --- |');
-    for (const ch of localFirst) {
+  // ── the index intakes ─────────────────────────────────────────────────────
+  // Stated rather than assumed. The reader needs to know which number is holding
+  // this intake up: the pin, not the collapse guard, which this file already
+  // documents as asleep below 20 records — though a carry writes its count back
+  // so the guard is at least armed rather than skipped.
+  const indexIntakes = CHANNELS.filter((c) => c.cronFetchedWithCarry);
+  if (indexIntakes.length > 0) {
+    lines.push('## Index intakes', '');
+    lines.push(
+      'Fetched by the daily cron since 2026-08-31, and ADD-ONLY: a committed record is',
+      'carried whether or not the catalogue still lists it, so this count can only rise.',
+      'The cron does not depend on the pull succeeding — on any failure there is no dump,',
+      'the committed records are carried, and the run stays green.',
+      '',
+    );
+    lines.push(
+      '| intake | records | pin | this run | pages | new | not in this pull |',
+      '| --- | ---: | ---: | --- | ---: | ---: | ---: |',
+    );
+    for (const ch of indexIntakes) {
       const n = withOverrides.filter((r) => r.intake === ch.id).length;
+      const carried = carriedWithFallback.includes(ch.id);
+      // The pull's self-report is what distinguishes these four, and its ABSENCE
+      // is a fifth state rather than a default: a dump with no stats beside it
+      // was placed by hand, so nothing here knows whether it is a delta or a
+      // sweep and the row must not claim either.
+      const mode = carried
+        ? theaterStats
+          ? 'carried (pull found no new tournament entries)'
+          : 'carried (no pull this run)'
+        : !theaterStats
+          ? 'rebuilt from a dump (no pull report)'
+          : theaterStats.mode === 'cursor'
+            ? `cursor delta${theaterStats.hitBound ? ' (hit page bound)' : ''}`
+            : 'rebuilt from a full sweep';
+      const survivors = theaterSurvivors.get(ch.id) ?? [];
+      // WHAT "not in this pull" MEANS DEPENDS ON THE MODE, and conflating the
+      // two would make it the most misleading number on this page. After a FULL
+      // sweep it is "committed records no longer in the catalogue" — the
+      // add-only rule's whole visible output. After a CURSOR run it is every
+      // record older than the two or three pages read, which is nearly all of
+      // them, and it means nothing at all. So the full number is reported and
+      // the cursor number is withheld rather than dressed up.
+      const gone = carried || theaterStats?.mode !== 'full' ? '—' : String(survivors.length);
+      // THE PIN COLUMN IS NOT `pins`, ON A REBUILDING RUN. `pins` is the file as
+      // it was read at the top of this function and it is never mutated — the
+      // re-pin block builds `next = { ...pins }` and writes THAT — so printing
+      // it here on a run that rebuilt shows yesterday's number beside today's
+      // record count and contradicts the data/source-pins.json this same run
+      // just wrote. Latent while rebuilds were rare and done by hand; the cron
+      // makes them the ordinary case. A CARRY is the opposite: it did not write
+      // the pin, it asserted itself against it, so the committed value is
+      // exactly the right thing to show.
+      const pin = carried ? (pins[ch.id] ?? '—') : n;
       lines.push(
-        `| \`${ch.id}\` | ${n} | ${pins[ch.id] ?? '—'} | ${
-          carriedLocalFirst.includes(ch.id) ? 'carried (no dump)' : 'rebuilt from a local dump'
-        } |`,
+        `| \`${ch.id}\` | ${n} | ${pin} | ${mode} | ${
+          carried ? '—' : (theaterStats?.pagesRead ?? '—')
+        } | ${carried ? '—' : n - survivors.length} | ${gone} |`,
       );
     }
     lines.push('');
+    if (carriedWithFallback.includes('replayTheater')) {
+      // A CARRY measures none of the counts below — the dump they would have
+      // been measured from is absent. Saying so beats printing 0, which reads as
+      // "checked, found nothing" when the truth is "not checked this run".
+      lines.push(
+        ...(theaterStats
+          ? [
+              '_The pull ran and found no new tournament entries, so the committed catalogue_',
+              '_was carried unchanged. The cursor still advanced — a quiet day is the_',
+              '_ordinary case here, not a failed one._',
+            ]
+          : [
+              '_No pull produced a dump this run, so the committed catalogue was carried and_',
+              '_the counts below were not measured. That is the designed fallback, not a_',
+              '_failure of this run: `npm run data:theater` refreshes them._',
+            ]),
+        '',
+      );
+    } else if (theaterStats) {
+      // The collapse is only observable HERE. The entries it merged are gone
+      // from the dump by the time this file reads it, so a report that stayed
+      // silent would be indistinguishable from a reader that lost records.
+      lines.push(
+        `Entries **collapsed as double-submitted**: **${theaterStats.collapsed ?? 0}** of ` +
+          `${theaterStats.tagged ?? 0} tagged` +
+          (Object.keys(theaterStats.collapsedTags ?? {}).length
+            ? ` — ${Object.entries(theaterStats.collapsedTags ?? {})
+                .sort((a, b) => b[1] - a[1])
+                .map(([pair, k]) => `${k}× \`${pair}\``)
+                .join(' · ')}`
+            : '') +
+          '. The same match submitted twice under two tag spellings; one copy kept, ' +
+          'chosen on the tag so the survivor does not depend on submission order.',
+        '',
+      );
+    }
     if (theaterSkippedKnown.length > 0) {
       const byWhere = tally(theaterSkippedKnown.map((k) => k.where));
       lines.push(
@@ -1566,6 +1859,8 @@ async function main() {
     }
     lines.push('');
   }
+
+  if (witnessResult) lines.push(...formatCrossCheck(witnessResult, witness?.mode));
 
   lines.push('## Misses', '');
   lines.push('| reason | count |', '| --- | ---: |');

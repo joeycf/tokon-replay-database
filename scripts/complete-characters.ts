@@ -73,9 +73,10 @@ const allQueue = read<BenchQueueItem[]>('bench-queue.json');
 const persisted = existsSync(STORE_PATH)
   ? (JSON.parse(readFileSync(STORE_PATH, 'utf8')) as Record<string, { geom: unknown }>)
   : {};
-const queue = (
-  UNCACHED ? allQueue.filter((q) => !persisted[q.id]?.geom) : allQueue
-).slice(0, LIMIT);
+const queue = (UNCACHED ? allQueue.filter((q) => !persisted[q.id]?.geom) : allQueue).slice(
+  0,
+  LIMIT,
+);
 const videos = new Map(read<MatchVideo[]>('videos.json').map((v) => [v.id, v]));
 const overrides = read<Record<string, VideoOverride>>('overrides.json');
 const roster = buildPlateRoster(await loadCharacters());

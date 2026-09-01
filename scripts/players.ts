@@ -86,15 +86,26 @@ export interface MergeReport {
  * changes with upload order, which makes the emitted id — and therefore a live
  * URL — depend on the day the pipeline ran.
  */
+/**
+ * THE IDENTITY KEY: normalise, then apply the curated alias verdict.
+ *
+ * Lifted out of resolvePlayers() (where it was `keyOf`) and exported unchanged,
+ * because a second reader now needs the SAME answer: scripts/crosscheck.ts
+ * compares a stranger's handle against ours, and a comparison that normalised
+ * differently from the merger would report a disagreement about a spelling this
+ * repo has already ruled on. One definition, two callers.
+ */
+export const resolveKey = (handle: string): string => {
+  const aliased = HANDLE_ALIASES.get(idKey(handle));
+  return aliased ? idKey(aliased) : idKey(handle);
+};
+
 export function resolvePlayers(records: MatchVideo[]): MergeReport {
   // key → spelling → weight
   const casing = new Map<string, Map<string, number>>();
   const seenIds = new Map<string, Set<string>>(); // key → ids observed before the merge
 
-  const keyOf = (handle: string): string => {
-    const aliased = HANDLE_ALIASES.get(idKey(handle));
-    return aliased ? idKey(aliased) : idKey(handle);
-  };
+  const keyOf = resolveKey;
 
   for (const r of records) {
     for (const s of r.sides) {

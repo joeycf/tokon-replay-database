@@ -1147,6 +1147,160 @@ try {
     }
   }
 
+  // ── 4f. the index intake: add-only, only-grows, cursor on the PULL ──────────
+  //
+  // Three rules that only exist together, and all three are invisible in a count
+  // on a healthy day — which is the condition this file exists to make
+  // impossible.
+  //
+  //  · ADD-ONLY. These records are SEGMENTS: the 44 committed here sit on 5
+  //    source VODs and the largest holds 18 of them. One VOD going private drops
+  //    40.9% of the intake in a morning, and the collapse guard cannot see it —
+  //    18 is under its >20 arm. Nothing else would have noticed.
+  //  · ONLY-GROWS. Until this change every cron run carried and asserted the pin
+  //    at exact equality. Most runs rebuild now and a rebuild overwrites the pin,
+  //    so the refusal below is the replacement for that assert, not a belt on it.
+  //  · THE CURSOR IS KEYED ON THE PULL, NOT THE REBUILD. A pull that returns no
+  //    TAGGED entries is the ordinary case at 44 records against a 248-entry
+  //    catalogue, and it writes an empty dump, which is a carry. Keying the
+  //    cursor on "records were rebuilt" means the most common successful run on
+  //    the calendar never persists it and every morning re-reads the same pages.
+  //    That was live in the reference before it was found.
+  console.log('\n[4f] index intake — add-only, only-grows pin, cursor keyed on the pull');
+  {
+    const parse = (extra: string[] = []) => {
+      try {
+        execFileSync('npx', ['tsx', 'scripts/parse.ts', ...extra], {
+          cwd: ROOT,
+          stdio: 'pipe',
+          encoding: 'utf8',
+        });
+        return { code: 0, out: '' };
+      } catch (e) {
+        const err = e as { status?: number; stdout?: string; stderr?: string };
+        return { code: err.status ?? 1, out: `${err.stdout ?? ''}${err.stderr ?? ''}` };
+      }
+    };
+    const rtPath = join(ROOT, 'raw', 'replayTheater.json');
+    const statsPath = join(ROOT, 'raw', '.replayTheater.stats.json');
+    const pinPath = join(ROOT, 'data', 'source-pins.json');
+    const cursorPath = join(ROOT, 'data', 'theater-cursor.json');
+    const rtOriginal = JSON.parse(await readFile(rtPath, 'utf8')) as { videoId: string }[];
+    const pinOriginal = await readFile(pinPath, 'utf8');
+    const theaterCount = async () =>
+      (
+        JSON.parse(await readFile(join(ROOT, 'data', 'videos.json'), 'utf8')) as MatchVideo[]
+      ).filter((v) => v.intake === 'replayTheater').length;
+    const pinNow = async () =>
+      (JSON.parse(await readFile(pinPath, 'utf8')) as Record<string, number>).replayTheater;
+    const cursorNow = async () =>
+      (JSON.parse(await readFile(cursorPath, 'utf8')) as Record<string, number>).replayTheater;
+    /** A pull's self-report. Its PRESENCE is what parse reads as "a pull
+     *  happened"; `mode` is what licenses the "not in this pull" number. */
+    const writeStats = (mode: 'cursor' | 'full', maxEntryId: number) =>
+      writeFile(
+        statsPath,
+        JSON.stringify({ mode, maxEntryId, pagesRead: mode === 'full' ? 5 : 2, hitBound: false }),
+      );
+
+    const before = await theaterCount();
+    const pinBefore = await pinNow();
+    const cursorBefore = await cursorNow();
+
+    // 4f-1 — the vanished VOD. Cut every entry cut from the largest source VOD
+    // out of the dump, exactly as a private/deleted upload would, and sweep.
+    const byVod = new Map<string, number>();
+    for (const r of rtOriginal) byVod.set(r.videoId, (byVod.get(r.videoId) ?? 0) + 1);
+    const [biggest, biggestN] = [...byVod.entries()].sort((a, b) => b[1] - a[1])[0]!;
+    await writeFile(
+      rtPath,
+      JSON.stringify(
+        rtOriginal.filter((r) => r.videoId !== biggest),
+        null,
+        1,
+      ),
+    );
+    await writeStats('full', cursorBefore);
+    const vanished = parse();
+    check(
+      'a full sweep missing its largest VOD publishes the committed count, not the dump',
+      vanished.code === 0 && (await theaterCount()) === before,
+      `exit ${vanished.code}, ${await theaterCount()} records (dump held ${before - biggestN})`,
+    );
+    // NAMED HONESTLY. The collapse guard is blind to this loss — that much is
+    // asserted here. It is NOT the only thing that would catch it: a real full
+    // sweep never reaches parse, because the floor in scripts/fetch-theater.ts
+    // refuses at 90% of the pin (44 → 39.6) and this dump would be 26. What
+    // this case reproduces is the dump placed by HAND, and the cursor path
+    // where the floor is deliberately skipped, and on those two the add-only
+    // merge is the last line.
+    check(
+      'the loss is inside the collapse guard, which is blind to it',
+      biggestN <= 20,
+      `${biggestN} records, ${((biggestN / before) * 100).toFixed(1)}% — the guard needs >20`,
+    );
+    check(
+      'and the full-sweep floor would have refused this dump before parse ever saw it',
+      before - biggestN < pinBefore * 0.9,
+      `${before - biggestN} records against a floor of ${(pinBefore * 0.9).toFixed(1)} (90% of pin ${pinBefore})`,
+    );
+    check(
+      'and report.md STATES the survivors rather than absorbing them',
+      (await readFile(join(ROOT, 'data', 'report.md'), 'utf8')).includes(
+        `| ${before - biggestN} | ${biggestN} |`,
+      ),
+      `"not in this pull: ${biggestN}"`,
+    );
+    check('the pin did not move', (await pinNow()) === pinBefore, `${await pinNow()}`);
+
+    // 4f-2 — the ordinary quiet morning: the pull ran, found no TAGGED entries,
+    // and wrote an empty dump. That is a CARRY, and the cursor must still move.
+    await writeFile(rtPath, '[]\n');
+    await writeStats('cursor', cursorBefore + 7);
+    const quiet = parse();
+    check(
+      'an empty dump carries rather than rebuilding to zero',
+      quiet.code === 0 && (await theaterCount()) === before,
+      `exit ${quiet.code}, ${await theaterCount()} records`,
+    );
+    check(
+      'and the cursor advances on the PULL, not on records having been rebuilt',
+      (await cursorNow()) === cursorBefore + 7,
+      `${cursorBefore} → ${await cursorNow()}`,
+    );
+
+    // NEGATIVE — no stats file means no pull happened, and a cursor that moved
+    // on that would be advancing off a number nothing observed.
+    await rm(statsPath, { force: true });
+    parse();
+    check(
+      'and does NOT advance on a run where no pull happened at all',
+      (await cursorNow()) === cursorBefore + 7,
+      `${await cursorNow()}`,
+    );
+
+    // 4f-3 — only-grows. A pin above the published count is the shape a silent
+    // drop leaves behind, and the rebuild must refuse rather than re-pin down.
+    await writeFile(rtPath, JSON.stringify(rtOriginal, null, 1));
+    await writeStats('full', cursorBefore);
+    await writeFile(pinPath, JSON.stringify({ replayTheater: before + 16 }, null, 2) + '\n');
+    const shrink = parse();
+    check(
+      'a rebuild refuses to re-pin DOWNWARD and names the shortfall',
+      shrink.code !== 0 && shrink.out.includes(`${before + 16} → ${before}`),
+      `exit ${shrink.code}`,
+    );
+    const allowed = parse(['--allow-shrink']);
+    check(
+      'and --allow-shrink is the deliberate way through',
+      allowed.code === 0 && (await pinNow()) === before,
+      `exit ${allowed.code}, pin ${await pinNow()}`,
+    );
+    await writeFile(pinPath, pinOriginal);
+    await writeFile(rtPath, JSON.stringify(rtOriginal, null, 1));
+    await rm(statsPath, { force: true });
+  }
+
   // ── 4d. the union slip ──────────────────────────────────────────────────────
   //
   // Two players swapping screen sides mid-match puts both portrait clusters on

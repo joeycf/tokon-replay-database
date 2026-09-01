@@ -278,7 +278,7 @@ export const CHANNELS: ChannelConfig[] = [
       pageSize: 50,
       pacingMs: 1200,
     },
-    localFirst: true,
+    cronFetchedWithCarry: true,
     /**
      * 18 of the 44 sit on one VOD published 2026-07-26 — the TNS Beta
      * Tournament, eleven days before launch. They are real competitive footage

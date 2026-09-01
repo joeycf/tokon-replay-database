@@ -31,6 +31,7 @@ import { idKey } from './roster';
 import { CHAR_TIERS } from '../types/index';
 import { DISTINCT_KEYS } from './players';
 import { CHANNELS } from './channels';
+import type { Disagreement } from './crosscheck';
 import { PATCHES, SEASONS, seasonToken } from './patches';
 import type {
   BenchQueueItem,
@@ -88,6 +89,14 @@ const summary = read<{
 }>('summary.json');
 const queue = read<ReviewQueueItem[]>('review-queue.json');
 const bench = read<BenchQueueItem[]>('bench-queue.json');
+/** The cross-check's contested rows. ABSENT until a pull has written a witness
+ *  file, which is a legitimate state rather than a broken one — raw/ is
+ *  gitignored, the pull is allowed to fail, and parse.ts writes this only on a
+ *  run that HAD a witness. Missing makes the two gates below vacuous instead of
+ *  red; once the file exists it is committed and only leaves by hand. */
+const contested = existsSync(join(ROOT, 'data', 'theater-disagreements.json'))
+  ? read<Disagreement[]>('theater-disagreements.json')
+  : [];
 const reportMd = readFileSync(join(ROOT, 'data', 'report.md'), 'utf8');
 
 const charIds = new Set(characters.map((c) => c.id));
@@ -362,6 +371,27 @@ function testSubstrate(): void {
     bench.every((b) => emittedIds.has(b.id)),
     `every bench-queue record IS published (${bench.length} incomplete but publishable)`,
   );
+  // THE MIRROR OF THE REVIEW-QUEUE RULE, and the reason scripts/crosscheck.ts
+  // does not write into review-queue.json. A queued item is WITHHELD; a
+  // cross-check disagreement is a record we have ALREADY published and are not
+  // proposing to unpublish on a third party's say-so. If one of these ever
+  // failed to appear in videos.json it would mean the catalogue had been allowed
+  // to REMOVE a record, which is the one thing this comparison must never do.
+  expect(
+    contested.every((d) => videoIds.has(d.videoId)),
+    `every cross-check disagreement is still published (${contested.length})`,
+  );
+  expect(
+    contested.every(
+      (d) =>
+        typeof d.videoId === 'string' &&
+        ['players', 'characters'].includes(d.field) &&
+        Array.isArray(d.ours) &&
+        Array.isArray(d.theirs) &&
+        typeof d.title === 'string',
+    ),
+    'theater-disagreements.json schema validates',
+  );
   expect(
     bench.every((b) => b.known.some((n) => n < 4) && b.known.every((n) => n >= 1)),
     'every bench-queue record is genuinely partial (1..3 on a side), never empty',
@@ -474,13 +504,15 @@ function testSubstrate(): void {
       'startSeconds is emitted when non-zero and omitted when zero (the falsy-0 contract)',
     );
 
-    // The pin is the carry's only check on a cron run, so a pin that has
-    // drifted from the committed corpus is the failure the carry cannot see.
+    // The pin is what a carrying run checks itself against, and what a
+    // rebuilding run is refused for moving downward. Either way it is compared
+    // to the committed corpus, so a pin that has drifted from it is the failure
+    // neither path can see from the inside.
     const pins = JSON.parse(readFileSync(join(ROOT, 'data/source-pins.json'), 'utf8')) as Record<
       string,
       number
     >;
-    for (const ch of CHANNELS.filter((c) => c.localFirst)) {
+    for (const ch of CHANNELS.filter((c) => c.cronFetchedWithCarry)) {
       const n = videos.filter((v) => v.intake === ch.id).length;
       expect(
         pins[ch.id] === n,
@@ -548,6 +580,18 @@ function testCronGuard(): void {
     guard.includes('git restore --staged --worktree data/report.md'),
     'guard drops a timestamp-only report.md',
   );
+  // The cursor gets the same suppression and for the same reason — the
+  // catalogue takes new entries most days, so maxEntryId moves whether or not
+  // any of OUR data did. Asserted as an EMPTINESS TEST on the remaining staged
+  // names: `git diff --quiet -- <paths>` with the cursor filtered out can be
+  // handed an EMPTY pathspec, which means "everything" and silently inverts the
+  // check. Cases C and D below exercise both branches.
+  expect(
+    guard.includes('git restore --staged --worktree data/theater-cursor.json') &&
+      /OTHERS=\$\(git diff --cached --name-only \| grep -v/.test(guard) &&
+      guard.includes('[ -z "$OTHERS" ]'),
+    'guard drops a cursor-only advance, as an emptiness test on the staged names',
+  );
 
   const dir = mkdtempSync(join(tmpdir(), 'tokon-cron-'));
   const sh = (cmd: string) =>
@@ -583,6 +627,14 @@ function testCronGuard(): void {
     'summary.json',
     'report.md',
     'source-pins.json',
+    // the index cursor. raw/ is gitignored and CI starts from a fresh checkout,
+    // so an unstaged cursor resets to 0 every morning and turns every cron run
+    // into a bounded sweep that never goes quiet.
+    'theater-cursor.json',
+    // the cross-check's output. Unlike review-queue.json these rows ARE
+    // published — see the mirror gate in testSubstrate — so the file is a record
+    // of contested readings, not a holding pen.
+    'theater-disagreements.json',
   ]) {
     expect(
       staged.some((p) => p.endsWith(f)),
@@ -610,6 +662,30 @@ function testCronGuard(): void {
   expect(
     sh('git show --stat --name-only HEAD').includes('data/report.md'),
     'case B: report.md ships with the real change',
+  );
+
+  // case C: the cursor advanced and NOTHING else did — the ordinary quiet
+  // morning, because the catalogue takes entries whether or not any are ours.
+  // Must not commit, and must put the worktree file back so tomorrow's run
+  // re-reads those pages rather than carrying an advance nothing committed.
+  write('data/theater-cursor.json', '{"replayTheater":488102}\n');
+  const c = sh(`bash ${guardPath}`);
+  expect(c.includes('No data changes'), 'case C: a cursor-only advance does not commit');
+  expect(sh('git rev-list --count HEAD').trim() === '2', 'case C: still two commits');
+  expect(
+    readFileSync(join(dir, 'data/theater-cursor.json'), 'utf8') === '[]\n',
+    'case C: the worktree cursor is restored, not left advanced',
+  );
+
+  // case D: the cursor advanced ALONGSIDE a real change. The suppression must
+  // not fire — this is the branch an empty pathspec would have inverted.
+  write('data/theater-cursor.json', '{"replayTheater":488102}\n');
+  write('data/replays.json', '[{"id":"x"},{"id":"y"}]\n');
+  sh(`bash ${guardPath}`);
+  expect(sh('git rev-list --count HEAD').trim() === '3', 'case D: a real change still commits');
+  expect(
+    sh('git show --stat --name-only HEAD').includes('data/theater-cursor.json'),
+    'case D: the cursor rides along with it',
   );
 }
 

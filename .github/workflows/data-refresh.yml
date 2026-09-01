@@ -34,10 +34,40 @@ jobs:
       # roster changes, and scripts/complete-characters.ts (footage) never runs
       # here at all: YouTube blocks datacenter IPs, so extraction is local-only
       # and the cron simply carries the committed overrides forward.
-      - name: Rebuild data
-        run: npm run data:build
+      - name: Fetch channel uploads
+        run: npm run data:fetch
         env:
           YT_API_KEY: ${{ secrets.YT_API_KEY }}
+
+      # THE INDEX PULL, AND IT IS ALLOWED TO FAIL.
+      #
+      # This is the second half of "the cron never depends on Replay Theater
+      # succeeding", and it is deliberately a step of its own rather than a link
+      # in data:build's && chain — a chain would take the whole refresh down with
+      # it, which is exactly the dependency the split exists to avoid.
+      #
+      # continue-on-error marks the run yellow and moves on. scripts/parse.ts
+      # then finds no dump, carries the committed records, and the rest of the
+      # day proceeds normally. A bad morning upstream costs that morning's new
+      # entries; nothing already committed is at risk, because this intake is
+      # add-only.
+      #
+      # LAST OF THE FETCHES, so a failure here cannot cost the channel dumps
+      # already in hand from the step above. It reads a bounded cursor (two or
+      # three pages, ten at most) rather than the whole catalogue — see
+      # scripts/fetch-theater.ts.
+      #
+      # YT_API_KEY is repeated on purpose: `env:` is per step, and
+      # requireApiKey() runs at module load, so without it this exits 1 before it
+      # has read anything.
+      - name: Fetch the tournament index (Replay Theater)
+        continue-on-error: true
+        run: npm run data:theater
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+
+      - name: Parse and emit
+        run: npm run data:parse
 
       - name: Commit if changed
         run: |
@@ -53,11 +83,20 @@ jobs:
           # review-queue.json and bench-queue.json are parse-regenerated derived
           # state — both are content-only with no timestamp, so a quiet day
           # leaves them byte-identical too.
-          # source-pins.json is the local-first carry's pin. The cron never
-          # rewrites it — it carries rather than rebuilds, so the pin is read
-          # and asserted, never written — but staging it costs nothing and an
-          # unstaged file that DOES change is a change discarded in silence.
-          git add data/videos.json data/replays.json data/stats.json data/players.json data/patchGroups.json data/patchBoundaries.json data/summary.json data/seasonBoundaries.json data/review-queue.json data/bench-queue.json data/player-redirects.json data/source-pins.json data/report.md
+          # source-pins.json is the index intake's carry pin. The cron used to
+          # only read it — every run was a carry — and now most runs rebuild and
+          # rewrite it, so staging it stopped being a courtesy and became
+          # required: an unstaged file that DOES change is a change discarded in
+          # silence.
+          # theater-cursor.json is where the index pull remembers how far it has
+          # read. raw/ is gitignored and CI starts from a fresh checkout, so if
+          # this is not committed the cursor resets to 0 every morning and every
+          # run becomes a bounded sweep that never goes quiet. Content-only (one
+          # integer, no timestamp) so a quiet day leaves it byte-identical.
+          # theater-disagreements.json is the cross-check's output. Unlike
+          # review-queue.json those rows ARE published — e2e gates exactly that —
+          # so the file is a record of contested readings, not a holding pen.
+          git add data/videos.json data/replays.json data/stats.json data/players.json data/patchGroups.json data/patchBoundaries.json data/summary.json data/seasonBoundaries.json data/review-queue.json data/bench-queue.json data/player-redirects.json data/source-pins.json data/theater-cursor.json data/theater-disagreements.json data/report.md
           # report.md's "_Generated <timestamp>_" line changes every run; a diff
           # that is ONLY that line is not a data change — drop it so a no-change
           # day produces no commit (and no deploy). report.md still ships
@@ -66,6 +105,24 @@ jobs:
           REAL=$(git diff --cached -- data/report.md | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' | { grep -vc '^[+-]_Generated ' || true; })
           if [ "$REAL" -eq 0 ]; then
             git restore --staged --worktree data/report.md
+          fi
+          # AND THE SAME FOR THE CURSOR, for the same reason. The catalogue takes
+          # new entries most days whether or not any of OUR data changed, so
+          # maxEntryId rises on essentially every run and theater-cursor.json
+          # changes every morning. Left staged that would retire the
+          # no-change-no-commit rule outright and put a deploy on the calendar
+          # every day forever. Dropped when it is the only thing left, the cursor
+          # simply does not advance on a quiet day and the next run re-reads
+          # those pages; the cost is a page or two, bounded at ten
+          # (CURSOR_MAX_PAGES), and nothing is lost because the intake is
+          # add-only.
+          # (Written as an emptiness test on the remaining staged NAMES rather
+          # than a `git diff --quiet -- <paths>`: with the cursor filtered out
+          # that path list can be EMPTY, and an empty pathspec means
+          # "everything", which would silently invert the check.)
+          OTHERS=$(git diff --cached --name-only | grep -v '^data/theater-cursor.json$' || true)
+          if [ -z "$OTHERS" ]; then
+            git restore --staged --worktree data/theater-cursor.json
           fi
           if git diff --cached --quiet; then
             echo "No data changes — skipping commit."
