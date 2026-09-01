@@ -752,7 +752,11 @@ async function main(): Promise<void> {
   console.log(
     `\n  → wrote raw/replayTheater.json (${records.length} record(s)${CURSOR_MODE ? ', a delta' : ''})`,
   );
-  console.log(`  → wrote raw/replayTheater.witness.json (${catalogue.length} catalogue entr(ies))`);
+  // `rightGame`, not `catalogue`: the witness is written from behind the
+  // per-entry game gate a few lines up, so the pre-gate count overstates the
+  // file by however many rows the gate rejected — 15,286 of them on the
+  // 2026-08-31 run the gate's own comment describes. Report what was written.
+  console.log(`  → wrote raw/replayTheater.witness.json (${rightGame.length} catalogue entr(ies))`);
 
   // ── reconnaissance ────────────────────────────────────────────────────────
   console.log(`\n${'█'.repeat(72)}`);

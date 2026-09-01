@@ -7,7 +7,7 @@
 - **patch-table** (stale-patch-table, due 2026-08-10)
   The newest patch in scripts/patches.ts is 2026-08-10, 22 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
-_Generated 2026-09-01T18:39:11.769Z_
+_Generated 2026-09-01T23:23:10.957Z_
 
 ## Coverage
 
@@ -108,7 +108,7 @@ is recorded in data/theater-disagreements.json with both claims and is never
 written into a record. The catalogue does not outrank a confident parse and never
 outranks a human override.
 
-_Measured this run against a full pull. 107 catalogue entr(ies) point at videos_
+_Measured on the last full sweep, at catalogue entry 488423. 107 catalogue video(s) point at videos_
 _we do not hold; 0 are VODs the catalogue segments, which the index intake owns._
 
 | field | population | agree | partial | disagree | cannot witness |
@@ -126,7 +126,7 @@ Side order differed on **3** record(s); the comparison realigns on the
 handles before reading fighters, so a swapped pair is not counted twice — here,
 eight times — as a character disagreement.
 
-No disagreements this run.
+No disagreements on that sweep.
 
 ## Misses
 

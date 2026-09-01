@@ -31,7 +31,7 @@ import { idKey } from './roster';
 import { CHAR_TIERS } from '../types/index';
 import { DISTINCT_KEYS } from './players';
 import { CHANNELS } from './channels';
-import type { Disagreement } from './crosscheck';
+import type { Disagreement, WitnessArtifact } from './crosscheck';
 import { PATCHES, SEASONS, seasonToken } from './patches';
 import type {
   BenchQueueItem,
@@ -89,14 +89,26 @@ const summary = read<{
 }>('summary.json');
 const queue = read<ReviewQueueItem[]>('review-queue.json');
 const bench = read<BenchQueueItem[]>('bench-queue.json');
-/** The cross-check's contested rows. ABSENT until a pull has written a witness
- *  file, which is a legitimate state rather than a broken one — raw/ is
- *  gitignored, the pull is allowed to fail, and parse.ts writes this only on a
- *  run that HAD a witness. Missing makes the two gates below vacuous instead of
- *  red; once the file exists it is committed and only leaves by hand. */
-const contested = existsSync(join(ROOT, 'data', 'theater-disagreements.json'))
-  ? read<Disagreement[]>('theater-disagreements.json')
-  : [];
+/** The cross-check's committed output. ABSENT until a parse has run, which is a
+ *  legitimate state rather than a broken one — raw/ is gitignored and the pull
+ *  is allowed to fail. Missing makes the gates below vacuous instead of red;
+ *  once the file exists it is committed and only leaves by hand.
+ *
+ *  AN OBJECT, NOT A BARE LIST: it carries the MEASUREMENT as well as the rows,
+ *  so report.md can be rendered from what is committed rather than from this
+ *  morning's cursor window. A cursor pull reads a couple of pages and its
+ *  numbers differ every day, so rendering them made report.md change on every
+ *  run whether or not a record had — which retires the cron's
+ *  no-change-no-commit rule from the other side. Only a full sweep writes here.
+ *  The bare-array shape it shipped as is still read, as rows with no
+ *  measurement. */
+const witnessFile = existsSync(join(ROOT, 'data', 'theater-disagreements.json'))
+  ? read<WitnessArtifact | Disagreement[]>('theater-disagreements.json')
+  : { disagreements: [] };
+const witnessArtifact: WitnessArtifact = Array.isArray(witnessFile)
+  ? { disagreements: witnessFile }
+  : witnessFile;
+const contested = witnessArtifact.disagreements ?? [];
 const reportMd = readFileSync(join(ROOT, 'data', 'report.md'), 'utf8');
 
 const charIds = new Set(characters.map((c) => c.id));
@@ -391,6 +403,32 @@ function testSubstrate(): void {
         typeof d.title === 'string',
     ),
     'theater-disagreements.json schema validates',
+  );
+  // THE MEASUREMENT HAS TO ADD UP, or the block report.md renders from it is
+  // decorative. Every fighter side is exactly one of agree / subset / disagree /
+  // cannotWitness, every compared record is exactly one of both / one / neither
+  // handles, and a record contributes exactly two sides — the one place the two
+  // halves of the reading are tied to each other.
+  const measured = witnessArtifact.measured;
+  expect(
+    !measured ||
+      (measured.characters.agree +
+        measured.characters.subset +
+        measured.characters.disagree +
+        measured.characters.cannotWitness ===
+        measured.characters.sides &&
+        measured.players.both + measured.players.one + measured.players.neither ===
+          measured.compared &&
+        measured.characters.sides === measured.compared * 2),
+    `cross-check measurement is internally consistent${
+      measured ? ` (${measured.compared} compared)` : ' (none yet)'
+    }`,
+  );
+  // Every contested row must be one the measurement actually counted. A row that
+  // is not is a row from a sweep the file no longer describes.
+  expect(
+    !measured || contested.length <= measured.characters.disagree + measured.players.neither,
+    'contested rows are a subset of what was measured',
   );
   expect(
     bench.every((b) => b.known.some((n) => n < 4) && b.known.every((n) => n >= 1)),

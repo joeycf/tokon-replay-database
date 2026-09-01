@@ -12,7 +12,13 @@ import { fileURLToPath } from 'node:url';
 import { alignBench, readBench } from './bench';
 import { ACTIVE_CHANNELS, CHANNELS, stripTheaterSponsor } from './channels';
 import { applyOverrides, emitGeneric } from './emit';
-import { crossCheck, formatCrossCheck, type WitnessFile } from './crosscheck';
+import {
+  crossCheck,
+  formatCrossCheck,
+  type Disagreement,
+  type WitnessArtifact,
+  type WitnessFile,
+} from './crosscheck';
 import { CHARACTERS_PER_SIDE } from './stats';
 import { resolveKey, resolvePlayers, undeclaredCollisions } from './players';
 import { dueExpiries, expiryBlock } from './expiries';
@@ -1178,35 +1184,9 @@ async function main() {
   // hand-editing a number on every refresh is friction that teaches people to
   // skip the check.
   //
-  // ASSERTED ON A CARRY, WRITTEN ON A REBUILD. A rebuild has the dump in front
-  // of it and is the authority on the count; a carry has only yesterday's file
-  // and needs something outside that file to check itself against. The re-pin
-  // happens after applyOverrides, from the count actually published.
-  //
-  // Note the assertion is unconditional for a carried intake — it is NOT
-  // guarded on `carried.length > 0`. That guard would make total loss the one
-  // case that passes, which is the case the pin exists for.
+  // Read here, ASSERTED after applyOverrides and re-written after that — see
+  // both blocks below.
   const pins: SourcePins = await readJson('source-pins.json', {});
-  for (const key of carriedWithFallback) {
-    const got = records.filter((r) => r.intake === key).length;
-    const want = pins[key];
-    if (want === undefined) {
-      throw new Error(
-        `${key} carried ${got} record(s) but data/source-pins.json has no pin for it.\n` +
-          `  "No expectation" is the exact state the pin exists to prevent.\n` +
-          `  Run \`npm run data:theater\` then \`npm run data:parse\` to rebuild from a dump and pin it.`,
-      );
-    }
-    if (got !== want) {
-      throw new Error(
-        `source pin mismatch on ${key}: carried ${got}, pinned ${want}.\n` +
-          `  data/videos.json is both the source and the target of this carry, so drift\n` +
-          `  compounds: the next run would treat ${got} as the new baseline.\n` +
-          `  If the change is deliberate, run \`npm run data:theater\` then\n` +
-          `  \`npm run data:parse\` to rebuild and re-pin.`,
-      );
-    }
-  }
 
   // ── the freeze carry ───────────────────────────────────────────────────────
   // A frozen channel's committed records are still real and still play. Carry
@@ -1285,6 +1265,44 @@ async function main() {
   // byte-identity the index intake's carry has to be able to prove.
   records.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt) || a.id.localeCompare(b.id));
   const withOverrides = applyOverrides(records, overrides);
+
+  // ── the carry pin, ASSERTED ───────────────────────────────────────────────
+  // ASSERTED ON A CARRY, WRITTEN ON A REBUILD. A rebuild has the dump in front
+  // of it and is the authority on the count; a carry has only yesterday's file
+  // and needs something outside that file to check itself against.
+  //
+  // COUNTED AFTER applyOverrides, ON BOTH SIDES. This assert stood above that
+  // call and counted `records`, while the re-pin below counts `withOverrides` —
+  // so the pin meant "published count" everywhere except the one place that
+  // checked it. The two agree only while no override touches this intake: a
+  // single `exclude: true` on an index record makes the assert want one more
+  // than the pin can ever hold, and every carrying run — which is every cron
+  // morning the pull fails, the exact fallback this is meant to protect — would
+  // hard-exit on a mismatch with nothing wrong.
+  //
+  // Note the assertion is unconditional for a carried intake — it is NOT
+  // guarded on `carried.length > 0`. That guard would make total loss the one
+  // case that passes, which is the case the pin exists for.
+  for (const key of carriedWithFallback) {
+    const got = withOverrides.filter((r) => r.intake === key).length;
+    const want = pins[key];
+    if (want === undefined) {
+      throw new Error(
+        `${key} carried ${got} record(s) but data/source-pins.json has no pin for it.\n` +
+          `  "No expectation" is the exact state the pin exists to prevent.\n` +
+          `  Run \`npm run data:theater\` then \`npm run data:parse\` to rebuild from a dump and pin it.`,
+      );
+    }
+    if (got !== want) {
+      throw new Error(
+        `source pin mismatch on ${key}: carried ${got}, pinned ${want}.\n` +
+          `  data/videos.json is both the source and the target of this carry, so drift\n` +
+          `  compounds: the next run would treat ${got} as the new baseline.\n` +
+          `  If the change is deliberate, run \`npm run data:theater\` then\n` +
+          `  \`npm run data:parse\` to rebuild and re-pin.`,
+      );
+    }
+  }
 
   // THE PROVENANCE TALLY IS RECOMPUTED FROM THE FINAL RECORDS.
   //
@@ -1507,6 +1525,63 @@ async function main() {
     ? crossCheck(witness, withOverrides, byAliasForWitness, resolveKey, stripTheaterSponsor)
     : null;
 
+  // ONLY A FULL SWEEP MEASURES AND WRITES; EVERY RUN RENDERS FROM WHAT IS
+  // COMMITTED. The witness file is rebuilt from scratch by each pull and holds
+  // only the pages that pull read, so a cursor morning sees the front page or
+  // two of the feed — a different WINDOW, not a different corpus. Two things
+  // went wrong with reading this run's result directly:
+  //
+  //  · report.md rendered the window's numbers, so it had a real diff every
+  //    morning whether or not a RECORD had changed. The workflow's `REAL` filter
+  //    only ever strips the `_Generated` line and its `OTHERS` test was never
+  //    empty, so the workflow's cursor suppression never fired, and the cron
+  //    committed and deployed daily forever.
+  //  · the artifact was written whenever there was a result at all, so the first
+  //    cursor delta that found nothing overwrote the last full sweep's rows with
+  //    an empty list — then flapped them back the next time a delta happened to
+  //    contain one. The carry path already refuses that write and says why; a
+  //    cursor run took the same erasure through the front door.
+  //
+  // So the artifact carries the MEASUREMENT as well as the rows, a full sweep is
+  // the only thing that writes it, and report.md is built from the committed
+  // file. A cursor morning prints its own reading to the console, where it is
+  // useful and costs nothing.
+  //
+  // The file shipped as a bare array before it carried a measurement, and a
+  // checkout can still be holding that shape until the next full sweep rewrites
+  // it — read as "rows, no measurement" rather than left to surface later as
+  // `undefined.disagreements`.
+  const committedWitness = await readJson<WitnessArtifact | Disagreement[]>(
+    'theater-disagreements.json',
+    { disagreements: [] },
+  );
+  let witnessArtifact: WitnessArtifact = Array.isArray(committedWitness)
+    ? { disagreements: committedWitness }
+    : committedWitness;
+  if (witnessResult && witness?.mode === 'full') {
+    witnessArtifact = {
+      measured: {
+        // The witness file's OWN high-water id, not the stats file's. Both are
+        // written from the same variable by scripts/fetch-theater.ts, and this
+        // is the file the measurement was actually taken from.
+        atEntryId: witness.maxEntryId ?? 0,
+        compared: witnessResult.compared,
+        unmatched: witnessResult.unmatched,
+        segmented: witnessResult.segmented,
+        players: witnessResult.players,
+        characters: witnessResult.characters,
+      },
+      disagreements: witnessResult.disagreements,
+    };
+  } else if (witnessResult) {
+    const wc = witnessResult.characters;
+    console.log(
+      `  cross-check (cursor window, not committed): ${witnessResult.compared} record(s), ` +
+        `${witnessResult.players.both} both-handles, ${wc.agree}/${wc.sides} fighter sides agree, ` +
+        `${witnessResult.disagreements.length} disagreement(s)`,
+    );
+  }
+
   // ── write ──────────────────────────────────────────────────────────────────
   /**
    * THE RETIRED-ID LEDGER — append-only, and that is the whole point.
@@ -1545,10 +1620,16 @@ async function main() {
     Object.fromEntries(Object.entries(redirects).sort(([a], [b]) => a.localeCompare(b))),
   );
   await write('review-queue.json', review);
-  // Only on a run that HAD a witness. A carrying run leaves the committed file
-  // exactly as it is rather than overwriting it with [] — the absence of a pull
-  // is not evidence that the disagreements were resolved.
-  if (witnessResult) await write('theater-disagreements.json', witnessResult.disagreements);
+  // Unconditional, and that is not a rewrite: on anything but a full sweep
+  // `witnessArtifact` IS the committed file, read back a few dozen lines above
+  // and re-serialised by the same helper that wrote it, so the bytes do not
+  // move. A carrying run and a cursor run both leave it exactly as it is —
+  // neither the absence of a pull nor a two-page window is evidence that the
+  // disagreements were resolved. Writing here rather than skipping also seeds
+  // the file on a first run: the cron NAMES this path in its `git add`, and
+  // `git add` on a path that does not exist fails under `set -e` and aborts the
+  // commit step.
+  await write('theater-disagreements.json', witnessArtifact);
   await write('bench-queue.json', benchQueue);
   await write('seasonBoundaries.json', SEASONS);
 
@@ -1626,7 +1707,14 @@ async function main() {
         : !theaterStats
           ? 'rebuilt from a dump (no pull report)'
           : theaterStats.mode === 'cursor'
-            ? `cursor delta${theaterStats.hitBound ? ' (hit page bound)' : ''}`
+            ? // NO PER-RUN DETAIL IN THE MODE STRING. This read
+              // `cursor delta (hit page bound)`, which put a fact about THIS
+              // MORNING'S window inside a cell that otherwise names a steady
+              // state — so the row changed on the days the bound was hit and
+              // changed back the day after, for the same reason the columns
+              // beside it are withheld below. The bound is still reported, as a
+              // conditional line under the table.
+              'rebuilt from a cursor delta'
             : 'rebuilt from a full sweep';
       const survivors = theaterSurvivors.get(ch.id) ?? [];
       // WHAT "not in this pull" MEANS DEPENDS ON THE MODE, and conflating the
@@ -1647,13 +1735,34 @@ async function main() {
       // the pin, it asserted itself against it, so the committed value is
       // exactly the right thing to show.
       const pin = carried ? (pins[ch.id] ?? '—') : n;
+      // THE PER-RUN COLUMNS ARE WITHHELD ON A CURSOR MORNING, for the same
+      // reason the cross-check block is rendered from the committed artifact:
+      // `pages` and `new` describe this morning's WINDOW, not the corpus. The
+      // catalogue takes entries most days whether or not any are ours, so those
+      // two numbers moved daily on their own and gave report.md a real diff
+      // every morning — which retires the cron's no-change-no-commit rule from
+      // the other side and puts a deploy on the calendar every day forever.
+      const full = !carried && theaterStats?.mode === 'full';
       lines.push(
         `| \`${ch.id}\` | ${n} | ${pin} | ${mode} | ${
-          carried ? '—' : (theaterStats?.pagesRead ?? '—')
-        } | ${carried ? '—' : n - survivors.length} | ${gone} |`,
+          full ? (theaterStats?.pagesRead ?? '—') : '—'
+        } | ${full ? n - survivors.length : '—'} | ${gone} |`,
       );
     }
     lines.push('');
+    // NOT per-run noise: normally absent, and present only on a morning the
+    // cursor could not go quiet inside its page bound. That is a real event and
+    // deserves to reach the commit, the same way an ACTION REQUIRED block does —
+    // the guard's rule is that a diff which is ONLY the timestamp is not a
+    // change, not that report.md may never change.
+    if (theaterStats?.hitBound) {
+      lines.push(
+        '_⚠ The cursor hit its page bound this run — entries may be unreached._',
+        '_Nothing is lost (this intake is add-only); `npm run data:theater -- --full`_',
+        '_reconciles._',
+        '',
+      );
+    }
     if (carriedWithFallback.includes('replayTheater')) {
       // A CARRY measures none of the counts below — the dump they would have
       // been measured from is absent. Saying so beats printing 0, which reads as
@@ -1860,7 +1969,7 @@ async function main() {
     lines.push('');
   }
 
-  if (witnessResult) lines.push(...formatCrossCheck(witnessResult, witness?.mode));
+  lines.push(...formatCrossCheck(witnessArtifact));
 
   lines.push('## Misses', '');
   lines.push('| reason | count |', '| --- | ---: |');
