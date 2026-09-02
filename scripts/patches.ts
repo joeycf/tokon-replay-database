@@ -94,7 +94,7 @@ export const SEASONS: SeasonBoundary[] = [
  *
  * Cadence warning for whoever reads this next: TWO patches shipped in the first
  * five days. scripts/expiries.ts carries a `stale-patch-table` check that goes
- * off if the newest row here is more than 21 days old, because a shipped patch
+ * off if the newest row here is more than 10 days old, because a shipped patch
  * that is missing from this table does not fail — it silently files every
  * replay since under the previous token, which renders, filters and passes
  * every count assertion while being wrong.

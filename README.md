@@ -129,7 +129,7 @@ strictly worse than the misfiling it warns about. **The red workflow and the
 deleting the check.
 
 Two things can trip them: a Year-1 character's announced window opening
-(`phoenix-cyclops`, 2026-10-01) and the patch table going 21 days stale on a
+(`phoenix-cyclops`, 2026-10-01) and the patch table going 10 days stale on a
 vendor that shipped twice in its first five days.
 
 ## Scripts
