@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-02T04:38:04.175Z_
+_Generated 2026-09-02T12:18:23.777Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 112 | 112 | 100.0% |
+| highLevelReplays | 125 | 125 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 776 | 80 | 10.3% |
-| replaysHub | 146 | 142 | 97.3% |
-| fightingStationX | 2712 | 109 | 4.0% |
-| fgcReplaysHub | 2572 | 29 | 1.1% |
-| marvelTokonYT _(events only)_ | 41 | 11 | 26.8% |
-| replayTheater _(index)_ | 10 | 44 | — |
-| **total** | | **540** | |
+| hadoukenReplays | 783 | 86 | 11.0% |
+| replaysHub | 163 | 159 | 97.5% |
+| fightingStationX | 2734 | 123 | 4.5% |
+| fgcReplaysHub | 2593 | 39 | 1.5% |
+| marvelTokonYT _(events only)_ | 43 | 11 | 25.6% |
+| replayTheater _(index)_ | 16 | 44 | — |
+| **total** | | **600** | |
 
 ## Index intakes
 
@@ -27,27 +27,27 @@ the committed records are carried, and the run stays green.
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
 | `replayTheater` | 44 | 44 | rebuilt from a cursor delta | — | — | — |
 
-Entries **collapsed as double-submitted**: **0** of 10 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
+Entries **collapsed as double-submitted**: **0** of 16 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
 
 _Entries skipped as already-known: **0**. The catalogue indexes no video this repo has fetched, published or ruled on._
 
 ## Character provenance
 
-How every one of the 1080 sides got its characters.
+How every one of the 1200 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 124 | 11.5% |
-| description | 293 | 27.1% |
-| index | 88 | 8.1% |
-| footage | 32 | 3.0% |
-| human | 519 | 48.1% |
-| review | 24 | 2.2% |
+| title | 200 | 16.7% |
+| description | 337 | 28.1% |
+| index | 88 | 7.3% |
+| footage | 32 | 2.7% |
+| human | 519 | 43.3% |
+| review | 24 | 2.0% |
 
-- complete (4/4): **956/1080** (88.5%)
+- complete (4/4): **1000/1200** (83.3%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 270 · character-subset 22 · ambiguous 4
-- title slot order: handle-first 812 · chars-first 78 · parallel-lists 80
+- bench alignment: handle 307 · character-subset 24 · ambiguous 4
+- title slot order: handle-first 920 · chars-first 84 · parallel-lists 86
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -55,25 +55,25 @@ How every one of the 1080 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 124 | 11.5% |
-| 4 | 949 | 87.9% |
-| 5 _(mid-set change)_ | 6 | 0.6% |
+| 1 | 200 | 16.7% |
+| 4 | 993 | 82.8% |
+| 5 _(mid-set change)_ | 6 | 0.5% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **124 side(s) awaiting a drain** across 62 record(s) — oldest published **17 day(s)** ago
+- **200 side(s) awaiting a drain** across 100 record(s) — oldest published **17 day(s)** ago
 
-> The bench queue is at 62 (nudge threshold 40).
+> The bench queue is at 100 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **4** — character-completion 3 · bench-conflict 1
-- bench queue (published, incomplete): **62**
+- bench queue (published, incomplete): **100**
 
 ## Player identity
 
-11 identity(s) resolved from more than one spelling. The
+13 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -85,11 +85,13 @@ after changing scripts/players.ts, or the old URLs 404.
 | `chrisg` | `chris-g` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
+| `majinburno` | `majin-burno` |
 | `mrmarben` | `mr-marben` |
 | `nychrisg` | `nychris-g` |
 | `sonicfox` | `sonic-fox` |
 | `tokon-player` | `to-kon-player` |
 | `vivid-aspiration` | `vividaspiration` |
+| `wolverlean` | `wolver-lean` |
 
 ## Replay Theater cross-check
 
@@ -125,23 +127,23 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 3963 |
+| other-game | 3975 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 117 |
-| not-an-event | 30 |
+| not-a-match | 121 |
+| not-an-event | 32 |
 | char-unresolved | 15 |
-| short-duration | 6 |
+| short-duration | 10 |
 | no-vs-title | 4 |
 | bench-conflict | 1 |
 
-- `marvelTokonYT` events-only gate: **30** upload(s) carried no known event brand.
+- `marvelTokonYT` events-only gate: **32** upload(s) carried no known event brand.
+  - MARVEL Tokon ▰ Bleed - INSANE DUO Black Panther x Storm ▰ High Level Match
+  - MARVEL Tokon ▰ MrChupy Demoniac CARNAGE ▰ High Level Match
   - MARVEL Tokon ▰ ImnoDeag (Spider-Man) vs Nieve (Champion) ▰ High Level Match
   - MARVEL Tokon ▰ ChrisG (Black Panther) vs Snake Eyes (Champion) ▰ High Level Match
   - MARVEL Tokon ▰ Naire (Spider-Man) vs Roda (Wolverine) ▰ High Level Match
-  - MARVEL Tokon ▰ Harampool Crazy DEADPOOL ▰ High Level Match
-  - MARVEL Tokon ▰ HaramPool (#1 Deadpool) vs Opal (Magik) ▰ High Level Match
-  - …and 25 more
+  - …and 27 more
 
 ## Unmatched text in character slots
 
@@ -162,8 +164,8 @@ garbled game name gets a human verdict instead of a quiet player page.
 
 | handle | records | example |
 | --- | ---: | --- |
+| `TOKON PLAYER` | 4 | -lxClCs9cb0 |
 | `TOKON` | 4 | 4AIZDJ4nvSE |
-| `TOKON PLAYER` | 3 | bNSKCKQXuSo |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
 | `TOKON DEEZ` | 1 | R8ixtuzZlY4 |
 | `marvel chokon` | 1 | 8Y6fDQNgFPk |
