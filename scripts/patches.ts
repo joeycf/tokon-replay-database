@@ -133,6 +133,23 @@ export const PATCHES: PatchBoundary[] = [
     announcedOn: 'steam',
     note: 'Patch Update 8/10/2026',
   },
+  {
+    // The vendor changed its post title here — "Patch Update - 21 August 2026"
+    // rather than "Patch Update 8/10/2026". `note` stays the title verbatim,
+    // as every steam-announced row does, so the row and the post it came from
+    // can be matched by eye. data:patch-check was blind to this spelling until
+    // the same commit that added these two rows.
+    version: '2026-08-21',
+    start: '2026-08-21',
+    announcedOn: 'steam',
+    note: 'Patch Update - 21 August 2026',
+  },
+  {
+    version: '2026-08-28',
+    start: '2026-08-28',
+    announcedOn: 'steam',
+    note: 'Patch Update - 28 August 2026',
+  },
 ];
 
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;

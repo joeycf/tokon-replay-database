@@ -1,13 +1,6 @@
 # Tōkon pipeline report
 
-## ⚠ ACTION REQUIRED
-
-1 self-expiring gate(s) are due:
-
-- **patch-table** (stale-patch-table, due 2026-08-10)
-  The newest patch in scripts/patches.ts is 2026-08-10, 22 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
-
-_Generated 2026-09-01T23:23:10.957Z_
+_Generated 2026-09-02T04:38:04.175Z_
 
 ## Coverage
 
@@ -20,7 +13,7 @@ _Generated 2026-09-01T23:23:10.957Z_
 | fightingStationX | 2712 | 109 | 4.0% |
 | fgcReplaysHub | 2572 | 29 | 1.1% |
 | marvelTokonYT _(events only)_ | 41 | 11 | 26.8% |
-| replayTheater _(index)_ | 44 | 44 | 100.0% |
+| replayTheater _(index)_ | 10 | 44 | — |
 | **total** | | **540** | |
 
 ## Index intakes
@@ -32,9 +25,9 @@ the committed records are carried, and the run stays green.
 
 | intake | records | pin | this run | pages | new | not in this pull |
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| `replayTheater` | 44 | 44 | rebuilt from a full sweep | 6 | 44 | 0 |
+| `replayTheater` | 44 | 44 | rebuilt from a cursor delta | — | — | — |
 
-Entries **collapsed as double-submitted**: **0** of 44 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
+Entries **collapsed as double-submitted**: **0** of 10 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
 
 _Entries skipped as already-known: **0**. The catalogue indexes no video this repo has fetched, published or ruled on._
 
@@ -67,7 +60,7 @@ How every one of the 1080 sides got its characters.
 | 5 _(mid-set change)_ | 6 | 0.6% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **124 side(s) awaiting a drain** across 62 record(s) — oldest published **16 day(s)** ago
+- **124 side(s) awaiting a drain** across 62 record(s) — oldest published **17 day(s)** ago
 
 > The bench queue is at 62 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction

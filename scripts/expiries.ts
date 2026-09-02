@@ -65,8 +65,21 @@ export const UNRELEASED: { id: string; releases: string; accent?: string; note?:
   },
 ];
 
-/** The patch table goes stale silently, so it gets a cadence check. */
-const STALE_PATCH_DAYS = 21;
+/** The patch table goes stale silently, so it gets a cadence check.
+ *
+ *  Ten days, down from 21, because 21 was picked before the game had a cadence
+ *  to measure. It now has one: post-launch the vendor has shipped on 08-06,
+ *  08-10, 08-21 and 08-28 — gaps of 4, 11 and 7 days. A 21-day threshold cannot
+ *  fire until two patches have already been missed, which is what happened.
+ *  Ten days lets one ordinary gap pass without noise and still catches the
+ *  first miss rather than the second.
+ *
+ *  This alarm is blunt on purpose and it is not the real check — that is
+ *  `npm run data:patch-check`. It earns its place by being the thing that
+ *  cannot go blind: it reads only the table's own newest date and the clock,
+ *  so no change of the vendor's title format can silence it. It was, in fact,
+ *  the only signal that fired when the parser did go blind. */
+const STALE_PATCH_DAYS = 10;
 
 const today = (): string => new Date().toISOString().slice(0, 10);
 const daysBetween = (a: string, b: string) =>
