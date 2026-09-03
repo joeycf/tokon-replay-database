@@ -32,6 +32,7 @@ import { CHAR_TIERS } from '../types/index';
 import { DISTINCT_KEYS } from './players';
 import { CHANNELS } from './channels';
 import type { Disagreement, WitnessArtifact } from './crosscheck';
+import { newerThanCursor } from './theater-delta';
 import { PATCHES, SEASONS, seasonToken } from './patches';
 import type {
   BenchQueueItem,
@@ -602,6 +603,42 @@ function testSubstrate(): void {
 // ════════════════════════════════════════════════════════════════════════════
 // the cron commit guard — shell, so only shell can test it
 // ════════════════════════════════════════════════════════════════════════════
+// ── the cursor delta ────────────────────────────────────────────────────────
+// `newerThanCursor` is what keeps a quiet morning a CARRY: the tagged dump is
+// cut from the entries above the committed cursor, not from the whole window
+// the walk read. Controlled both ways, plus the id-less and full-sweep arms, so
+// a regression to "the whole window" cannot pass quietly.
+function testTheaterDelta(): void {
+  const window: Array<{ id?: number; tag: string }> = [
+    { id: 12, tag: 'evo' },
+    { id: 11, tag: '' },
+    { id: 10, tag: 'evo' },
+    { id: 9, tag: 'evo' },
+    { tag: 'evo' },
+  ];
+  const delta = newerThanCursor(window, true, 10);
+  expect(
+    delta.map((e) => e.id).join(',') === '12,11,',
+    'cursor delta keeps the ids above the cursor and an id-less entry (12, 11, —)',
+  );
+  expect(
+    !delta.some((e) => e.id === 10 || e.id === 9),
+    'cursor delta drops the cursor entry itself and everything older',
+  );
+  expect(
+    newerThanCursor(window, true, 0).length === window.length,
+    'positive control: a zero cursor keeps the whole window',
+  );
+  expect(
+    newerThanCursor(window, false, 10).length === window.length,
+    'a full sweep ignores the cursor and returns everything',
+  );
+  expect(
+    newerThanCursor(window, true, 12).filter((e) => typeof e.id === 'number').length === 0,
+    'negative control: a cursor at the newest id yields no numbered entry — an empty dump, a carry',
+  );
+}
+
 function testCronGuard(): void {
   console.log('\n— cron commit guard (extracted from the real workflow)');
   const wf = readFileSync(join(ROOT, '.github/workflows/data-refresh.yml'), 'utf8').split('\n');
@@ -730,6 +767,7 @@ function testCronGuard(): void {
 // ════════════════════════════════════════════════════════════════════════════
 async function main(): Promise<void> {
   testSubstrate();
+  testTheaterDelta();
 
   const server = await serve();
   const browser = await chromium.launch({

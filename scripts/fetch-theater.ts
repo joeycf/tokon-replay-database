@@ -46,6 +46,7 @@ import { fileURLToPath } from 'node:url';
 import { CHANNEL_BY_ID } from './channels';
 import { fetchVideoMeta, requireApiKey, sleep } from './youtube';
 import type { TheaterRawRecord } from '../types/index';
+import { newerThanCursor } from './theater-delta';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -480,9 +481,11 @@ async function main(): Promise<void> {
   // ── scope: tagged tournament matches only ─────────────────────────────────
   // The untagged remainder is online play. This repo already carries six
   // channels of that; what it has none of is tournament sets.
-  const tagged = rightGame.filter((e) => (e.tag ?? '').trim() !== '');
+  // IN CURSOR MODE, ONLY WHAT IS NEWER THAN THE CURSOR — see theater-delta.ts.
+  const delta = newerThanCursor(rightGame, CURSOR_MODE, cursorAt);
+  const tagged = delta.filter((e) => (e.tag ?? '').trim() !== '');
   console.log(
-    `  ${tagged.length} tagged tournament match(es); ${rightGame.length - tagged.length} untagged (out of scope)`,
+    `  ${tagged.length} tagged tournament match(es)${CURSOR_MODE ? ` newer than the cursor, of ${delta.length} new in ${rightGame.length} read` : ''}; ${delta.length - tagged.length} untagged (out of scope)`,
   );
 
   // ── links ─────────────────────────────────────────────────────────────────
