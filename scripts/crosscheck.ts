@@ -396,8 +396,8 @@ export function formatCrossCheck(a: WitnessArtifact): string[] {
     'against the parser.',
     '',
     `Side order differed on **${m.players.flipped}** record(s); the comparison realigns on the`,
-    'handles before reading fighters, so a swapped pair is not counted twice — here,',
-    'eight times — as a character disagreement.',
+    'handles before reading fighters, so a swapped pair is not scored as a character',
+    `disagreement — which, at two sides a record, would have been ${m.players.flipped * 2} here.`,
     '',
     ...(a.disagreements.length
       ? [

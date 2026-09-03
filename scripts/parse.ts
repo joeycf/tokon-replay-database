@@ -1054,7 +1054,7 @@ async function main() {
 
   // ── the index intake: rebuild from a dump, or carry ───────────────────────
   //
-  // An INDEX source is fetched by the daily cron since 2026-08-31, and the carry
+  // An INDEX source is fetched by the daily cron since 2026-09-02, and the carry
   // is now its FALLBACK rather than its normal state. raw/ is gitignored and the
   // cron works from a fresh checkout, so before that there was never a dump here
   // and the committed records were CARRIED every single run — the same mechanism
@@ -1448,9 +1448,11 @@ async function main() {
   // moved back to 0 would turn every cron run into a bounded sweep that never
   // goes quiet.
   //
-  // THE SEED IS EXACT, NOT A GUESS. data/theater-cursor.json was committed at
-  // 488095, which is the highest entry id on `?game=tokon&page=1` — verified
-  // live 2026-08-31. A seed that overshot would skip real entries permanently
+  // THE SEED IS EXACT, NOT A GUESS. data/theater-cursor.json was first committed
+  // at 488423, the highest entry id the 2026-09-01 full sweep read; a live probe
+  // on 2026-08-31 had put page 1's newest at 488095, and the sweep superseded it
+  // before anything was committed. A seed that overshot would skip real entries
+  // permanently
   // (nothing ever re-reads behind the cursor on the daily path); one that
   // undershot only costs pages. It is stated here because the file itself is
   // JSON and cannot carry the provenance of its own number.
@@ -1471,6 +1473,13 @@ async function main() {
   // pages and the cursor only ever moves on the days a tournament happened to be
   // added. The pull happening is what moves the cursor; whether it produced
   // records is a different question. (Found in the reference, where it was live.)
+  // WHETHER THE CURSOR MOVED is a fact the report states, so it is measured
+  // rather than assumed: on 2026-09-02 2XKO's cursor stayed at 488405 while its
+  // report said it "still advanced".
+  const cursorMoved =
+    !!theaterStats &&
+    typeof theaterStats.maxEntryId === 'number' &&
+    theaterStats.maxEntryId > (theaterCursor.replayTheater ?? 0);
   if (theaterStats && typeof theaterStats.maxEntryId === 'number') {
     const nextCursor: Record<string, number> = { ...theaterCursor };
     for (const ch of CHANNELS.filter((c) => c.index && c.cronFetchedWithCarry)) {
@@ -1683,7 +1692,7 @@ async function main() {
   if (indexIntakes.length > 0) {
     lines.push('## Index intakes', '');
     lines.push(
-      'Fetched by the daily cron since 2026-08-31, and ADD-ONLY: a committed record is',
+      'Fetched by the daily cron since 2026-09-02, and ADD-ONLY: a committed record is',
       'carried whether or not the catalogue still lists it, so this count can only rise.',
       'The cron does not depend on the pull succeeding — on any failure there is no dump,',
       'the committed records are carried, and the run stays green.',
@@ -1771,8 +1780,16 @@ async function main() {
         ...(theaterStats
           ? [
               '_The pull ran and found no new tournament entries, so the committed catalogue_',
-              '_was carried unchanged. The cursor still advanced — a quiet day is the_',
-              '_ordinary case here, not a failed one._',
+              '_was carried unchanged._',
+              ...(cursorMoved
+                ? [
+                    '_The cursor still advanced — a quiet day is the ordinary case here, not a_',
+                    '_failed one._',
+                  ]
+                : [
+                    '_The cursor did not move: the catalogue has taken no new Tōkon entry since_',
+                    '_the last pull — quieter still, and equally ordinary._',
+                  ]),
             ]
           : [
               '_No pull produced a dump this run, so the committed catalogue was carried and_',
@@ -1807,10 +1824,19 @@ async function main() {
           `does not re-enter through a side door — existing ids win, by ignoring.`,
         '',
       );
+    } else if ((theaterStats?.tagged ?? 0) === 0) {
+      // A carry checked nothing: the delta held no tagged row. "0 of 0 — none
+      // was a video we hold" is true and says nothing; say what happened.
+      lines.push(
+        '_Entries skipped as already-known: **0** — this pull carried no tagged rows to check._',
+        '',
+      );
     } else {
       lines.push(
-        '_Entries skipped as already-known: **0**. The catalogue indexes no video this ' +
-          'repo has fetched, published or ruled on._',
+        `_Entries skipped as already-known: **0** of ${theaterStats?.tagged ?? 0} in this pull — ` +
+          'none was a video this repo has already fetched, published or ruled on. A statement ' +
+          "about this pull's tagged rows, not the catalogue: the cross-check below measures " +
+          'the catalogue-wide overlap._',
         '',
       );
     }
