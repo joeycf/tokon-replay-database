@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-03T12:16:13.062Z_
+_Generated 2026-09-04T12:16:59.349Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 130 | 130 | 100.0% |
+| highLevelReplays | 134 | 134 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 787 | 90 | 11.4% |
-| replaysHub | 169 | 165 | 97.6% |
-| fightingStationX | 2742 | 128 | 4.7% |
+| hadoukenReplays | 789 | 92 | 11.7% |
+| replaysHub | 175 | 171 | 97.7% |
+| fightingStationX | 2750 | 133 | 4.8% |
 | fgcReplaysHub | 2597 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 43 | 11 | 25.6% |
-| replayTheater _(index)_ | 6 | 50 | — |
-| **total** | | **627** | |
+| replayTheater _(carried)_ | — | 50 | — |
+| **total** | | **644** | |
 
 ## Index intakes
 
@@ -25,29 +25,32 @@ the committed records are carried, and the run stays green.
 
 | intake | records | pin | this run | pages | new | not in this pull |
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| `replayTheater` | 50 | 50 | rebuilt from a cursor delta | — | — | — |
+| `replayTheater` | 50 | 50 | carried (pull found no new tournament entries) | — | — | — |
 
-Entries **collapsed as double-submitted**: **0** of 6 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
+_The pull ran and found no new tournament entries, so the committed catalogue_
+_was carried unchanged._
+_The cursor still advanced — a quiet day is the ordinary case here, not a_
+_failed one._
 
-_Entries skipped as already-known: **0** of 6 in this pull — none was a video this repo has already fetched, published or ruled on. A statement about this pull's tagged rows, not the catalogue: the cross-check below measures the catalogue-wide overlap._
+_Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 1254 sides got its characters.
+How every one of the 1288 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 230 | 18.3% |
-| description | 349 | 27.8% |
-| index | 100 | 8.0% |
-| footage | 32 | 2.6% |
-| human | 519 | 41.4% |
+| title | 256 | 19.9% |
+| description | 357 | 27.7% |
+| index | 100 | 7.8% |
+| footage | 32 | 2.5% |
+| human | 519 | 40.3% |
 | review | 24 | 1.9% |
 
-- complete (4/4): **1024/1254** (81.7%)
+- complete (4/4): **1032/1288** (80.1%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 319 · character-subset 24 · ambiguous 4
-- title slot order: handle-first 958 · chars-first 88 · parallel-lists 86
+- bench alignment: handle 329 · character-subset 24 · ambiguous 4
+- title slot order: handle-first 988 · chars-first 90 · parallel-lists 88
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -55,21 +58,21 @@ How every one of the 1254 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 230 | 18.3% |
-| 4 | 1017 | 81.1% |
+| 1 | 256 | 19.9% |
+| 4 | 1025 | 79.6% |
 | 5 _(mid-set change)_ | 6 | 0.5% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **230 side(s) awaiting a drain** across 115 record(s) — oldest published **18 day(s)** ago
+- **256 side(s) awaiting a drain** across 128 record(s) — oldest published **19 day(s)** ago
 
-> The bench queue is at 115 (nudge threshold 40).
+> The bench queue is at 128 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **4** — character-completion 3 · bench-conflict 1
-- bench queue (published, incomplete): **115**
+- bench queue (published, incomplete): **128**
 
 ## Player identity
 
@@ -130,10 +133,10 @@ No disagreements on that sweep.
 | other-game | 3978 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 122 |
+| not-a-match | 123 |
 | not-an-event | 32 |
 | char-unresolved | 15 |
-| short-duration | 12 |
+| short-duration | 14 |
 | no-vs-title | 4 |
 | bench-conflict | 1 |
 
