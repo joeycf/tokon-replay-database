@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-04T12:16:59.349Z_
+_Generated 2026-09-05T11:24:45.006Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 134 | 134 | 100.0% |
+| highLevelReplays | 139 | 139 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 789 | 92 | 11.7% |
-| replaysHub | 175 | 171 | 97.7% |
-| fightingStationX | 2750 | 133 | 4.8% |
-| fgcReplaysHub | 2597 | 40 | 1.5% |
-| marvelTokonYT _(events only)_ | 43 | 11 | 25.6% |
+| hadoukenReplays | 793 | 96 | 12.1% |
+| replaysHub | 181 | 177 | 97.8% |
+| fightingStationX | 2758 | 139 | 5.0% |
+| fgcReplaysHub | 2601 | 40 | 1.5% |
+| marvelTokonYT _(events only)_ | 44 | 11 | 25.0% |
 | replayTheater _(carried)_ | — | 50 | — |
-| **total** | | **644** | |
+| **total** | | **665** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 1288 sides got its characters.
+How every one of the 1330 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 256 | 19.9% |
-| description | 357 | 27.7% |
-| index | 100 | 7.8% |
-| footage | 32 | 2.5% |
-| human | 519 | 40.3% |
-| review | 24 | 1.9% |
+| title | 288 | 21.7% |
+| description | 367 | 27.6% |
+| index | 100 | 7.5% |
+| footage | 32 | 2.4% |
+| human | 519 | 39.0% |
+| review | 24 | 1.8% |
 
-- complete (4/4): **1032/1288** (80.1%)
+- complete (4/4): **1042/1330** (78.3%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 329 · character-subset 24 · ambiguous 4
-- title slot order: handle-first 988 · chars-first 90 · parallel-lists 88
+- bench alignment: handle 340 · character-subset 24 · ambiguous 4
+- title slot order: handle-first 1022 · chars-first 94 · parallel-lists 92
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,21 +58,21 @@ How every one of the 1288 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 256 | 19.9% |
-| 4 | 1025 | 79.6% |
+| 1 | 288 | 21.7% |
+| 4 | 1035 | 77.8% |
 | 5 _(mid-set change)_ | 6 | 0.5% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **256 side(s) awaiting a drain** across 128 record(s) — oldest published **19 day(s)** ago
+- **288 side(s) awaiting a drain** across 144 record(s) — oldest published **20 day(s)** ago
 
-> The bench queue is at 128 (nudge threshold 40).
+> The bench queue is at 144 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **4** — character-completion 3 · bench-conflict 1
-- bench queue (published, incomplete): **128**
+- bench queue (published, incomplete): **144**
 
 ## Player identity
 
@@ -130,23 +130,23 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 3978 |
+| other-game | 3982 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
 | not-a-match | 123 |
-| not-an-event | 32 |
+| not-an-event | 33 |
+| short-duration | 16 |
 | char-unresolved | 15 |
-| short-duration | 14 |
 | no-vs-title | 4 |
 | bench-conflict | 1 |
 
-- `marvelTokonYT` events-only gate: **32** upload(s) carried no known event brand.
+- `marvelTokonYT` events-only gate: **33** upload(s) carried no known event brand.
+  - UNOKOA'S INSANE DUO | Loki & Blade | Marvel Tokon
   - MARVEL Tokon ▰ Bleed - INSANE DUO Black Panther x Storm ▰ High Level Match
   - MARVEL Tokon ▰ MrChupy Demoniac CARNAGE ▰ High Level Match
   - MARVEL Tokon ▰ ImnoDeag (Spider-Man) vs Nieve (Champion) ▰ High Level Match
   - MARVEL Tokon ▰ ChrisG (Black Panther) vs Snake Eyes (Champion) ▰ High Level Match
-  - MARVEL Tokon ▰ Naire (Spider-Man) vs Roda (Wolverine) ▰ High Level Match
-  - …and 27 more
+  - …and 28 more
 
 ## Unmatched text in character slots
 
@@ -167,8 +167,9 @@ garbled game name gets a human verdict instead of a quiet player page.
 
 | handle | records | example |
 | --- | ---: | --- |
-| `TOKON PLAYER` | 4 | -lxClCs9cb0 |
+| `TOKON PLAYER` | 5 | A5I1zx7zStM |
 | `TOKON` | 4 | 4AIZDJ4nvSE |
+| `The Tokon Texan` | 1 | Ca3NPZBIzgg |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
 | `TOKON DEEZ` | 1 | R8ixtuzZlY4 |
 | `marvel chokon` | 1 | 8Y6fDQNgFPk |
