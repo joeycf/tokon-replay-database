@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-05T11:24:45.006Z_
+_Generated 2026-09-06T11:46:00.434Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 139 | 139 | 100.0% |
+| highLevelReplays | 144 | 144 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 793 | 96 | 12.1% |
-| replaysHub | 181 | 177 | 97.8% |
-| fightingStationX | 2758 | 139 | 5.0% |
-| fgcReplaysHub | 2601 | 40 | 1.5% |
+| hadoukenReplays | 795 | 98 | 12.3% |
+| replaysHub | 187 | 183 | 97.9% |
+| fightingStationX | 2766 | 144 | 5.2% |
+| fgcReplaysHub | 2609 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 44 | 11 | 25.0% |
 | replayTheater _(carried)_ | — | 50 | — |
-| **total** | | **665** | |
+| **total** | | **683** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 1330 sides got its characters.
+How every one of the 1366 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 288 | 21.7% |
-| description | 367 | 27.6% |
-| index | 100 | 7.5% |
-| footage | 32 | 2.4% |
-| human | 519 | 39.0% |
+| title | 314 | 23.0% |
+| description | 377 | 27.6% |
+| index | 100 | 7.3% |
+| footage | 32 | 2.3% |
+| human | 519 | 38.0% |
 | review | 24 | 1.8% |
 
-- complete (4/4): **1042/1330** (78.3%)
+- complete (4/4): **1052/1366** (77.0%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 340 · character-subset 24 · ambiguous 4
-- title slot order: handle-first 1022 · chars-first 94 · parallel-lists 92
+- bench alignment: handle 350 · character-subset 24 · ambiguous 4
+- title slot order: handle-first 1054 · chars-first 96 · parallel-lists 94
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,25 +58,25 @@ How every one of the 1330 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 288 | 21.7% |
-| 4 | 1035 | 77.8% |
-| 5 _(mid-set change)_ | 6 | 0.5% |
+| 1 | 314 | 23.0% |
+| 4 | 1045 | 76.5% |
+| 5 _(mid-set change)_ | 6 | 0.4% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **288 side(s) awaiting a drain** across 144 record(s) — oldest published **20 day(s)** ago
+- **314 side(s) awaiting a drain** across 157 record(s) — oldest published **21 day(s)** ago
 
-> The bench queue is at 144 (nudge threshold 40).
+> The bench queue is at 157 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **4** — character-completion 3 · bench-conflict 1
-- bench queue (published, incomplete): **144**
+- bench queue (published, incomplete): **157**
 
 ## Player identity
 
-13 identity(s) resolved from more than one spelling. The
+15 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -86,8 +86,10 @@ after changing scripts/players.ts, or the old URLs 404.
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
 | `chrisg` | `chris-g` |
+| `gurihiru-fan` | `gurihi-ru-fan` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
+| `kingcreed` | `king-creed` |
 | `majinburno` | `majin-burno` |
 | `mrmarben` | `mr-marben` |
 | `nychrisg` | `nychris-g` |
@@ -130,10 +132,10 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 3982 |
+| other-game | 3990 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 123 |
+| not-a-match | 126 |
 | not-an-event | 33 |
 | short-duration | 16 |
 | char-unresolved | 15 |
@@ -155,6 +157,7 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 | text | count | example |
 | --- | ---: | --- |
 | `P.Parker` | 2 | cAjt5HIKDyI |
+| `Cap.America` | 1 | OFrZKy1f_Dg |
 | `C.America` | 1 | RAsu7I_i-fk |
 | `B.Panther` | 1 | -KobHCx2Pvc |
 | `Raked` | 1 | f_RPQ0HmHXE |
