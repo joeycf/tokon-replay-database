@@ -1,20 +1,28 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-06T11:46:00.434Z_
+## ⚠ ACTION REQUIRED
+
+1 unmatched character-slot string(s) appear on 3+ records:
+- `Cap.America` × 3 (e.g. Kq78fIkgYs0)
+
+A new fighter has probably shipped. Add it to scripts/characters.ts and
+get an accent token before it silently shortens every side it appears on.
+
+_Generated 2026-09-07T13:42:02.184Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 144 | 144 | 100.0% |
+| highLevelReplays | 150 | 150 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 795 | 98 | 12.3% |
-| replaysHub | 187 | 183 | 97.9% |
-| fightingStationX | 2766 | 144 | 5.2% |
-| fgcReplaysHub | 2609 | 40 | 1.5% |
+| hadoukenReplays | 797 | 100 | 12.5% |
+| replaysHub | 193 | 189 | 97.9% |
+| fightingStationX | 2774 | 148 | 5.3% |
+| fgcReplaysHub | 2616 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 44 | 11 | 25.0% |
-| replayTheater _(carried)_ | — | 50 | — |
-| **total** | | **683** | |
+| replayTheater _(index)_ | 10 | 60 | — |
+| **total** | | **711** | |
 
 ## Index intakes
 
@@ -25,32 +33,29 @@ the committed records are carried, and the run stays green.
 
 | intake | records | pin | this run | pages | new | not in this pull |
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| `replayTheater` | 50 | 50 | carried (pull found no new tournament entries) | — | — | — |
+| `replayTheater` | 60 | 60 | rebuilt from a cursor delta | — | — | — |
 
-_The pull ran and found no new tournament entries, so the committed catalogue_
-_was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+Entries **collapsed as double-submitted**: **0** of 10 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
 
-_Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
+_Entries skipped as already-known: **0** of 10 in this pull — none was a video this repo has already fetched, published or ruled on. A statement about this pull's tagged rows, not the catalogue: the cross-check below measures the catalogue-wide overlap._
 
 ## Character provenance
 
-How every one of the 1366 sides got its characters.
+How every one of the 1422 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 314 | 23.0% |
-| description | 377 | 27.6% |
-| index | 100 | 7.3% |
+| title | 338 | 23.8% |
+| description | 389 | 27.4% |
+| index | 120 | 8.4% |
 | footage | 32 | 2.3% |
-| human | 519 | 38.0% |
-| review | 24 | 1.8% |
+| human | 519 | 36.5% |
+| review | 24 | 1.7% |
 
-- complete (4/4): **1052/1366** (77.0%)
+- complete (4/4): **1084/1422** (76.2%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 350 · character-subset 24 · ambiguous 4
-- title slot order: handle-first 1054 · chars-first 96 · parallel-lists 94
+- bench alignment: handle 364 · character-subset 24 · ambiguous 3
+- title slot order: handle-first 1084 · chars-first 98 · parallel-lists 98
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,21 +63,21 @@ How every one of the 1366 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 314 | 23.0% |
-| 4 | 1045 | 76.5% |
+| 1 | 338 | 23.8% |
+| 4 | 1077 | 75.7% |
 | 5 _(mid-set change)_ | 6 | 0.4% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **314 side(s) awaiting a drain** across 157 record(s) — oldest published **21 day(s)** ago
+- **338 side(s) awaiting a drain** across 169 record(s) — oldest published **22 day(s)** ago
 
-> The bench queue is at 157 (nudge threshold 40).
+> The bench queue is at 169 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **4** — character-completion 3 · bench-conflict 1
-- bench queue (published, incomplete): **157**
+- bench queue (published, incomplete): **169**
 
 ## Player identity
 
@@ -132,14 +137,14 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 3990 |
+| other-game | 3997 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 126 |
+| not-a-match | 129 |
 | not-an-event | 33 |
 | short-duration | 16 |
 | char-unresolved | 15 |
-| no-vs-title | 4 |
+| no-vs-title | 5 |
 | bench-conflict | 1 |
 
 - `marvelTokonYT` events-only gate: **33** upload(s) carried no known event brand.
@@ -156,8 +161,8 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
+| `Cap.America` | 3 | Kq78fIkgYs0 |
 | `P.Parker` | 2 | cAjt5HIKDyI |
-| `Cap.America` | 1 | OFrZKy1f_Dg |
 | `C.America` | 1 | RAsu7I_i-fk |
 | `B.Panther` | 1 | -KobHCx2Pvc |
 | `Raked` | 1 | f_RPQ0HmHXE |
@@ -172,7 +177,7 @@ garbled game name gets a human verdict instead of a quiet player page.
 | --- | ---: | --- |
 | `TOKON PLAYER` | 5 | A5I1zx7zStM |
 | `TOKON` | 4 | 4AIZDJ4nvSE |
-| `The Tokon Texan` | 1 | Ca3NPZBIzgg |
+| `The Tokon Texan` | 2 | 26SqJz0Xlpo |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
 | `TOKON DEEZ` | 1 | R8ixtuzZlY4 |
 | `marvel chokon` | 1 | 8Y6fDQNgFPk |
