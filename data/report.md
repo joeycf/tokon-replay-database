@@ -5,29 +5,29 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-08-28)
-  The newest patch in scripts/patches.ts is 2026-08-28, 11 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
+  The newest patch in scripts/patches.ts is 2026-08-28, 12 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
 1 unmatched character-slot string(s) appear on 3+ records:
-- `Cap.America` × 3 (e.g. Kq78fIkgYs0)
+- `Cap.America` × 4 (e.g. 369i_xcSQ_M)
 
 A new fighter has probably shipped. Add it to scripts/characters.ts and
 get an accent token before it silently shortens every side it appears on.
 
-_Generated 2026-09-08T12:18:44.644Z_
+_Generated 2026-09-09T12:30:17.918Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 154 | 154 | 100.0% |
+| highLevelReplays | 160 | 160 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 799 | 102 | 12.8% |
-| replaysHub | 199 | 195 | 98.0% |
-| fightingStationX | 2782 | 153 | 5.5% |
-| fgcReplaysHub | 2620 | 40 | 1.5% |
+| hadoukenReplays | 801 | 104 | 13.0% |
+| replaysHub | 205 | 201 | 98.0% |
+| fightingStationX | 2790 | 158 | 5.7% |
+| fgcReplaysHub | 2627 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 44 | 11 | 25.0% |
-| replayTheater _(carried)_ | — | 60 | — |
-| **total** | | **728** | |
+| replayTheater _(index)_ | 9 | 69 | — |
+| **total** | | **756** | |
 
 ## Index intakes
 
@@ -38,32 +38,29 @@ the committed records are carried, and the run stays green.
 
 | intake | records | pin | this run | pages | new | not in this pull |
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| `replayTheater` | 60 | 60 | carried (pull found no new tournament entries) | — | — | — |
+| `replayTheater` | 69 | 69 | rebuilt from a cursor delta | — | — | — |
 
-_The pull ran and found no new tournament entries, so the committed catalogue_
-_was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+Entries **collapsed as double-submitted**: **0** of 9 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
 
-_Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
+_Entries skipped as already-known: **0** of 9 in this pull — none was a video this repo has already fetched, published or ruled on. A statement about this pull's tagged rows, not the catalogue: the cross-check below measures the catalogue-wide overlap._
 
 ## Character provenance
 
-How every one of the 1456 sides got its characters.
+How every one of the 1512 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 364 | 25.0% |
-| description | 397 | 27.3% |
-| index | 120 | 8.2% |
-| footage | 32 | 2.2% |
-| human | 519 | 35.6% |
+| title | 390 | 25.8% |
+| description | 409 | 27.1% |
+| index | 138 | 9.1% |
+| footage | 32 | 2.1% |
+| human | 519 | 34.3% |
 | review | 24 | 1.6% |
 
-- complete (4/4): **1092/1456** (75.0%)
+- complete (4/4): **1122/1512** (74.2%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 374 · character-subset 24 · ambiguous 3
-- title slot order: handle-first 1106 · chars-first 100 · parallel-lists 108
+- bench alignment: handle 385 · character-subset 25 · ambiguous 3
+- title slot order: handle-first 1132 · chars-first 102 · parallel-lists 118
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -71,25 +68,25 @@ How every one of the 1456 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 364 | 25.0% |
-| 4 | 1085 | 74.5% |
+| 1 | 390 | 25.8% |
+| 4 | 1115 | 73.7% |
 | 5 _(mid-set change)_ | 6 | 0.4% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **364 side(s) awaiting a drain** across 182 record(s) — oldest published **23 day(s)** ago
+- **390 side(s) awaiting a drain** across 195 record(s) — oldest published **24 day(s)** ago
 
-> The bench queue is at 182 (nudge threshold 40).
+> The bench queue is at 195 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **4** — character-completion 3 · bench-conflict 1
-- bench queue (published, incomplete): **182**
+- bench queue (published, incomplete): **195**
 
 ## Player identity
 
-16 identity(s) resolved from more than one spelling. The
+17 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -104,8 +101,9 @@ after changing scripts/players.ts, or the old URLs 404.
 | `jaazzrap` | `jaazz-rap` |
 | `kingcreed` | `king-creed` |
 | `majinburno` | `majin-burno` |
+| `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
-| `mrmarben` | `mr-marben` |
+| `nick-985` | `nick985` |
 | `nychrisg` | `nychris-g` |
 | `sonicfox` | `sonic-fox` |
 | `tokon-player` | `to-kon-player` |
@@ -146,12 +144,12 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4001 |
+| other-game | 4008 |
 | not-tokon | 1090 |
 | pre-launch | 663 |
-| not-a-match | 131 |
+| not-a-match | 132 |
 | not-an-event | 33 |
-| short-duration | 17 |
+| short-duration | 19 |
 | char-unresolved | 15 |
 | no-vs-title | 5 |
 | bench-conflict | 1 |
@@ -170,7 +168,7 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
-| `Cap.America` | 3 | Kq78fIkgYs0 |
+| `Cap.America` | 4 | 369i_xcSQ_M |
 | `P.Parker` | 2 | cAjt5HIKDyI |
 | `C.America` | 1 | RAsu7I_i-fk |
 | `B.Panther` | 1 | -KobHCx2Pvc |
