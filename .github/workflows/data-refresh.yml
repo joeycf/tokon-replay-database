@@ -145,12 +145,41 @@ jobs:
         run: npm run verify:deployed
 
       - name: Flag due expiries
-        # Deliberately LAST and deliberately failing (scripts/expiries.ts).
-        # The data has already been committed and pushed by the step above, so
-        # a red run never costs a refresh — it only makes the pending work
-        # impossible to miss. Two things can trip it: a Year-1 character's
-        # announced window opening (phoenix-cyclops, 2026-10-01), and the patch
-        # table going more than 21 days stale on a vendor that shipped twice in
-        # its first five days.
+        # Deliberately failing (scripts/expiries.ts). The data has already been
+        # committed and pushed by the step above, so a red run never costs a
+        # refresh — it only makes the pending work impossible to miss. Two things
+        # can trip it: a Year-1 character's announced window opening
+        # (phoenix-cyclops 2026-10-01, then the three unnamed Year-1 slots at
+        # 2027-01-01, 2027-04-01 and 2027-07-01), and the patch table going more
+        # than STALE_PATCH_DAYS (10) stale on a vendor that shipped twice in its
+        # first five days.
         # Clear it by doing the work, NOT by deleting this step.
         run: npx tsx scripts/expiries.ts --check
+
+      - name: Flag stale redirects
+        # `if: always()` because the step above is DESIGNED to go red, and a red
+        # step stops the ones after it. These two gates are independent, and both
+        # have to be able to report on the same run.
+        #
+        # WHY THIS CHECKS RATHER THAN REGENERATES. vercel.json is build
+        # configuration, and scripts/redirects.ts is emphatic that the daily data
+        # commit has no business writing it: a data refresh that quietly changes
+        # routing is a different and worse thing than one that changes data. So
+        # the cron does not fix this. It refuses to stay quiet about it.
+        #
+        # IT DRIFTS WITH NOBODY TOUCHING THE REPO, which is why a human-triggered
+        # check was not enough. redirects.ts's header says the retired set "only
+        # changes when a person edits scripts/players.ts" — that stopped being
+        # true when parse.ts started growing data/player-redirects.json from its
+        # own automatic player merges, and the cron commits that ledger nightly.
+        # vercel.json, the routing DERIVED from it, was left behind every time.
+        #
+        # Every row in the ledger and not in vercel.json is a live 404 on an
+        # indexed, prerendered player URL — there is no other redirect layer on
+        # this platform. Seventeen had accumulated by 2026-09-10, and the only
+        # reason anyone noticed was an unrelated `npm run typecheck`, which is
+        # where the --check already lived and which the cron does not run.
+        #
+        # Clear it with `npm run data:redirects` and commit vercel.json.
+        if: always()
+        run: npx tsx scripts/redirects.ts --check
