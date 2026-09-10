@@ -5,29 +5,23 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-08-28)
-  The newest patch in scripts/patches.ts is 2026-08-28, 12 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
+  The newest patch in scripts/patches.ts is 2026-08-28, 13 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
-1 unmatched character-slot string(s) appear on 3+ records:
-- `Cap.America` × 4 (e.g. 369i_xcSQ_M)
-
-A new fighter has probably shipped. Add it to scripts/characters.ts and
-get an accent token before it silently shortens every side it appears on.
-
-_Generated 2026-09-09T12:30:17.918Z_
+_Generated 2026-09-10T12:23:25.549Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 160 | 160 | 100.0% |
+| highLevelReplays | 164 | 164 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 801 | 104 | 13.0% |
-| replaysHub | 205 | 201 | 98.0% |
-| fightingStationX | 2790 | 158 | 5.7% |
-| fgcReplaysHub | 2627 | 40 | 1.5% |
-| marvelTokonYT _(events only)_ | 44 | 11 | 25.0% |
-| replayTheater _(index)_ | 9 | 69 | — |
-| **total** | | **756** | |
+| hadoukenReplays | 803 | 106 | 13.2% |
+| replaysHub | 211 | 207 | 98.1% |
+| fightingStationX | 2799 | 164 | 5.9% |
+| fgcReplaysHub | 2633 | 40 | 1.5% |
+| marvelTokonYT _(events only)_ | 45 | 11 | 24.4% |
+| replayTheater _(carried)_ | — | 69 | — |
+| **total** | | **774** | |
 
 ## Index intakes
 
@@ -38,29 +32,32 @@ the committed records are carried, and the run stays green.
 
 | intake | records | pin | this run | pages | new | not in this pull |
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| `replayTheater` | 69 | 69 | rebuilt from a cursor delta | — | — | — |
+| `replayTheater` | 69 | 69 | carried (pull found no new tournament entries) | — | — | — |
 
-Entries **collapsed as double-submitted**: **0** of 9 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
+_The pull ran and found no new tournament entries, so the committed catalogue_
+_was carried unchanged._
+_The cursor still advanced — a quiet day is the ordinary case here, not a_
+_failed one._
 
-_Entries skipped as already-known: **0** of 9 in this pull — none was a video this repo has already fetched, published or ruled on. A statement about this pull's tagged rows, not the catalogue: the cross-check below measures the catalogue-wide overlap._
+_Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 1512 sides got its characters.
+How every one of the 1548 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 390 | 25.8% |
-| description | 409 | 27.1% |
-| index | 138 | 9.1% |
+| title | 418 | 27.0% |
+| description | 417 | 26.9% |
+| index | 138 | 8.9% |
 | footage | 32 | 2.1% |
-| human | 519 | 34.3% |
+| human | 519 | 33.5% |
 | review | 24 | 1.6% |
 
-- complete (4/4): **1122/1512** (74.2%)
+- complete (4/4): **1130/1548** (73.0%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 385 · character-subset 25 · ambiguous 3
-- title slot order: handle-first 1132 · chars-first 102 · parallel-lists 118
+- bench alignment: handle 394 · character-subset 26 · ambiguous 3
+- title slot order: handle-first 1156 · chars-first 104 · parallel-lists 128
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -68,25 +65,26 @@ How every one of the 1512 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 390 | 25.8% |
-| 4 | 1115 | 73.7% |
+| 1 | 416 | 26.9% |
+| 2 | 2 | 0.1% |
+| 4 | 1123 | 72.5% |
 | 5 _(mid-set change)_ | 6 | 0.4% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **390 side(s) awaiting a drain** across 195 record(s) — oldest published **24 day(s)** ago
+- **418 side(s) awaiting a drain** across 209 record(s) — oldest published **25 day(s)** ago
 
-> The bench queue is at 195 (nudge threshold 40).
+> The bench queue is at 209 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
-- review queue (never published): **4** — character-completion 3 · bench-conflict 1
-- bench queue (published, incomplete): **195**
+- review queue (never published): **3** — character-completion 2 · bench-conflict 1
+- bench queue (published, incomplete): **209**
 
 ## Player identity
 
-17 identity(s) resolved from more than one spelling. The
+16 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -103,7 +101,6 @@ after changing scripts/players.ts, or the old URLs 404.
 | `majinburno` | `majin-burno` |
 | `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
-| `nick-985` | `nick985` |
 | `nychrisg` | `nychris-g` |
 | `sonicfox` | `sonic-fox` |
 | `tokon-player` | `to-kon-player` |
@@ -144,23 +141,23 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4008 |
-| not-tokon | 1090 |
+| other-game | 4014 |
+| not-tokon | 1091 |
 | pre-launch | 663 |
-| not-a-match | 132 |
-| not-an-event | 33 |
-| short-duration | 19 |
-| char-unresolved | 15 |
+| not-a-match | 133 |
+| not-an-event | 34 |
+| short-duration | 21 |
+| char-unresolved | 14 |
 | no-vs-title | 5 |
 | bench-conflict | 1 |
 
-- `marvelTokonYT` events-only gate: **33** upload(s) carried no known event brand.
+- `marvelTokonYT` events-only gate: **34** upload(s) carried no known event brand.
+  - MARVEL Tokon ▰ Moku (Magneto) vs Skinoff (Captain America) - High Level Match
   - UNOKOA'S INSANE DUO | Loki & Blade | Marvel Tokon
   - MARVEL Tokon ▰ Bleed - INSANE DUO Black Panther x Storm ▰ High Level Match
   - MARVEL Tokon ▰ MrChupy Demoniac CARNAGE ▰ High Level Match
   - MARVEL Tokon ▰ ImnoDeag (Spider-Man) vs Nieve (Champion) ▰ High Level Match
-  - MARVEL Tokon ▰ ChrisG (Black Panther) vs Snake Eyes (Champion) ▰ High Level Match
-  - …and 28 more
+  - …and 29 more
 
 ## Unmatched text in character slots
 
@@ -168,10 +165,6 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
-| `Cap.America` | 4 | 369i_xcSQ_M |
-| `P.Parker` | 2 | cAjt5HIKDyI |
-| `C.America` | 1 | RAsu7I_i-fk |
-| `B.Panther` | 1 | -KobHCx2Pvc |
 | `Raked` | 1 | f_RPQ0HmHXE |
 
 ## Handles that resemble the game name
