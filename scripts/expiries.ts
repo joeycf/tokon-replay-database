@@ -56,12 +56,38 @@ export const UNRELEASED: { id: string; releases: string; accent?: string; note?:
       'hard date, so this row fires at WINDOW OPEN. If the window slips, re-date the row — ' +
       'do not delete it.',
   },
+  // ── THE REMAINING YEAR-1 SLOTS, ONE ROW PER WINDOW ─────────────────────────
+  // These three replace a single 'year1-remainder' row dated 2027-12-31. That
+  // date was the pass's OUTSIDE COMMITMENT ("expected to be made available by
+  // 31 December 2027" on the Year 1 pass listing), not a release date, and using
+  // it as one meant the gate fired ELEVEN MONTHS after character 2's window
+  // opened and three months after character 4's window closed. All three could
+  // have shipped and been filed nowhere before it ever went off — the exact
+  // failure this file exists to prevent.
+  //
+  // The published windows come from the Year-1 pass roadmap. None of the three
+  // is named, so there is no id and no accent yet: split a row into a real one
+  // on reveal, the same way the October row was handled in the CotW repo.
+  // Window-open dates, per this file's rule for quarter-granularity windows.
   {
-    id: 'year1-remainder',
-    releases: '2027-12-31',
+    id: 'year1-character-2',
+    releases: '2027-01-01',
+    note: 'Year-1 character #2, window January–March 2027. Announced, unnamed.',
+  },
+  {
+    id: 'year1-character-3-and-stage',
+    releases: '2027-04-01',
     note:
-      'Year-1 characters 2/3/4 and the Year-1 stage, all committed to "by 31 December 2027" ' +
-      'and none of them announced. Split into real rows as each is named.',
+      'Year-1 character #3 AND the Year-1 stage, both window April–June 2027. Announced, ' +
+      'unnamed. The stage is not a roster row — it is here so the one announcement that ' +
+      'covers both is not half-tracked.',
+  },
+  {
+    id: 'year1-character-4',
+    releases: '2027-07-01',
+    note:
+      'Year-1 character #4, window July–September 2027. Announced, unnamed. This is the last ' +
+      'of the pass; when it is named and shipped, the Year-1 gate is done.',
   },
 ];
 

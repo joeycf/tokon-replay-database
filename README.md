@@ -145,6 +145,7 @@ vendor that shipped twice in its first five days.
 | `npm run data:art-tile`     | generate the comic-register fallback tile / cutout ground                   |
 | `npm run data:og`           | regenerate `public/og-default.png`                                          |
 | `npm run data:patch-check`  | diff the patch table against the vendor's news feed                         |
+| `npm run data:roster-check` | diff the roster against Sony's Hero Select block                            |
 | `npm run data:expiries`     | the self-expiring gates (`--check`)                                         |
 | `npm run data:catchup`      | **the maintenance ritual** — fetch → parse → read new footage → what's left |
 | `npm run data:replay-dupes` | cross-channel duplicate audit — report-only, never drops                    |

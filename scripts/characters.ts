@@ -78,12 +78,22 @@ const ROSTER: RosterEntry[] = [
     team: 'Fighting Avengers',
     leader: true,
     // 'capitan america' is an observed uploader typo (MdS4wMUEp0U).
+    // 'Cap.America' (369i_xcSQ_M) was the largest unmatched character-slot
+    // string in data/report.md — 4 records, enough to trip the 3+ gate and read
+    // as "a new fighter has probably shipped". It is highLevelReplays picking up
+    // a new abbreviation, and it arrived with 'C.America' (RAsu7I_i-fk) as the
+    // unspaced twin of the 'c. america' this list already had. Both punctuation
+    // variants of both abbreviations are listed, because the matcher compares
+    // literal text — see byAlias in parse.ts.
     aliases: [
       'captain america',
       'captain-america',
       'c. america',
+      'c.america',
       'c america',
       'cap america',
+      'cap. america',
+      'cap.america',
       'capitan america',
     ],
   },
@@ -102,7 +112,15 @@ const ROSTER: RosterEntry[] = [
     // phanter' is a SECOND, independent misspelling of the same name, used
     // consistently by marvelTokonYT (dO0h9Iwub4U, dQFLnW2moiU). Two of its
     // eight CEO 2026 matches would otherwise be char-unresolved.
-    aliases: ['black panther', 'black-panther', 'b. panther', 'black phanther', 'black phanter'],
+    // 'B.Panther' (-KobHCx2Pvc) is the unspaced twin of 'b. panther'.
+    aliases: [
+      'black panther',
+      'black-panther',
+      'b. panther',
+      'b.panther',
+      'black phanther',
+      'black phanter',
+    ],
   },
 
   // ── Amazing Guardians ──────────────────────────────────────────────────────
@@ -112,7 +130,20 @@ const ROSTER: RosterEntry[] = [
     team: 'Amazing Guardians',
     leader: true,
     // 'sipder man' is an observed uploader typo in the launch corpus.
-    aliases: ['spider-man', 'spider man', 'spiderman', 'spidey', 'sipder man'],
+    // 'Spíder-Man' (N1jJjRiNvrI) carries U+00ED LATIN SMALL LETTER I WITH ACUTE.
+    // It is NOT a lookalike this list already covers: the matcher lowercases and
+    // trims but does not fold diacritics, so the accented spelling needs its own
+    // entry. 'spider-mam' (f7vQ43Hbyp8) is a straight typo.
+    aliases: [
+      'spider-man',
+      'spider man',
+      'spiderman',
+      'spidey',
+      'sipder man',
+      'sp\u00edder-man',
+      'sp\u00edder man',
+      'spider-mam',
+    ],
   },
   {
     id: 'ms-marvel',
@@ -131,7 +162,10 @@ const ROSTER: RosterEntry[] = [
     id: 'peni-parker',
     name: 'Peni Parker',
     team: 'Amazing Guardians',
-    aliases: ['peni parker', 'peni-parker', 'peni'],
+    // 'P. Parker' (cAjt5HIKDyI, l-UvElOYcsU) is the duo-slot abbreviation, and
+    // report.md carries 'P.Parker' unspaced. Both, for the same reason as
+    // Captain America above.
+    aliases: ['peni parker', 'peni-parker', 'peni', 'p. parker', 'p.parker'],
   },
 
   // ── Unbreakable X-Men ──────────────────────────────────────────────────────
@@ -222,7 +256,11 @@ const ROSTER: RosterEntry[] = [
     name: 'Champion',
     team: 'Unaffiliated',
     unlockable: true,
-    aliases: ['champion'],
+    // Arc System Works' own patch notes write "Champion's Cosmic Smash" and
+    // every uploader writes "(Champion)", so the bare name is canonical here.
+    // Wikipedia, tokon.gg and the community wiki all write "The Champion", and
+    // an uploader following them would otherwise miss.
+    aliases: ['champion', 'the champion'],
   },
 ];
 
