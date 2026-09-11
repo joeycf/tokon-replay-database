@@ -524,6 +524,15 @@ function buildTheaterRecords(
       season: seasonForDate(r.publishedAt.slice(0, 10)),
       videoId: r.videoId,
       startSeconds: r.startSeconds,
+      // What the badge prints (engine v0.13.0). The tag is why this intake is
+      // worth having: "Cream City Convergence 2026 Top 8" is what the footage
+      // IS, and the source token can only ever name the catalogue that filed
+      // it. `uploader` is the fallback for a future untagged entry — this
+      // intake admits none today, so it is a guard, not a live path.
+      ...((tag, up) => (tag ? { event: tag } : up ? { channelName: up } : {}))(
+        (r.tag ?? '').trim(),
+        (r.uploader ?? '').trim(),
+      ),
       sides: [sides[0]!, sides[1]!] as [MatchSide, MatchSide],
     });
   }

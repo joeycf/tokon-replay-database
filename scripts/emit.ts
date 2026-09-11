@@ -62,6 +62,10 @@ export interface GenericReplay {
   videoId?: string;
   /** Where this record's footage starts inside `videoId`, in seconds. */
   startSeconds?: number;
+  /** What the badge prints instead of the source's configured name (engine
+   *  v0.13.0): the event first, then the uploader, then neither. */
+  event?: string;
+  channelName?: string;
 }
 
 /**
@@ -106,6 +110,12 @@ function toReplay(v: MatchVideo, windows = patchWindows()): GenericReplay {
     // the shape most likely to be missed in a spot-check.
     ...(v.videoId ? { videoId: v.videoId } : {}),
     ...(v.startSeconds ? { startSeconds: v.startSeconds } : {}),
+    // Pass-through, not a decision. "Is this label meaningful here?" is a
+    // question only the builder that read it can answer, and the theater
+    // builder is the only one that sets either field — so a guard here would
+    // be a second, weaker copy of a rule already enforced upstream.
+    ...(v.event ? { event: v.event } : {}),
+    ...(v.channelName ? { channelName: v.channelName } : {}),
   };
 }
 

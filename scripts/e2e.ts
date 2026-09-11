@@ -70,6 +70,10 @@ const replays = read<
     /** Present only on a segment record — see the segment blocks below. */
     videoId?: string;
     startSeconds?: number;
+    /** What the badge prints instead of the source name (engine v0.13.0). */
+    event?: string;
+    channelName?: string;
+    title: string;
   }[]
 >('replays.json');
 const characters = read<CharacterRecord[]>('characters.json');
@@ -955,11 +959,84 @@ async function main(): Promise<void> {
   );
   expect(chipLabels.has('Online'), 'source facet renders the Online group chip');
   expect(chipLabels.has('Tournament'), 'source facet renders the Tournament group chip');
-  const leaked = CHANNELS.filter((c) => chipLabels.has(c.name)).map((c) => c.name);
+  // A channel whose NAME equals a group's name cannot be told from that group's
+  // chip by text alone, so it is excluded rather than silently asserted about.
+  // None exists today; the guard is here because 'Tournament' is exactly the
+  // name a future index token would reach for.
+  const GROUP_NAMES = new Set(['Online', 'Tournament']);
+  const leaked = CHANNELS.filter((c) => !GROUP_NAMES.has(c.name) && chipLabels.has(c.name)).map(
+    (c) => c.name,
+  );
   expect(
     leaked.length === 0,
     `no per-channel source chip renders when grouped${leaked.length ? ` (leaked: ${leaked.join(', ')})` : ''}`,
   );
+
+  // ── the badge names the EVENT, not the catalogue (engine v0.13.0) ─────────
+  // The index intake is one token covering many organisers, so its configured
+  // name can only ever say "a catalogue filed this". Every record it emits now
+  // carries the catalogue's own event tag, and the badge prints that instead.
+  //
+  // Asserted in two places on purpose: over the emitted file, which is where
+  // the contract lives, and over a rendered card, which is the only proof it
+  // reaches a viewer. The card read also pins the badge's TAG NAME — the chip
+  // check above tells a filter chip from a card badge by <button> vs <span>,
+  // and would start matching card badges the day that changes.
+  const theater = replays.filter((r) => r.source === 'replayTheater');
+  const labelled = theater.filter((r) => r.event);
+  expect(
+    labelled.length === theater.length,
+    `every index-sourced record carries an event (${labelled.length}/${theater.length})`,
+  );
+  expect(
+    replays.every((r) => r.source === 'replayTheater' || !r.event),
+    'no channel-sourced record carries an event',
+  );
+  expect(
+    replays.every((r) => (r.event ?? 'x').trim() !== ''),
+    'no emitted event is empty or blank — an empty label would render a chip with no text',
+  );
+  // The card caps the chip and ellipsizes past it, so a catalogue row with a
+  // runaway tag should fail HERE rather than render as a two-word fragment.
+  const longestEvent = labelled.reduce((n, r) => Math.max(n, r.event!.length), 0);
+  expect(longestEvent <= 60, `longest event label is ${longestEvent} chars (cap 60)`);
+  // The tag rides in the synthesized title too — that is what makes an event
+  // findable by search — so the two must agree, or one of them is stale.
+  const disagree = labelled.filter((r) => !r.title.endsWith(`▰ ${r.event}`));
+  expect(
+    disagree.length === 0,
+    `every event matches its title's trailing slot${disagree.length ? ` (${disagree[0]!.id})` : ''}`,
+  );
+
+  {
+    await gotoIdle(page, server.at('/?src=replayTheater'));
+    await page.waitForSelector('[data-replay-id]');
+    const badges = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-replay-id]')].slice(0, 12).map((c) => {
+        const b = c.querySelector('span.cut-bl-md');
+        return {
+          id: c.getAttribute('data-replay-id') ?? '',
+          tag: b?.tagName ?? 'NONE',
+          text: (b?.textContent ?? '').trim(),
+        };
+      }),
+    );
+    const byId = new Map(replays.map((r) => [r.id, r]));
+    expect(badges.length > 0, 'the index-source filter renders cards');
+    expect(
+      badges.every((b) => b.tag === 'SPAN'),
+      `every card badge is a <span> (saw ${[...new Set(badges.map((b) => b.tag))].join(', ')})`,
+    );
+    const wrong = badges.filter((b) => b.text !== (byId.get(b.id)?.event ?? ''));
+    expect(
+      wrong.length === 0,
+      `every card badge prints its record's event${wrong.length ? ` — ${wrong[0]!.id} showed "${wrong[0]!.text}"` : ''}`,
+    );
+    expect(
+      !badges.some((b) => b.text === 'Tournament VODs'),
+      'no card falls back to the source name',
+    );
+  }
   const chipText = await page.evaluate(() => document.body.innerText);
 
   // patch facet — S1 parent with date children
