@@ -5,23 +5,23 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-08-28)
-  The newest patch in scripts/patches.ts is 2026-08-28, 13 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
+  The newest patch in scripts/patches.ts is 2026-08-28, 14 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
-_Generated 2026-09-10T12:23:25.549Z_
+_Generated 2026-09-11T12:22:01.029Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 164 | 164 | 100.0% |
+| highLevelReplays | 170 | 170 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 803 | 106 | 13.2% |
-| replaysHub | 211 | 207 | 98.1% |
-| fightingStationX | 2799 | 164 | 5.9% |
-| fgcReplaysHub | 2633 | 40 | 1.5% |
+| hadoukenReplays | 805 | 108 | 13.4% |
+| replaysHub | 217 | 213 | 98.2% |
+| fightingStationX | 2808 | 169 | 6.0% |
+| fgcReplaysHub | 2637 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 45 | 11 | 24.4% |
 | replayTheater _(carried)_ | — | 69 | — |
-| **total** | | **774** | |
+| **total** | | **793** | |
 
 ## Index intakes
 
@@ -43,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 1548 sides got its characters.
+How every one of the 1586 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 418 | 27.0% |
-| description | 417 | 26.9% |
-| index | 138 | 8.9% |
-| footage | 32 | 2.1% |
-| human | 519 | 33.5% |
-| review | 24 | 1.6% |
+| title | 444 | 28.0% |
+| description | 429 | 27.0% |
+| index | 138 | 8.7% |
+| footage | 32 | 2.0% |
+| human | 519 | 32.7% |
+| review | 24 | 1.5% |
 
-- complete (4/4): **1130/1548** (73.0%)
+- complete (4/4): **1142/1586** (72.0%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 394 · character-subset 26 · ambiguous 3
-- title slot order: handle-first 1156 · chars-first 104 · parallel-lists 128
+- bench alignment: handle 406 · character-subset 26 · ambiguous 3
+- title slot order: handle-first 1182 · chars-first 106 · parallel-lists 138
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,22 +65,22 @@ How every one of the 1548 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 416 | 26.9% |
+| 1 | 442 | 27.9% |
 | 2 | 2 | 0.1% |
-| 4 | 1123 | 72.5% |
+| 4 | 1135 | 71.6% |
 | 5 _(mid-set change)_ | 6 | 0.4% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **418 side(s) awaiting a drain** across 209 record(s) — oldest published **25 day(s)** ago
+- **444 side(s) awaiting a drain** across 222 record(s) — oldest published **26 day(s)** ago
 
-> The bench queue is at 209 (nudge threshold 40).
+> The bench queue is at 222 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **209**
+- bench queue (published, incomplete): **222**
 
 ## Player identity
 
@@ -141,12 +141,12 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4014 |
-| not-tokon | 1091 |
+| other-game | 4018 |
+| not-tokon | 1092 |
 | pre-launch | 663 |
-| not-a-match | 133 |
+| not-a-match | 135 |
 | not-an-event | 34 |
-| short-duration | 21 |
+| short-duration | 22 |
 | char-unresolved | 14 |
 | no-vs-title | 5 |
 | bench-conflict | 1 |
