@@ -7,7 +7,21 @@
           <h1 class="mt-1 font-display text-d2 font-bold text-text">Bench diamonds</h1>
         </div>
         <p class="font-mono text-[12px] text-text-muted">
-          {{ labelled }}/{{ total }} sides · {{ crops }} crops
+          <span :class="counts && counts.pending ? 'text-primary' : ''"
+            >{{ counts?.pending ?? 0 }} open</span
+          >
+          · {{ labelled }}/{{ total }} sides · {{ crops }} crops
+          <button
+            type="button"
+            class="ml-2 cursor-pointer underline"
+            :class="showResolved ? 'text-primary' : 'text-text-muted'"
+            @click="
+              showResolved = !showResolved;
+              cursor = 0;
+            "
+          >
+            {{ showResolved ? 'back to open' : 'show labelled' }}
+          </button>
         </p>
         <p
           v-if="offBench"
@@ -142,6 +156,7 @@ definePageMeta({
     category: 'Curation',
     description:
       'Three-way diamond labeller over 4x corner crops, keyboard-driven. Nothing pre-selects an answer.',
+    queue: '/api/dev/portrait-review',
   },
 });
 
@@ -170,16 +185,24 @@ interface Item {
 }
 
 const cursor = ref(0);
+const showResolved = ref(false);
 const { data, pending, error, refresh } = await useFetch<{
   total: number;
   labelled: number;
   crops: number;
   offBench: number;
   roster: { id: string; name: string }[];
+  counts: { total: number; pending: number; done: number; unreadable: number };
   items: Item[];
+  resolved: Item[];
 }>('/api/dev/portrait-review');
 
-const items = computed(() => data.value?.items ?? []);
+// The OPEN work. Every one of the 63 items was fully labelled and every one was
+// still listed; the settled ones are one toggle away rather than the default.
+const items = computed(() =>
+  showResolved.value ? (data.value?.resolved ?? []) : (data.value?.items ?? []),
+);
+const counts = computed(() => data.value?.counts);
 const total = computed(() => data.value?.total ?? 0);
 const labelled = computed(() => data.value?.labelled ?? 0);
 const crops = computed(() => data.value?.crops ?? 0);
@@ -188,21 +211,27 @@ const roster = computed(() => data.value?.roster ?? []);
 const cur = computed(() => items.value[cursor.value]);
 
 async function assign(cell: string, char: string | null): Promise<void> {
+  // `i` IS THE WORK-LIST INDEX, NOT THE CURSOR. They were the same thing while
+  // this page listed every row; now that it lists only the open ones, sending the
+  // cursor would address a different side entirely — and a mis-addressed write
+  // here is silent, published, and wrong.
+  const target = cur.value;
+  if (!target) return;
   await $fetch('/api/dev/portrait-review', {
     method: 'POST',
-    body: { i: cursor.value, cell, char },
+    body: { i: target.i, cell, char },
   });
   await refresh();
   // advance only once every diamond on this side has an answer, so a correction
   // does not throw the cursor forward mid-item
-  if (cur.value?.done && cursor.value < total.value - 1) cursor.value++;
+  if (cur.value?.done && cursor.value < items.value.length - 1) cursor.value++;
 }
 
 function onKey(e: KeyboardEvent): void {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
   if (e.key === 'ArrowLeft') return void (cursor.value = Math.max(0, cursor.value - 1));
   if (e.key === 'ArrowRight')
-    return void (cursor.value = Math.min(total.value - 1, cursor.value + 1));
+    return void (cursor.value = Math.min(items.value.length - 1, cursor.value + 1));
   for (const [k, row] of KEYS.entries()) {
     const ci = row.indexOf(e.key as never);
     if (ci >= 0) {

@@ -20,13 +20,24 @@
  * Those disagreements are counted rather than swallowed. Description-derived benches
  * are the truth set the whole tier is scored against, so how often a human contradicts
  * one is a measurement of that truth set, and it belongs in the report either way.
+ *
+ * `items` IS THE OPEN WORK (engine v0.14.0 review-queue contract). It used to be
+ * every row, labelled or not: this route already computed `done` per item and
+ * returned the row anyway, leaving the page to restyle it. Measured the day this
+ * changed — 63 of 63 items fully labelled and all 63 still listed as work. The
+ * settled ones are carried in `resolved` so a labeller can re-check their own
+ * answers; they are simply not what the page opens on.
  */
+import { partitionReviewQueue } from '@engine/server/utils/reviewQueue';
 
 export default defineEventHandler(() => {
   if (!import.meta.dev) throw createError({ statusCode: 404 });
 
   const work = buildWorkList();
-  const labels = readJson<Record<string, { char: string }>>('data/portrait-labels.json', {});
+  const labels = readJson<Record<string, { char: string | null; unreadable?: boolean }>>(
+    'data/portrait-labels.json',
+    {},
+  );
   const roster = readJson<{ id: string; name: string }[]>('data/characters.json', []);
   const nameOf = new Map(roster.map((c) => [c.id, c.name]));
   const templates = readJson<Record<string, { lit?: string; dim?: string }>>(
@@ -53,6 +64,19 @@ export default defineEventHandler(() => {
     };
   });
 
+  // A cell a labeller marked unreadable is SETTLED, not blank — the same
+  // distinction the fuse tools draw. `char: null` with `unreadable: true` is the
+  // verdict; a missing entry is "nobody has looked".
+  const queue = partitionReviewQueue(
+    items,
+    (it) => {
+      if (it.done) return 'resolved';
+      const marked = CELLS.filter((c) => labels[labelKey(work[it.i]!, c)]?.unreadable);
+      return marked.length === CELLS.length ? 'negative' : 'pending';
+    },
+    { generatedAt: new Date().toISOString() },
+  );
+
   return {
     total: items.length,
     labelled: items.filter((x) => x.done).length,
@@ -60,6 +84,6 @@ export default defineEventHandler(() => {
     offBench,
     hasTemplates: Object.keys(templates).length > 0,
     roster: [...roster].sort((a, b) => a.name.localeCompare(b.name)),
-    items,
+    ...queue,
   };
 });

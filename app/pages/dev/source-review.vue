@@ -6,7 +6,20 @@
           <p class="font-mono text-label uppercase text-text-muted">Curation — dev only</p>
           <h1 class="mt-1 font-display text-d2 font-bold text-text">Plate reading</h1>
         </div>
-        <p class="font-mono text-[12px] text-text-muted">{{ savedCount }}/{{ total }} done</p>
+        <p class="font-mono text-[12px] text-text-muted">
+          {{ savedCount }}/{{ total }} done
+          <button
+            type="button"
+            class="ml-2 cursor-pointer underline"
+            :class="showResolved ? 'text-primary' : 'text-text-muted'"
+            @click="
+              showResolved = !showResolved;
+              cursor = 0;
+            "
+          >
+            {{ showResolved ? 'back to open' : 'show settled' }}
+          </button>
+        </p>
         <p class="ml-auto font-mono text-[12px] text-text-muted">
           ⏎ save &amp; next · ←/→ move · u unreadable both
         </p>
@@ -103,7 +116,7 @@
         </div>
 
         <p class="mt-3 font-mono text-[12px] text-text-muted">
-          sample {{ cursor + 1 }} of {{ total }}
+          sample {{ cursor + 1 }} of {{ items.length }}{{ showResolved ? ' (settled)' : '' }}
         </p>
         <p
           v-if="postError"
@@ -141,6 +154,7 @@ definePageMeta({
     description:
       'Label the left and right nameplates on each sampled frame. No title, no handles, nothing to anchor on.',
     writes: 'data/plate-labels.json',
+    queue: '/api/dev/source-review',
   },
 });
 
@@ -161,15 +175,25 @@ interface Item {
 const { data, pending, error, refresh } = await useAsyncData(
   'dev-plate-review',
   () =>
-    $fetch<{ roster: { id: string; name: string }[]; total: number; items: Item[] }>(
-      '/api/dev/source-review',
-    ),
+    $fetch<{
+      roster: { id: string; name: string }[];
+      total: number;
+      counts: { total: number; pending: number; done: number; unreadable: number };
+      items: Item[];
+      resolved: Item[];
+    }>('/api/dev/source-review'),
   { server: false },
 );
 const roster = computed(() => data.value?.roster ?? []);
-const items = computed(() => data.value?.items ?? []);
+// The OPEN samples. All 132 were labelled and all 132 were still listed, which
+// left the page's jump-to-next-unsaved with nowhere to jump.
+const showResolved = ref(false);
+const items = computed(() =>
+  showResolved.value ? (data.value?.resolved ?? []) : (data.value?.items ?? []),
+);
+const counts = computed(() => data.value?.counts);
 const total = computed(() => data.value?.total ?? 0);
-const savedCount = computed(() => items.value.filter((i) => i.saved).length);
+const savedCount = computed(() => counts.value?.done ?? 0);
 
 const cursor = ref(0);
 const left = ref<string>(UNSET);
@@ -201,15 +225,18 @@ async function save(): Promise<void> {
     await $fetch('/api/dev/source-review', {
       method: 'POST',
       body: {
-        i: cursor.value,
+        // The SAMPLE index, not the cursor. They were the same number while this
+        // page listed every row; with only the open ones listed, the cursor
+        // addresses a different frame — and this write is silent when wrong.
+        i: current.value?.i ?? cursor.value,
         left: left.value === NONE ? null : left.value,
         right: right.value === NONE ? null : right.value,
       },
     });
     await refresh();
-    const next = items.value.findIndex((it) => it.i > cursor.value && !it.saved);
-    if (next >= 0) cursor.value = items.value[next]!.i;
-    else if (cursor.value + 1 < total.value) cursor.value += 1;
+    // The row just saved has left the open list, so the same cursor now points at
+    // the next piece of work; clamp when it was the last one.
+    cursor.value = Math.min(cursor.value, Math.max(0, items.value.length - 1));
   } catch (e) {
     postError.value = (e as { statusMessage?: string }).statusMessage ?? String(e);
   } finally {
@@ -226,7 +253,7 @@ function onKey(e: KeyboardEvent): void {
     return;
   }
   if (e.target instanceof HTMLSelectElement) return;
-  if (e.key === 'ArrowRight') cursor.value = Math.min(cursor.value + 1, total.value - 1);
+  if (e.key === 'ArrowRight') cursor.value = Math.min(cursor.value + 1, items.value.length - 1);
   else if (e.key === 'ArrowLeft') cursor.value = Math.max(cursor.value - 1, 0);
   else if (e.key === 'u') {
     left.value = NONE;

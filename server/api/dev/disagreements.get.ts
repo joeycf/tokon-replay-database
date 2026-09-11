@@ -27,11 +27,32 @@ export default defineEventHandler(() => {
         missingNames: r.missing.map(nm),
       })),
     },
-    offBench: ob.map((o) => ({
-      ...o,
-      readName: nm(o.read),
-      pointName: nm(o.point),
-      benchNames: o.benches.map((b) => b.map(nm)),
-    })),
+    // OPEN disagreements only. `applied` has been computed here since the row
+    // existed and never used to filter, so a disagreement the reviewer had
+    // already resolved came back every time — the page "kept offering buttons for
+    // work already done", which is the failure this file's own comment describes.
+    // The resolved ones ride along for reference rather than disappearing.
+    offBench: ob
+      .filter((o) => !o.applied)
+      .map((o) => ({
+        ...o,
+        readName: nm(o.read),
+        pointName: nm(o.point),
+        benchNames: o.benches.map((b) => b.map(nm)),
+      })),
+    offBenchResolved: ob
+      .filter((o) => o.applied)
+      .map((o) => ({
+        ...o,
+        readName: nm(o.read),
+        pointName: nm(o.point),
+        benchNames: o.benches.map((b) => b.map(nm)),
+      })),
+    counts: {
+      total: ob.length,
+      pending: ob.filter((o) => !o.applied).length,
+      done: ob.filter((o) => o.applied).length,
+      unreadable: 0,
+    },
   };
 });

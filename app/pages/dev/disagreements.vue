@@ -178,6 +178,7 @@ definePageMeta({
     category: 'Diagnostic',
     description:
       'Human reads versus the automatic tiers — cross-tier conflicts and the off-bench read queue.',
+    queue: '/api/dev/disagreements',
   },
 });
 
@@ -210,6 +211,9 @@ const busy = ref(false);
 const { data, pending, error, refresh } = await useFetch<{
   crossTier: { scanned: number; rows: Cross[] };
   offBench: Off[];
+  /** already applied — carried for reference, not as work */
+  offBenchResolved: Off[];
+  counts: { total: number; pending: number; done: number; unreadable: number };
   roster: { id: string; name: string }[];
 }>('/api/dev/disagreements');
 

@@ -21,6 +21,8 @@
  * mistake.
  */
 
+import { partitionReviewQueue } from '@engine/server/utils/reviewQueue';
+
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -31,6 +33,8 @@ interface SampleEntry {
 interface PlateLabel {
   left: string | null;
   right: string | null;
+  /** the labeller looked and the plate cannot be read — a verdict, not a blank */
+  unreadable?: boolean;
   at: string;
 }
 
@@ -54,22 +58,30 @@ export default defineEventHandler(() => {
   if (!sample.length) {
     throw createError({
       statusCode: 503,
-      statusMessage:
-        'no plate sample — run `npx tsx scripts/spike/build-plate-sample.ts` first',
+      statusMessage: 'no plate sample — run `npx tsx scripts/spike/build-plate-sample.ts` first',
     });
   }
 
-  return {
-    roster,
-    total: sample.length,
-    // Index and saved verdict. Nothing else. `saved` is the labeller's own prior
-    // answer, which is theirs to see; a first pass returns null and opens blank.
-    items: sample.map((e, i) => {
-      const saved = labels[`${e.videoId}/${e.sec}`];
-      return {
-        i,
-        saved: saved ? { left: saved.left, right: saved.right } : null,
-      };
-    }),
-  };
+  // Index and saved verdict. Nothing else. `saved` is the labeller's own prior
+  // answer, which is theirs to see; a first pass returns null and opens blank.
+  const items = sample.map((e, i) => {
+    const saved = labels[`${e.videoId}/${e.sec}`];
+    return {
+      i,
+      saved: saved ? { left: saved.left, right: saved.right } : null,
+      unreadable: !!saved?.unreadable,
+    };
+  });
+
+  // `items` IS THE OPEN WORK (engine v0.14.0). Every sample row used to come back
+  // regardless: the route computed `saved` and returned the row anyway. Measured
+  // the day this changed — 132 of 132 rows already labelled, all 132 still listed,
+  // and the page's jump-to-next-unsaved had nowhere to jump.
+  const queue = partitionReviewQueue(
+    items,
+    (it) => (it.unreadable ? 'negative' : it.saved ? 'resolved' : 'pending'),
+    { generatedAt: new Date().toISOString() },
+  );
+
+  return { roster, total: sample.length, ...queue };
 });

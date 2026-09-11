@@ -6,7 +6,20 @@
           <p class="font-mono text-label uppercase text-text-muted">Curation — dev only</p>
           <h1 class="mt-1 font-display text-d2 font-bold text-text">Bench queue</h1>
         </div>
-        <p class="font-mono text-[12px] text-text-muted">{{ done }}/{{ total }} sides drained</p>
+        <p class="font-mono text-[12px] text-text-muted">
+          {{ done }}/{{ total }} sides drained
+          <button
+            type="button"
+            class="ml-2 cursor-pointer underline"
+            :class="showResolved ? 'text-primary' : 'text-text-muted'"
+            @click="
+              showResolved = !showResolved;
+              cursor = 0;
+            "
+          >
+            {{ showResolved ? 'back to open' : 'show drained' }}
+          </button>
+        </p>
         <p class="ml-auto font-mono text-[12px] text-text-muted">
           ⏎ save · ←/→ move · type in a box to jump to a fighter
         </p>
@@ -278,6 +291,7 @@ definePageMeta({
     category: 'Curation',
     description:
       'Drain the bench queue by reading the HUD portrait cluster — two frames per side, compared as sets.',
+    queue: '/api/dev/bench-review',
   },
 });
 
@@ -338,10 +352,17 @@ const { data, pending, error, refresh } = await useFetch<{
   total: number;
   done: number;
   roster: { id: string; name: string }[];
+  counts: { total: number; pending: number; done: number; unreadable: number };
   items: Item[];
+  resolved: Item[];
 }>('/api/dev/bench-review');
 
-const items = computed(() => data.value?.items ?? []);
+// The OPEN sides. A drained bench is not work, and listing it as work is how
+// this queue's sibling ended up advertising 171 records when 65 were incomplete.
+const showResolved = ref(false);
+const items = computed(() =>
+  showResolved.value ? (data.value?.resolved ?? []) : (data.value?.items ?? []),
+);
 const total = computed(() => data.value?.total ?? 0);
 const done = computed(() => data.value?.done ?? 0);
 const roster = computed(() => data.value?.roster ?? []);
@@ -444,7 +465,7 @@ async function save(force: boolean, union = false, keepTitled = false): Promise<
       disagree.value = null;
       titleMissing.value = null;
       await refresh();
-      if (cursor.value < total.value - 1) cursor.value++;
+      if (cursor.value < items.value.length - 1) cursor.value++;
     } else if (r.disagree) {
       disagree.value = { a: r.a ?? [], b: r.b ?? [] };
     }
@@ -456,7 +477,8 @@ async function save(force: boolean, union = false, keepTitled = false): Promise<
 function onKey(e: KeyboardEvent): void {
   if (e.target instanceof HTMLSelectElement) return;
   if (e.key === 'ArrowLeft') cursor.value = Math.max(0, cursor.value - 1);
-  else if (e.key === 'ArrowRight') cursor.value = Math.min(total.value - 1, cursor.value + 1);
+  else if (e.key === 'ArrowRight')
+    cursor.value = Math.min(items.value.length - 1, cursor.value + 1);
   else if (e.key === 'Enter') void save(false);
 }
 onMounted(() => window.addEventListener('keydown', onKey));

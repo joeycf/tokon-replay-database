@@ -11,6 +11,8 @@
  * of four.
  */
 
+import { partitionReviewQueue } from '@engine/server/utils/reviewQueue';
+
 export default defineEventHandler(() => {
   if (!import.meta.dev) throw createError({ statusCode: 404 });
 
@@ -31,7 +33,6 @@ export default defineEventHandler(() => {
       }
     >
   >('data/overrides.json', {});
-
 
   const items = work.map((w, i) => {
     // Match the saved side by the SCREEN side it was read from. Falling back to
@@ -79,10 +80,16 @@ export default defineEventHandler(() => {
     };
   });
 
+  // `items` IS THE OPEN WORK (engine v0.14.0). `done` was computed here and the
+  // row returned anyway, so a finished bench kept its place in the worklist.
+  const queue = partitionReviewQueue(items, (it) => (it.done ? 'resolved' : 'pending'), {
+    generatedAt: new Date().toISOString(),
+  });
+
   return {
     total: items.length,
     done: items.filter((x) => x.done).length,
     roster: [...roster].sort((a, b) => a.name.localeCompare(b.name)),
-    items,
+    ...queue,
   };
 });
