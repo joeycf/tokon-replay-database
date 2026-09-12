@@ -5,23 +5,23 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-08-28)
-  The newest patch in scripts/patches.ts is 2026-08-28, 14 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
+  The newest patch in scripts/patches.ts is 2026-08-28, 15 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
-_Generated 2026-09-11T12:22:01.029Z_
+_Generated 2026-09-12T11:44:49.493Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 170 | 170 | 100.0% |
+| highLevelReplays | 175 | 175 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 805 | 108 | 13.4% |
-| replaysHub | 217 | 213 | 98.2% |
-| fightingStationX | 2808 | 169 | 6.0% |
-| fgcReplaysHub | 2637 | 40 | 1.5% |
+| hadoukenReplays | 808 | 111 | 13.7% |
+| replaysHub | 223 | 219 | 98.2% |
+| fightingStationX | 2817 | 174 | 6.2% |
+| fgcReplaysHub | 2642 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 45 | 11 | 24.4% |
-| replayTheater _(carried)_ | — | 69 | — |
-| **total** | | **793** | |
+| replayTheater _(index)_ | 16 | 85 | — |
+| **total** | | **828** | |
 
 ## Index intakes
 
@@ -32,32 +32,29 @@ the committed records are carried, and the run stays green.
 
 | intake | records | pin | this run | pages | new | not in this pull |
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| `replayTheater` | 69 | 69 | carried (pull found no new tournament entries) | — | — | — |
+| `replayTheater` | 85 | 85 | rebuilt from a cursor delta | — | — | — |
 
-_The pull ran and found no new tournament entries, so the committed catalogue_
-_was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+Entries **collapsed as double-submitted**: **0** of 16 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
 
-_Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
+_Entries skipped as already-known: **0** of 16 in this pull — none was a video this repo has already fetched, published or ruled on. A statement about this pull's tagged rows, not the catalogue: the cross-check below measures the catalogue-wide overlap._
 
 ## Character provenance
 
-How every one of the 1586 sides got its characters.
+How every one of the 1656 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 444 | 28.0% |
-| description | 429 | 27.0% |
-| index | 138 | 8.7% |
-| footage | 32 | 2.0% |
-| human | 519 | 32.7% |
-| review | 24 | 1.5% |
+| title | 472 | 28.5% |
+| description | 439 | 26.5% |
+| index | 170 | 10.3% |
+| footage | 32 | 1.9% |
+| human | 519 | 31.3% |
+| review | 24 | 1.4% |
 
-- complete (4/4): **1142/1586** (72.0%)
+- complete (4/4): **1184/1656** (71.5%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 406 · character-subset 26 · ambiguous 3
-- title slot order: handle-first 1182 · chars-first 106 · parallel-lists 138
+- bench alignment: handle 417 · character-subset 26 · ambiguous 3
+- title slot order: handle-first 1207 · chars-first 109 · parallel-lists 148
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,26 +62,26 @@ How every one of the 1586 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 442 | 27.9% |
+| 1 | 470 | 28.4% |
 | 2 | 2 | 0.1% |
-| 4 | 1135 | 71.6% |
+| 4 | 1177 | 71.1% |
 | 5 _(mid-set change)_ | 6 | 0.4% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **444 side(s) awaiting a drain** across 222 record(s) — oldest published **26 day(s)** ago
+- **472 side(s) awaiting a drain** across 236 record(s) — oldest published **27 day(s)** ago
 
-> The bench queue is at 222 (nudge threshold 40).
+> The bench queue is at 236 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **222**
+- bench queue (published, incomplete): **236**
 
 ## Player identity
 
-16 identity(s) resolved from more than one spelling. The
+17 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -98,10 +95,11 @@ after changing scripts/players.ts, or the old URLs 404.
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
 | `kingcreed` | `king-creed` |
-| `majinburno` | `majin-burno` |
+| `majin-burno` | `majinburno` |
 | `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
 | `nychrisg` | `nychris-g` |
+| `omegahilip` | `omega-hilip` |
 | `sonicfox` | `sonic-fox` |
 | `tokon-player` | `to-kon-player` |
 | `vivid-aspiration` | `vividaspiration` |
@@ -141,12 +139,12 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4018 |
+| other-game | 4023 |
 | not-tokon | 1092 |
 | pre-launch | 663 |
-| not-a-match | 135 |
+| not-a-match | 138 |
 | not-an-event | 34 |
-| short-duration | 22 |
+| short-duration | 23 |
 | char-unresolved | 14 |
 | no-vs-title | 5 |
 | bench-conflict | 1 |
