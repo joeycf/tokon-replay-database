@@ -7,21 +7,21 @@
 - **patch-table** (stale-patch-table, due 2026-08-28)
   The newest patch in scripts/patches.ts is 2026-08-28, 15 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
-_Generated 2026-09-12T11:44:49.493Z_
+_Generated 2026-09-12T22:26:57.257Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 175 | 175 | 100.0% |
+| highLevelReplays | 178 | 178 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 808 | 111 | 13.7% |
-| replaysHub | 223 | 219 | 98.2% |
-| fightingStationX | 2817 | 174 | 6.2% |
-| fgcReplaysHub | 2642 | 40 | 1.5% |
+| hadoukenReplays | 810 | 113 | 14.0% |
+| replaysHub | 226 | 222 | 98.2% |
+| fightingStationX | 2821 | 176 | 6.2% |
+| fgcReplaysHub | 2644 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 45 | 11 | 24.4% |
-| replayTheater _(index)_ | 16 | 85 | — |
-| **total** | | **828** | |
+| replayTheater _(carried)_ | — | 85 | — |
+| **total** | | **838** | |
 
 ## Index intakes
 
@@ -32,29 +32,32 @@ the committed records are carried, and the run stays green.
 
 | intake | records | pin | this run | pages | new | not in this pull |
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| `replayTheater` | 85 | 85 | rebuilt from a cursor delta | — | — | — |
+| `replayTheater` | 85 | 85 | carried (pull found no new tournament entries) | — | — | — |
 
-Entries **collapsed as double-submitted**: **0** of 16 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
+_The pull ran and found no new tournament entries, so the committed catalogue_
+_was carried unchanged._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
-_Entries skipped as already-known: **0** of 16 in this pull — none was a video this repo has already fetched, published or ruled on. A statement about this pull's tagged rows, not the catalogue: the cross-check below measures the catalogue-wide overlap._
+_Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 1656 sides got its characters.
+How every one of the 1676 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 472 | 28.5% |
-| description | 439 | 26.5% |
-| index | 170 | 10.3% |
+| title | 486 | 29.0% |
+| description | 445 | 26.6% |
+| index | 170 | 10.1% |
 | footage | 32 | 1.9% |
-| human | 519 | 31.3% |
+| human | 519 | 31.0% |
 | review | 24 | 1.4% |
 
-- complete (4/4): **1184/1656** (71.5%)
+- complete (4/4): **1190/1676** (71.0%)
 - oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 417 · character-subset 26 · ambiguous 3
-- title slot order: handle-first 1207 · chars-first 109 · parallel-lists 148
+- bench alignment: handle 422 · character-subset 26 · ambiguous 4
+- title slot order: handle-first 1221 · chars-first 111 · parallel-lists 152
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -62,22 +65,22 @@ How every one of the 1656 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 470 | 28.4% |
+| 1 | 484 | 28.9% |
 | 2 | 2 | 0.1% |
-| 4 | 1177 | 71.1% |
+| 4 | 1183 | 70.6% |
 | 5 _(mid-set change)_ | 6 | 0.4% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 
-- **472 side(s) awaiting a drain** across 236 record(s) — oldest published **27 day(s)** ago
+- **486 side(s) awaiting a drain** across 243 record(s) — oldest published **27 day(s)** ago
 
-> The bench queue is at 236 (nudge threshold 40).
+> The bench queue is at 243 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **236**
+- bench queue (published, incomplete): **243**
 
 ## Player identity
 
@@ -139,12 +142,12 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4023 |
+| other-game | 4025 |
 | not-tokon | 1092 |
 | pre-launch | 663 |
-| not-a-match | 138 |
+| not-a-match | 139 |
 | not-an-event | 34 |
-| short-duration | 23 |
+| short-duration | 24 |
 | char-unresolved | 14 |
 | no-vs-title | 5 |
 | bench-conflict | 1 |
