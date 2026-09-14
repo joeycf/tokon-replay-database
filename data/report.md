@@ -7,21 +7,21 @@
 - **patch-table** (stale-patch-table, due 2026-08-28)
   The newest patch in scripts/patches.ts is 2026-08-28, 17 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
-_Generated 2026-09-14T01:52:26.767Z_
+_Generated 2026-09-14T14:26:01.443Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 183 | 183 | 100.0% |
+| highLevelReplays | 186 | 186 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 812 | 115 | 14.2% |
-| replaysHub | 232 | 227 | 97.8% |
-| fightingStationX | 2831 | 182 | 6.4% |
-| fgcReplaysHub | 2646 | 40 | 1.5% |
+| replaysHub | 236 | 231 | 97.9% |
+| fightingStationX | 2837 | 185 | 6.5% |
+| fgcReplaysHub | 2648 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 45 | 11 | 24.4% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **856** | |
+| **total** | | **866** | |
 
 ## Index intakes
 
@@ -36,28 +36,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor did not move: the catalogue has taken no new Tōkon entry since_
-_the last pull — quieter still, and equally ordinary._
+_The cursor still advanced — a quiet day is the ordinary case here, not a_
+_failed one._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 1712 sides got its characters.
+How every one of the 1732 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 479 | 28.0% |
-| description | 455 | 26.6% |
-| index | 170 | 9.9% |
-| footage | 32 | 1.9% |
-| human | 552 | 32.2% |
+| title | 493 | 28.5% |
+| description | 461 | 26.6% |
+| index | 170 | 9.8% |
+| footage | 32 | 1.8% |
+| human | 552 | 31.9% |
 | review | 24 | 1.4% |
 
-- complete (4/4): **1233/1712** (72.0%)
+- complete (4/4): **1239/1732** (71.5%)
 - oversize (>4, mid-set team change): **8** — counted in usage, excluded from pairing
-- bench alignment: handle 431 · character-subset 27 · ambiguous 4
-- title slot order: handle-first 1243 · chars-first 113 · parallel-lists 164
+- bench alignment: handle 438 · character-subset 27 · ambiguous 4
+- title slot order: handle-first 1257 · chars-first 113 · parallel-lists 170
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,23 +65,23 @@ How every one of the 1712 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 477 | 27.9% |
+| 1 | 491 | 28.3% |
 | 2 | 2 | 0.1% |
-| 4 | 1225 | 71.6% |
-| 5 _(mid-set change)_ | 6 | 0.4% |
+| 4 | 1231 | 71.1% |
+| 5 _(mid-set change)_ | 6 | 0.3% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.1% |
 
-- **479 side(s) awaiting a drain** across 255 record(s) — oldest published **29 day(s)** ago
+- **493 side(s) awaiting a drain** across 262 record(s) — oldest published **29 day(s)** ago
 
-> The bench queue is at 255 (nudge threshold 40).
+> The bench queue is at 262 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **255**
+- bench queue (published, incomplete): **262**
 
 ## Player identity
 
@@ -143,12 +143,12 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4027 |
-| not-tokon | 1094 |
+| other-game | 4029 |
+| not-tokon | 1095 |
 | pre-launch | 663 |
-| not-a-match | 139 |
+| not-a-match | 140 |
 | not-an-event | 34 |
-| short-duration | 26 |
+| short-duration | 27 |
 | char-unresolved | 14 |
 | no-vs-title | 6 |
 | bench-conflict | 1 |
