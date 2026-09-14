@@ -12,7 +12,8 @@
  *   resolved  the reader returned an id  -> measures PRECISION
  *   rejected  the reader returned null   -> measures HEADROOM
  *
- * Rejected plates are 16% of the population (918 of 5754). Only a human can say
+ * Rejected plates are ~20% of the population (19,109 of 93,804 as of 2026-09-14;
+ * 918 of 5754 when this was drawn). Only a human can say
  * whether those were genuinely illegible or whether a readable name was thrown
  * away by an alias gap or the radius cap, and that is the number deciding
  * whether the reader is at its ceiling or has recall left on the table. So they
@@ -85,9 +86,10 @@ export interface SampleEntry {
   readerRight: string | null;
 }
 
-const store = JSON.parse(
-  readFileSync(join(CACHE, 'extracted.json'), 'utf8'),
-) as Record<string, Extraction>;
+const store = JSON.parse(readFileSync(join(CACHE, 'extracted.json'), 'utf8')) as Record<
+  string,
+  Extraction
+>;
 const videos = JSON.parse(readFileSync(join(CACHE, '..', '..', 'data/videos.json'), 'utf8')) as {
   id: string;
   intake: string;
@@ -118,7 +120,13 @@ for (const [vid, v] of Object.entries(store)) {
   for (const f of framesOf(vid)) {
     const sec = Number(f.split('/').pop()!.replace('.png', ''));
     if (hudSecs.has(sec)) continue;
-    pools['no-hud'].push({ videoId: vid, sec, stratum: 'no-hud', readerLeft: null, readerRight: null });
+    pools['no-hud'].push({
+      videoId: vid,
+      sec,
+      stratum: 'no-hud',
+      readerLeft: null,
+      readerRight: null,
+    });
   }
 }
 
@@ -179,7 +187,10 @@ const picked = [
 ];
 const sample = shuffle(picked);
 
-writeFileSync(join(CACHE, 'plate-sample.json'), `${JSON.stringify({ seed: SEED, sample }, null, 1)}\n`);
+writeFileSync(
+  join(CACHE, 'plate-sample.json'),
+  `${JSON.stringify({ seed: SEED, sample }, null, 1)}\n`,
+);
 
 // ── report ──────────────────────────────────────────────────────────────────
 const popResolved = Object.values(store).reduce(
@@ -190,15 +201,15 @@ const popRejected = Object.values(store).reduce(
   (a, v) => a + v.left.filter((x) => !x.id).length + v.right.filter((x) => !x.id).length,
   0,
 );
-const sResolved = sample.filter((e) => e.stratum !== 'no-hud').reduce(
-  (a, e) => a + (e.readerLeft ? 1 : 0) + (e.readerRight ? 1 : 0),
-  0,
-);
-const sRejected =
-  sample.filter((e) => e.stratum !== 'no-hud').length * 2 - sResolved;
+const sResolved = sample
+  .filter((e) => e.stratum !== 'no-hud')
+  .reduce((a, e) => a + (e.readerLeft ? 1 : 0) + (e.readerRight ? 1 : 0), 0);
+const sRejected = sample.filter((e) => e.stratum !== 'no-hud').length * 2 - sResolved;
 
 console.log(`plate sample — seed ${SEED}\n`);
-console.log(`  population: ${popResolved + popRejected} plates · resolved ${popResolved} (${((100 * popResolved) / (popResolved + popRejected)).toFixed(1)}%) · rejected ${popRejected} (${((100 * popRejected) / (popResolved + popRejected)).toFixed(1)}%)`);
+console.log(
+  `  population: ${popResolved + popRejected} plates · resolved ${popResolved} (${((100 * popResolved) / (popResolved + popRejected)).toFixed(1)}%) · rejected ${popRejected} (${((100 * popRejected) / (popResolved + popRejected)).toFixed(1)}%)`,
+);
 console.log(`  sample:     ${sample.length} frames`);
 for (const s of ['one-rejected', 'both-rejected', 'both-resolved', 'no-hud'] as Stratum[]) {
   const n = sample.filter((e) => e.stratum === s).length;

@@ -213,10 +213,25 @@ guard would not have caught it, because it needs >10% _and_ >20 records from a
 single channel and this arrives as one or two spread across four. Pairing fetch
 with parse is the fix.
 
-`data:catchup` runs extraction `--dry`: it persists reads and frames for the
-labelling UI and never writes `data/overrides.json`. Publishing a fighter onto
-a side stays a human decision in `/dev/bench-review` — the reader closes a side
-outright only 15.9% of the time, so it is a head start, not an answer.
+`data:catchup` publishes what the footage gate accepts, and defers the rest to
+`/dev/bench-review`. The gate is four clauses — both unions non-empty, min
+confidence at or above `AUTO_ACCEPT`, side attribution decided, and the fighter
+the title names present in its own side — and at that gate the reader's precision
+is 100%: 125/125 against blind human plate labels, and on every side where both a
+machine and a human verdict exist, the machine's union is a subset of the human's
+with zero invented members.
+
+It used to run `--dry` on the grounds that the reader "closes a side outright only
+15.9% of the time". That number is real but it is _completeness_, not accuracy, and
+completeness is capped by the game's own HUD: a nameplate names whoever is on point,
+while a description names who was selected, so 36% of bench slots never appear on a
+plate at all. What the gate cannot close still goes to a person. What it can, it
+writes — and a side carrying `fromHuman` is never restamped, so a verdict you made
+by hand outranks the machine permanently.
+
+`--dry` still suppresses every write, which is what you want when a labelling
+session is open: both writers rewrite the whole of `data/overrides.json`, so the
+loser of that race loses verdicts.
 
 ## Things worth knowing
 

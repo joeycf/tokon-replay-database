@@ -19,13 +19,23 @@
  * 1-of-4 the record had, `Side.characters` is 1..N by contract, and the record
  * simply stays in the bench queue for a later, denser pass.
  *
- * Run: npm run data:extract [-- --limit N] [--dry] [--uncached]
+ * Run: npm run data:extract [-- --limit N] [--dry] [--uncached] [--from-cache] [--plan PATH]
  *
  * `--uncached` restricts the worklist to records with NO frames on disk. The pass
  * is otherwise idempotent but not cheap: `grabWindow` skips a cached window without
  * a request, yet `readCached` still re-OCRs every frame it finds, so a full run
  * re-reads footage that was already read. When the goal is to make NEW records
  * readable, that work is pure waste.
+ *
+ * `--from-cache` is the other half of that: the store already holds every frame's
+ * plate, so the fold, the gate and the write are pure computation over it. No
+ * network, no OCR, no tesseract worker — the whole queue in seconds rather than the
+ * hours a re-read costs. A record with no persisted read is SKIPPED, not fetched:
+ * silently turning a cheap pass into a slow one is how an operator loses an evening.
+ *
+ * `--plan PATH` runs the identical gate and writes what it WOULD publish to PATH as
+ * markdown, touching nothing in data/. The applying run is the same command without
+ * the flag, so what you reviewed is what lands.
  *
  * `--dry` matters more than it looks when a person is labelling at the same time.
  * Both this script and /dev/bench-review read-modify-write the whole of
@@ -61,6 +71,14 @@ const argv = process.argv.slice(2);
 const LIMIT = Number(argv[argv.indexOf('--limit') + 1]) || Infinity;
 const DRY = argv.includes('--dry');
 const UNCACHED = argv.includes('--uncached');
+const FROM_CACHE = argv.includes('--from-cache');
+const PLAN = argv.includes('--plan') ? (argv[argv.indexOf('--plan') + 1] ?? '') : null;
+if (PLAN === '') {
+  console.error('--plan needs a path: --plan cache/tokon/auto-publish-plan.md');
+  process.exit(2);
+}
+/** A planning run reports; it never touches data/. Same gate either way. */
+const WRITE = !DRY && !PLAN;
 
 const read = <T>(p: string): T => JSON.parse(readFileSync(join(DATA, p), 'utf8')) as T;
 const STORE_PATH = join(CACHE, 'extracted.json');
@@ -112,8 +130,11 @@ const persist = (id: string, r: VideoRead): void => {
   writeFileSync(STORE_PATH, JSON.stringify(reads, null, 1));
 };
 
-const worker = await createWorker('eng', undefined, { logger: () => {} });
-await worker.setParameters({
+// A cache-only pass never OCRs anything, so it never needs the worker. Loading the
+// language data in order to not use it is the kind of cost that makes a fast path
+// feel slow for no reason.
+const worker = FROM_CACHE ? null : await createWorker('eng', undefined, { logger: () => {} });
+await worker?.setParameters({
   tessedit_char_whitelist: WHITELIST,
   tessedit_pageseg_mode: '7' as never,
 });
@@ -121,18 +142,40 @@ await worker.setParameters({
 console.log(
   `bench queue: ${queue.length} record(s)` +
     `${UNCACHED ? ` of ${allQueue.length} (no persisted read yet)` : ''}` +
+    `${FROM_CACHE ? '  [cache only — no downloads, no OCR]' : ''}` +
+    `${PLAN ? `  [planning run — writing ${PLAN}, data/ untouched]` : ''}` +
     `${DRY ? '  [dry run — reads persisted, overrides.json untouched]' : ''}\n`,
 );
+
+/** What a planning run reports, one entry per record the gate would publish. */
+type Proposal = {
+  id: string;
+  confidence: number;
+  votes: number;
+  sides: { before: string[]; after: string[]; held: boolean }[];
+};
+const proposals: Proposal[] = [];
 
 let resolved = 0;
 let deferred = 0;
 let tail = 0;
+let unread = 0;
 
 for (const [i, item] of queue.entries()) {
   const v = videos.get(item.id);
   if (!v) continue;
 
-  let r = await readVideo(worker, item.id, v.durationSec, roster);
+  // THE CACHED READ IS THE DENSEST ONE, so re-folding it is not a lesser pass —
+  // `persist` runs after any re-sample, so what is in the store already reflects
+  // the extra windows a starved side bought. Skip rather than fetch: a record with
+  // no persisted read belongs to the downloading pass, not to this one.
+  const cached = FROM_CACHE ? reads[item.id] : undefined;
+  if (FROM_CACHE && !cached?.geom) {
+    unread++;
+    continue;
+  }
+
+  let r = cached ?? (await readVideo(worker!, item.id, v.durationSec, roster));
   let left = foldSide(r.left);
   let right = foldSide(r.right);
   let resampled = false;
@@ -142,17 +185,19 @@ for (const [i, item] of queue.entries()) {
   // exactly when singletons keep arriving — and the HUD count guards against
   // paying for a second pass on a video that had almost no nameplate to read.
   const starved = Math.min(left.saturation, right.saturation) < RESAMPLE_BELOW;
-  if (starved && r.hud >= 12) {
+  if (!cached && starved && r.hud >= 12) {
     await grabBursts(item.id, v.durationSec, 24);
     pruneClips(item.id);
-    r = await readCached(worker, item.id, roster);
+    r = await readCached(worker!, item.id, roster);
     left = foldSide(r.left);
     right = foldSide(r.right);
     resampled = true;
   }
   // AFTER any re-sample, so the store holds the densest read of this video rather
-  // than a first pass that a second pass has already superseded.
-  persist(item.id, r);
+  // than a first pass that a second pass has already superseded. A cached read is
+  // already in the store by definition; rewriting 550 records per iteration to say
+  // nothing new is pure I/O.
+  if (!cached) persist(item.id, r);
 
   const known = v.sides.map((s) => s.provenance.fromTitle[0] ?? '') as [string, string];
   const side = resolveSide(r.left, r.right, known);
@@ -193,27 +238,67 @@ for (const [i, item] of queue.entries()) {
     ...prior.filter((c) => !fold.characters.includes(c)),
   ];
 
-  if (!DRY) {
+  // A SIDE A PERSON HAS ALREADY READ IS NOT THE MACHINE'S TO RESTAMP. `sides` is
+  // replaced wholesale downstream (emit.ts applyOverrides), so writing this side
+  // would relabel a hand verdict as tier `footage` — the work would still be in
+  // `characters` and `fromHuman`, but the corpus would report it as machine output
+  // and the tier tally would quietly move. The other side of the same record is
+  // still fair game; this is per-side, not per-record.
+  //
+  // ASK overrides.json, NOT videos.json. The published record only carries a verdict
+  // once a parse has folded it in, so a side read since the last `data:parse` looks
+  // untouched there — 30 sides drained that same evening were restamped by exactly
+  // that gap. overrides.json is where a verdict lands the moment it is written, so
+  // it is the only source that is never behind.
+  const ovSides = overrides[item.id]?.sides;
+  const humanSide = (k: number) =>
+    ovSides?.[k]?.provenance.fromHuman?.length ? ovSides[k] : undefined;
+  const held = (k: number) =>
+    Boolean(humanSide(k)) || Boolean(v.sides[k]!.provenance.fromHuman?.length);
+  const sides = v.sides.map((s, k) => {
+    // Prefer the override's own copy: it is at least as fresh as the published one.
+    if (held(k)) return humanSide(k) ?? s;
+    const fold = k === 0 ? forFirst : forSecond;
+    const characters = merge(fold, s.characters);
+    return {
+      ...s,
+      characters,
+      provenance: {
+        ...s.provenance,
+        tier: 'footage' as const,
+        tiers: [...s.provenance.tiers, 'footage' as const],
+        fromFootage: fold.characters,
+        confidence: fold.confidence,
+        complete: characters.length >= 4,
+      },
+    };
+  }) as NonNullable<VideoOverride['sides']>;
+
+  // resolvedBy IS THE DEDUPE PRIORITY, not bookkeeping (types/index.ts): only
+  // hand-authored overrides protect a record from a duplicate. Stamping
+  // `extractor` onto a record a person has already touched would strip protection
+  // it earned, so a human-held record keeps its own verdict.
+  const humanHeld = overrides[item.id]?.resolvedBy === 'human' || v.sides.some((_, k) => held(k));
+
+  if (PLAN) {
+    proposals.push({
+      id: item.id,
+      confidence,
+      votes: side.votes,
+      sides: v.sides.map((s, k) => ({
+        before: s.characters,
+        after: sides[k]!.characters,
+        held: held(k),
+      })),
+    });
+  }
+
+  if (WRITE) {
     overrides[item.id] = {
       ...overrides[item.id],
       '//': `bench-completion: read from footage [data:extract ${new Date().toISOString().slice(0, 10)}]`,
-      sides: v.sides.map((s, k) => {
-        const fold = k === 0 ? forFirst : forSecond;
-        const characters = merge(fold, s.characters);
-        return {
-          ...s,
-          characters,
-          provenance: {
-            ...s.provenance,
-            tier: 'footage' as const,
-            tiers: [...s.provenance.tiers, 'footage' as const],
-            fromFootage: fold.characters,
-            confidence: fold.confidence,
-            complete: characters.length >= 4,
-          },
-        };
-      }) as VideoOverride['sides'],
-      resolvedBy: 'extractor',
+      sides,
+      resolvedBy: humanHeld ? 'human' : 'extractor',
       confidence,
       sideVotes: side.votes,
     };
@@ -221,11 +306,55 @@ for (const [i, item] of queue.entries()) {
   }
 }
 
-await worker.terminate();
+await worker?.terminate();
+
+// THE PLANNING ARTIFACT. Written with the same numbers the applying run uses, so
+// reviewing this and then re-running without --plan cannot drift: the only
+// difference between the two passes is whether overrides.json is opened.
+if (PLAN) {
+  const sidesClosed = proposals.flatMap((p) => p.sides).filter((s) => s.after.length >= 4 && s.before.length < 4).length; // prettier-ignore
+  const slots = proposals.flatMap((p) => p.sides).reduce((n, s) => n + (s.after.length - s.before.length), 0); // prettier-ignore
+  const heldSides = proposals.flatMap((p) => p.sides).filter((s) => s.held).length;
+  const closedRecords = proposals.filter((p) => p.sides.every((s) => s.after.length >= 4)).length;
+
+  const lines = [
+    `# Auto-publish plan — ${new Date().toISOString().slice(0, 10)}`,
+    '',
+    `Gate: both unions non-empty, min confidence >= ${AUTO_ACCEPT}, attribution decided,`,
+    'and the title-named fighter present in its own side.',
+    '',
+    `- records the gate would publish: **${proposals.length}**`,
+    `- fighter slots filled: **${slots}**`,
+    `- sides reaching 4/4: **${sidesClosed}**`,
+    `- records leaving the bench queue: **${closedRecords}**`,
+    `- sides left untouched because a person already read them: **${heldSides}**`,
+    `- deferred to review: ${deferred}`,
+    ...(unread ? [`- skipped, no persisted read: ${unread}`] : []),
+    '',
+    '| record | conf | side | before | after |',
+    '| --- | --- | --- | --- | --- |',
+  ];
+  for (const p of proposals) {
+    p.sides.forEach((s, k) => {
+      const change = s.held ? 'HELD (human)' : s.after.join('+') || '—';
+      lines.push(
+        `| ${k === 0 ? p.id : ''} | ${k === 0 ? p.confidence.toFixed(2) : ''} | ${k + 1} ` +
+          `| ${s.before.join('+') || '—'} | ${change} |`,
+      );
+    });
+  }
+  writeFileSync(join(ROOT, PLAN), `${lines.join('\n')}\n`, 'utf8');
+  console.log(`\n  plan written: ${PLAN}`);
+  console.log(
+    `  ${proposals.length} record(s) · ${slots} slot(s) · ${sidesClosed} side(s) reaching 4/4` +
+      `${heldSides ? ` · ${heldSides} side(s) held for the person who read them` : ''}`,
+  );
+}
 
 console.log(
   `\n  resolved ${resolved} · deferred to review ${deferred}` +
-    `${DRY ? '  (nothing written)' : ''}`,
+    `${unread ? ` · skipped (no persisted read) ${unread}` : ''}` +
+    `${WRITE ? '' : '  (nothing written)'}`,
 );
 // DECISION #4'S TRIGGER, COUNTED RATHER THAN GUESSED. A side read confidently
 // and still short of four is a fighter who never took point — the case a
@@ -234,5 +363,5 @@ console.log(
   `  never-enters tail: ${tail} record(s) resolved but short of four —\n` +
     `  the portrait tier's trigger is ~10 sides/week sustained.\n`,
 );
-if (!DRY && resolved) console.log('  run `npm run data:parse` to fold these into data/\n');
+if (WRITE && resolved) console.log('  run `npm run data:parse` to fold these into data/\n');
 export {};

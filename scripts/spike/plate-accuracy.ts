@@ -1,7 +1,7 @@
 /**
  * Score the reader against human plate readings.
  *
- * The sample is deliberately NOT representative — rejected plates are 15.9% of
+ * The sample is deliberately NOT representative — rejected plates are ~20% of
  * the population and half the sample, and the five channels are drawn evenly
  * although one uploader supplies most of the corpus. Both distortions are
  * chosen: they buy resolution exactly where the open questions are. Both are
@@ -77,7 +77,11 @@ const channelOf = new Map(videos.map((v) => [v.id, v.intake]));
 // ── population weights, from the full extraction ────────────────────────────
 const store = JSON.parse(readFileSync(join(CACHE, 'extracted.json'), 'utf8')) as Record<
   string,
-  { hud: number; left: { sec: number; id: string | null }[]; right: { sec: number; id: string | null }[] }
+  {
+    hud: number;
+    left: { sec: number; id: string | null }[];
+    right: { sec: number; id: string | null }[];
+  }
 >;
 let popResolved = 0;
 let popRejected = 0;
@@ -106,7 +110,7 @@ function wilson(k: number, n: number): [number, number] {
   const p = k / n;
   const d = 1 + (z * z) / n;
   const c = p + (z * z) / (2 * n);
-  const s = z * Math.sqrt(p * (1 - p) / n + (z * z) / (4 * n * n));
+  const s = z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n));
   return [Math.max(0, (c - s) / d), Math.min(1, (c + s) / d)];
 }
 const pct = (x: number) => `${(100 * x).toFixed(1)}%`;
@@ -163,7 +167,9 @@ if (movedIn) {
   );
 }
 
-console.log(`plate accuracy — ${labelledFrames}/${sample.length} frames labelled, ${js.length} plate judgements\n`);
+console.log(
+  `plate accuracy — ${labelledFrames}/${sample.length} frames labelled, ${js.length} plate judgements\n`,
+);
 
 // ── 1. precision on resolved plates ─────────────────────────────────────────
 const resolved = js.filter((j) => j.stratum !== 'no-hud' && j.reader !== null);
@@ -181,7 +187,9 @@ if (humanBlank.length) {
 const rejected = js.filter((j) => j.stratum !== 'no-hud' && j.reader === null);
 const recoverable = rejected.filter((j) => j.human !== null);
 console.log('\n── of plates the reader REJECTED, how many can a HUMAN read? ────────\n');
-console.log(`  ${recoverable.length}/${rejected.length}   ${ci(recoverable.length, rejected.length)}`);
+console.log(
+  `  ${recoverable.length}/${rejected.length}   ${ci(recoverable.length, rejected.length)}`,
+);
 console.log(
   '  HUMAN-READABLE IS NOT MACHINE-RECOVERABLE, and this line was mislabelled\n' +
     '  "headroom" until the sweep said otherwise. A person reads the plate in the\n' +
@@ -218,8 +226,12 @@ console.log('\n── population estimate (weighted) ─────────
 const precision = resolved.length ? rightOnes.length / resolved.length : 0;
 const headroom = rejected.length ? recoverable.length / rejected.length : 0;
 const overall = pResolved * precision + (1 - pResolved) * (1 - headroom);
-console.log(`  population is ${pct(pResolved)} resolved / ${pct(1 - pResolved)} rejected (${popTotal} plates)`);
-console.log(`  sample is      ${pct(resolved.length / Math.max(1, resolved.length + rejected.length))} resolved — over-sampled, hence this reweighting`);
+console.log(
+  `  population is ${pct(pResolved)} resolved / ${pct(1 - pResolved)} rejected (${popTotal} plates)`,
+);
+console.log(
+  `  sample is      ${pct(resolved.length / Math.max(1, resolved.length + rejected.length))} resolved — over-sampled, hence this reweighting`,
+);
 console.log(
   `\n  plate-level agreement with a human, weighted: ${pct(overall)}\n` +
     `    = ${pct(pResolved)} × ${pct(precision)} precision  +  ${pct(1 - pResolved)} × ${pct(1 - headroom)} correctly-rejected`,

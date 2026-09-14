@@ -520,10 +520,16 @@ export const BURST_GAP = 3;
  *  ground-truth sides (scripts/spike/accuracy.ts) is degenerate — member
  *  precision is 99.5% at 0.01 and 100.0% from 0.75 up, and never falls again:
  *
- *      thresh   accepted   precision   both-exact   coverage
+ *      thresh   accepted   precision   side-exact   coverage
  *      0.01      38/41       99.5%       17.1%       92.7%
  *      0.75      30/41      100.0%       16.7%       73.2%
  *      0.90      14/41      100.0%        0.0%       34.1%
+ *
+ *  THAT COLUMN IS PER SIDE, NOT PER RECORD. accuracy.ts computes it as
+ *  `pct(ex, acc.length * 2)`, so it is the share of the 82 SIDES whose union
+ *  matched exactly; both-sides-exact is roughly half of it (7.3% at the gate).
+ *  The header read `both-exact` until 2026-09-14 and anyone pricing the tier off
+ *  this table alone was reading it ~2× too good.
  *
  *  Precision is already carried by MEMBER_MIN, which gates every member before
  *  `min` ever sees it, so the threshold buys nothing above 0.75 and costs 39
@@ -533,7 +539,15 @@ export const BURST_GAP = 3;
  *  as the threshold rises, because a side read at confidence 1.00 is typically a
  *  side with ONE member witnessed many times, and a one-member union is never
  *  right about a four-fighter bench. Raising the gate does not buy caution here;
- *  it selects for under-reading. 0.75 is the last point that is free. */
+ *  it selects for under-reading. 0.75 is the last point that is free.
+ *
+ *  AND SIDE-EXACT IS NOT AN ARGUMENT ABOUT TRUST. It is completeness: how often
+ *  the union is the whole bench. It was quoted for a year as the reason not to
+ *  publish, which is a category error — 36% of bench slots never appear on a
+ *  nameplate at all, because the plate names who is ON POINT while descriptions
+ *  name who was SELECTED. The publishing question is precision, and precision at
+ *  this gate is 100% (125/125 blind plate labels; 136/136 machine unions a subset
+ *  of the human union, zero invented members). */
 export const AUTO_ACCEPT = 0.75;
 
 /** Below this saturation, the side has not stopped discovering new fighters and

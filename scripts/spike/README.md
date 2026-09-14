@@ -258,14 +258,18 @@ against the description.
 
 ## The threshold curve is degenerate, so 0.90 does not survive
 
-|   thresh | accepted |  precision | both-exact |  coverage |
+|   thresh | accepted |  precision | side-exact |  coverage |
 | -------: | -------: | ---------: | ---------: | --------: |
 |     0.60 |    41/41 |      99.5% |      15.9% |      100% |
 | **0.75** |    32/41 | **100.0%** |      15.6% | **78.0%** |
 |     0.90 |    16/41 |     100.0% |   **0.0%** |     39.0% |
 
+That column is **per side, not per record** — `accuracy.ts` divides by
+`acc.length * 2`. Both-sides-exact is about half of it (7.3% at the gate). It read
+`both-exact` until 2026-09-14, which made the tier look twice as complete as it is.
+
 Precision never falls — `MEMBER_MIN` already carries it. And the gate
-**anti-selects for completeness**: both-exact goes to 0.0% at 0.90, because a
+**anti-selects for completeness**: side-exact goes to 0.0% at 0.90, because a
 side at confidence 1.00 is usually one member witnessed many times, and a
 one-member union is never right about a four-fighter bench.
 

@@ -1,7 +1,7 @@
 /**
  * THE MAINTENANCE RITUAL, AS ONE COMMAND.
  *
- * Run: npm run data:catchup [-- --no-extract] [-- --limit N]
+ * Run: npm run data:catchup [-- --no-extract] [-- --limit N] [-- --dry]
  *
  * WHY THIS EXISTS. Keeping this corpus honest takes four steps in a fixed order,
  * and between 2026-08-20 and 2026-08-24 the last two were simply not run. Nobody
@@ -18,11 +18,21 @@
  * this arrives as one or two records spread across four. Pairing fetch with
  * parse in one command is what makes that unhittable by accident.
  *
- * WHAT IT WILL NOT DO. It never drains to the site. Extraction runs `--dry`:
- * reads and frames are persisted for the labelling UI, `data/overrides.json` is
- * left alone. Publishing a fighter to a side stays a human decision made in
- * /dev/bench-review, because the reader's own numbers say it closes a side
- * outright 15.9% of the time — it is a head start, not an answer.
+ * WHAT IT PUBLISHES, AND WHY THAT CHANGED. Extraction now writes what its gate
+ * accepts. It used to run `--dry` unconditionally on the argument that the reader
+ * "closes a side outright only 15.9% of the time" — but 15.9% is side-exact, a
+ * COMPLETENESS number, and it was being used to argue about TRUST. The precision
+ * measurements say the opposite: 125/125 on blind human plate labels, 136/136
+ * machine unions a subset of the human union with zero invented members, and every
+ * one of 143 machine-asserted members that a person independently picked was
+ * confirmed. Meanwhile the two-frame human reading of the same side agrees with
+ * itself 66.3% of the time. The reader is ~100% precise and ~16% complete, and
+ * only the first of those is an argument about publishing.
+ *
+ * So the gate publishes, and a person's verdict still outranks it: a side carrying
+ * `fromHuman` is never restamped, and `/dev/bench-review` replaces a footage side
+ * wholesale whenever someone reads it. `--dry` still suppresses all writing for a
+ * pass run alongside a labelling session, which is the race it was really for.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -36,6 +46,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data');
 const argv = process.argv.slice(2);
 const NO_EXTRACT = argv.includes('--no-extract');
+const DRY = argv.includes('--dry');
 const LIMIT = argv[argv.indexOf('--limit') + 1];
 
 /** Roughly what one video costs end to end — download, frame grab, OCR. Measured
@@ -62,7 +73,7 @@ function step(label: string, cmd: string, args: string[]): void {
 step('fetch — refresh raw/ from YouTube', 'npm', ['run', 'data:fetch']);
 step('parse — rebuild the substrate and the queues', 'npm', ['run', 'data:parse']);
 
-// ── 3: read footage for anything new, without publishing it ─────────────────
+// ── 3: read footage for anything new, publishing what the gate accepts ──────
 const queue = read<BenchQueueItem[]>('bench-queue.json');
 const storePath = join(ROOT, 'cache', 'tokon', 'extracted.json');
 const persisted = existsSync(storePath)
@@ -84,14 +95,23 @@ if (NO_EXTRACT) {
       `${LIMIT ? ` (limited to ${LIMIT})` : ''}, about ${eta.toFixed(1)}h at ~${MINUTES_PER_VIDEO} min each.`,
   );
   console.log('   Local-only and resumable. Ctrl-C is safe: each video flushes as it finishes.');
-  step('extract — read the HUD, persist reads, publish nothing', 'npm', [
-    'run',
-    'data:extract',
-    '--',
-    '--dry',
-    '--uncached',
-    ...(LIMIT ? ['--limit', LIMIT] : []),
-  ]);
+  step(
+    DRY
+      ? 'extract — read the HUD, persist reads, publish nothing'
+      : 'extract — read the HUD, publish what the gate accepts',
+    'npm',
+    [
+      'run',
+      'data:extract',
+      '--',
+      // PASSED THROUGH, NOT HARD-CODED. A pass run alongside a labelling session
+      // still needs to keep its hands off overrides.json — both writers rewrite the
+      // whole file, so the loser of that race loses verdicts.
+      ...(DRY ? ['--dry'] : []),
+      '--uncached',
+      ...(LIMIT ? ['--limit', LIMIT] : []),
+    ],
+  );
 }
 
 // ── 4: say exactly what is left, and what only a person can do ──────────────
@@ -136,7 +156,8 @@ console.log('');
 if (short.length) {
   console.log('  → npm run dev, then /dev/bench-review');
   console.log('    The reader supplies the point fighter and a candidate order; the bench');
-  console.log('    is yours to read off the portrait cluster. Nothing here is auto-published.');
+  console.log('    is yours to read off the portrait cluster. What is left here is what the');
+  console.log('    footage gate would not take — a nameplate only ever names who is on point.');
 } else {
   console.log('  → nothing. Every side is complete. 🎉');
 }
