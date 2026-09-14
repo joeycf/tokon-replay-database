@@ -5,23 +5,23 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-08-28)
-  The newest patch in scripts/patches.ts is 2026-08-28, 16 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
+  The newest patch in scripts/patches.ts is 2026-08-28, 17 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
-_Generated 2026-09-13T12:52:02.629Z_
+_Generated 2026-09-14T01:52:26.767Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 180 | 180 | 100.0% |
+| highLevelReplays | 183 | 183 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 810 | 113 | 14.0% |
-| replaysHub | 229 | 224 | 97.8% |
-| fightingStationX | 2826 | 179 | 6.3% |
+| hadoukenReplays | 812 | 115 | 14.2% |
+| replaysHub | 232 | 227 | 97.8% |
+| fightingStationX | 2831 | 182 | 6.4% |
 | fgcReplaysHub | 2646 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 45 | 11 | 24.4% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **845** | |
+| **total** | | **856** | |
 
 ## Index intakes
 
@@ -36,28 +36,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 1690 sides got its characters.
+How every one of the 1712 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 496 | 29.3% |
-| description | 449 | 26.6% |
-| index | 170 | 10.1% |
+| title | 479 | 28.0% |
+| description | 455 | 26.6% |
+| index | 170 | 9.9% |
 | footage | 32 | 1.9% |
-| human | 519 | 30.7% |
+| human | 552 | 32.2% |
 | review | 24 | 1.4% |
 
-- complete (4/4): **1194/1690** (70.7%)
-- oversize (>4, mid-set team change): **7** — counted in usage, excluded from pairing
-- bench alignment: handle 426 · character-subset 26 · ambiguous 4
-- title slot order: handle-first 1229 · chars-first 111 · parallel-lists 158
+- complete (4/4): **1233/1712** (72.0%)
+- oversize (>4, mid-set team change): **8** — counted in usage, excluded from pairing
+- bench alignment: handle 431 · character-subset 27 · ambiguous 4
+- title slot order: handle-first 1243 · chars-first 113 · parallel-lists 164
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,22 +65,23 @@ How every one of the 1690 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 494 | 29.2% |
+| 1 | 477 | 27.9% |
 | 2 | 2 | 0.1% |
-| 4 | 1187 | 70.2% |
+| 4 | 1225 | 71.6% |
 | 5 _(mid-set change)_ | 6 | 0.4% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
+| 7 _(mid-set change)_ | 1 | 0.1% |
 
-- **496 side(s) awaiting a drain** across 248 record(s) — oldest published **28 day(s)** ago
+- **479 side(s) awaiting a drain** across 255 record(s) — oldest published **29 day(s)** ago
 
-> The bench queue is at 248 (nudge threshold 40).
+> The bench queue is at 255 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **248**
+- bench queue (published, incomplete): **255**
 
 ## Player identity
 
@@ -143,11 +144,11 @@ No disagreements on that sweep.
 | reason | count |
 | --- | ---: |
 | other-game | 4027 |
-| not-tokon | 1093 |
+| not-tokon | 1094 |
 | pre-launch | 663 |
 | not-a-match | 139 |
 | not-an-event | 34 |
-| short-duration | 25 |
+| short-duration | 26 |
 | char-unresolved | 14 |
 | no-vs-title | 6 |
 | bench-conflict | 1 |
