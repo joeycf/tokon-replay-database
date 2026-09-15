@@ -41117,5 +41117,69 @@
       }
     ],
     "resolvedBy": "human"
+  },
+  "Rt6A0-Kq79Q": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-15]. THE TITLE MIS-ATTRIBUTES CARNAGE. It reads \"KINGAFRICA (#2 Ranked Captain America) vs ODYSSEUS (Carnage)\", but the handle strips at 62s put KINGAFRICA on the RIGHT and ODYSSEUS on the LEFT, and carnage witnesses on the RIGHT plate (145-385s) beside captain-america (62-940s) — i.e. on Kingafrica's team. Odysseus never fields it. buildBenchList placed the sides by matching carnage to the title, so it inverted them and offered the reviewer Odysseus's bench as Kingafrica's. Odysseus keeps fromTitle [] because the title states nothing true about that side; leaving [\"carnage\"] would fail its own control forever.",
+    "sides": [
+      {
+        "player": "kingafrica",
+        "handle": "Kingafrica",
+        "characters": [
+          "captain-america",
+          "carnage",
+          "magneto",
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "captain-america"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "captain-america",
+            "carnage",
+            "magneto",
+            "spider-man"
+          ],
+          "humanScreenSide": "R"
+        }
+      },
+      {
+        "player": "odysseus",
+        "handle": "Odysseus",
+        "characters": [
+          "wolverine",
+          "spider-man",
+          "storm",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "wolverine",
+            "spider-man",
+            "storm",
+            "green-goblin"
+          ],
+          "humanScreenSide": "L"
+        }
+      }
+    ],
+    "resolvedBy": "human"
   }
 }
