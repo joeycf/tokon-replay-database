@@ -291,10 +291,18 @@ Open `https://<machine>.ts.net/tokon/dev?k=<token>` once per device: that sets a
 cookie and redirects, and every later request carries it — including the `/dev`
 index's own queue counts, which fail silently without it.
 
-On WSL2, `tailscaled` needs userspace networking
-(`sudo tailscaled --tun=userspace-networking --socks5-server=localhost:1055 &`),
-and `tailscale serve` is what makes inbound work in that mode. The fallback is
-Tailscale on the Windows host plus
+`tailscale serve` is not optional here: the dev server binds `127.0.0.1`, so the
+tailnet cannot reach the port directly — `serve` terminates in the daemon and
+proxies to localhost, which is the whole reason the bind and the tunnel coexist.
+
+On WSL2 the packaged `tailscaled` installs as a systemd unit and starts itself,
+so there is nothing to run by hand; `sudo tailscale up` is the only step. Two
+things to check before reaching for workarounds, because the usual WSL2 advice
+assumes both are missing: `systemctl is-active tailscaled`, and `ls /dev/net/tun`.
+Only if the unit is absent or there is no TUN device does the daemon need
+`sudo tailscaled --tun=userspace-networking --socks5-server=localhost:1055 &`,
+and running that while the service is up just collides on its socket. Failing
+both, run Tailscale on the Windows host and bridge with
 `netsh interface portproxy add v4tov4 listenport=3000 connectaddress=<wsl-ip> connectport=3000`,
 remembering the WSL IP changes on reboot.
 
