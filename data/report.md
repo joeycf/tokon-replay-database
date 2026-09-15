@@ -7,21 +7,21 @@
 - **patch-table** (stale-patch-table, due 2026-08-28)
   The newest patch in scripts/patches.ts is 2026-08-28, 18 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
-_Generated 2026-09-15T12:54:38.165Z_
+_Generated 2026-09-15T18:51:15.959Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 190 | 190 | 100.0% |
+| highLevelReplays | 193 | 193 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 814 | 117 | 14.4% |
-| replaysHub | 241 | 236 | 97.9% |
-| fightingStationX | 2845 | 189 | 6.6% |
+| hadoukenReplays | 815 | 118 | 14.5% |
+| replaysHub | 243 | 238 | 97.9% |
+| fightingStationX | 2848 | 190 | 6.7% |
 | fgcReplaysHub | 2650 | 40 | 1.5% |
-| marvelTokonYT _(events only)_ | 45 | 11 | 24.4% |
+| marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **881** | |
+| **total** | | **888** | |
 
 ## Index intakes
 
@@ -36,28 +36,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 1762 sides got its characters.
+How every one of the 1776 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 186 | 10.6% |
-| description | 467 | 26.5% |
+| title | 158 | 8.9% |
+| description | 473 | 26.6% |
 | index | 170 | 9.6% |
-| footage | 319 | 18.1% |
-| human | 596 | 33.8% |
+| footage | 277 | 15.6% |
+| human | 674 | 38.0% |
 | review | 24 | 1.4% |
 
-- complete (4/4): **1330/1762** (75.5%)
+- complete (4/4): **1414/1776** (79.6%)
 - oversize (>4, mid-set team change): **8** — counted in usage, excluded from pairing
-- bench alignment: ambiguous 5 · handle 446 · character-subset 27
-- title slot order: handle-first 1277 · chars-first 115 · parallel-lists 178
+- bench alignment: handle 451 · ambiguous 5 · character-subset 27
+- title slot order: handle-first 1288 · chars-first 116 · parallel-lists 180
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,24 +65,24 @@ How every one of the 1762 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 259 | 14.7% |
-| 2 | 93 | 5.3% |
-| 3 | 80 | 4.5% |
-| 4 | 1322 | 75.0% |
+| 1 | 214 | 12.0% |
+| 2 | 81 | 4.6% |
+| 3 | 67 | 3.8% |
+| 4 | 1406 | 79.2% |
 | 5 _(mid-set change)_ | 6 | 0.3% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.1% |
 
-- **432 side(s) awaiting a drain** across 250 record(s) — oldest published **30 day(s)** ago
+- **362 side(s) awaiting a drain** across 220 record(s) — oldest published **30 day(s)** ago
 
-> The bench queue is at 250 (nudge threshold 40).
+> The bench queue is at 220 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **250**
+- bench queue (published, incomplete): **220**
 
 ## Player identity
 
@@ -143,20 +143,20 @@ No disagreements on that sweep.
 | other-game | 4031 |
 | not-tokon | 1096 |
 | pre-launch | 663 |
-| not-a-match | 143 |
-| not-an-event | 34 |
-| short-duration | 27 |
+| not-a-match | 144 |
+| not-an-event | 35 |
+| short-duration | 28 |
 | char-unresolved | 14 |
 | no-vs-title | 6 |
 | bench-conflict | 1 |
 
-- `marvelTokonYT` events-only gate: **34** upload(s) carried no known event brand.
+- `marvelTokonYT` events-only gate: **35** upload(s) carried no known event brand.
+  - MARVEL Tokon ▰ Save The Queen (Magik) vs FilipinoChamp (Black Phanter) High Level Match
   - MARVEL Tokon ▰ Moku (Magneto) vs Skinoff (Captain America) - High Level Match
   - UNOKOA'S INSANE DUO | Loki & Blade | Marvel Tokon
   - MARVEL Tokon ▰ Bleed - INSANE DUO Black Panther x Storm ▰ High Level Match
   - MARVEL Tokon ▰ MrChupy Demoniac CARNAGE ▰ High Level Match
-  - MARVEL Tokon ▰ ImnoDeag (Spider-Man) vs Nieve (Champion) ▰ High Level Match
-  - …and 29 more
+  - …and 30 more
 
 ## Unmatched text in character slots
 
