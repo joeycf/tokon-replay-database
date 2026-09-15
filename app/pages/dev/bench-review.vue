@@ -249,6 +249,19 @@
               use frame A anyway
             </button>
           </p>
+          <p
+            v-if="refused"
+            class="warn"
+          >
+            <strong>Refused — nothing was written.</strong><br />
+            {{ refused }}<br />
+            <span class="dim">
+              When the two frames are far apart, check the point fighter in each header: if they
+              name the two DIFFERENT players, the quadrant changed hands between games and the
+              frames belong to different sides. Step frame B back into the same game as frame A, or
+              use frame A alone.
+            </span>
+          </p>
           <button
             class="save"
             :disabled="!ready || busy"
@@ -323,6 +336,9 @@ const busy = ref(false);
 const sideIndex = ref<number | null>(null);
 const disagree = ref<{ a: string[]; b: string[] } | null>(null);
 const titleMissing = ref<string[] | null>(null);
+/** A refusal the server explained — shown verbatim, because the alternative is a
+ *  button that looks broken. */
+const refused = ref<string | null>(null);
 
 /** Three diamonds when the plate named the point fighter; the bust as a fourth
  *  when it did not. `◆` is the bust so the row cannot be mistaken for a diamond. */
@@ -395,6 +411,7 @@ function loadPicks(): void {
   const it = cur.value;
   disagree.value = null;
   titleMissing.value = null;
+  refused.value = null;
   const blank = (): string[][] => [
     new Array<string>(slotsFor(0).length).fill(''),
     new Array<string>(slotsFor(1).length).fill(''),
@@ -437,6 +454,7 @@ async function saveKeepingTitled(): Promise<void> {
 async function save(force: boolean, union = false, keepTitled = false): Promise<void> {
   if (!ready.value || busy.value) return;
   busy.value = true;
+  refused.value = null;
   try {
     const r = await $fetch<{
       ok: boolean;
@@ -444,6 +462,8 @@ async function save(force: boolean, union = false, keepTitled = false): Promise<
       a?: string[];
       b?: string[];
       titleMissing?: string[];
+      unionSlip?: boolean;
+      message?: string;
     }>('/api/dev/bench-review', {
       method: 'POST',
       body: {
@@ -464,11 +484,24 @@ async function save(force: boolean, union = false, keepTitled = false): Promise<
     if (r.ok) {
       disagree.value = null;
       titleMissing.value = null;
+      refused.value = null;
       await refresh();
       if (cursor.value < items.value.length - 1) cursor.value++;
     } else if (r.disagree) {
       disagree.value = { a: r.a ?? [], b: r.b ?? [] };
+    } else {
+      // EVERY OTHER REFUSAL LANDS HERE, AND IT MUST SAY SOMETHING. The union-slip
+      // guard answers `{ ok: false, unionSlip, message }` and had no branch at all,
+      // so clicking "both — the team changed mid-set" on a side-swapped set did
+      // nothing visible: the click was refused, correctly, and silently. A guard
+      // nobody can see is indistinguishable from a broken button.
+      refused.value = r.message ?? 'the server refused this read and gave no reason';
     }
+  } catch (e) {
+    // A 400 or a 409 REJECTS rather than resolving, so without this the same click
+    // vanishes into an unhandled rejection. A stale cursor (409) is the likely one.
+    const msg = (e as { data?: { message?: string }; message?: string })?.data?.message;
+    refused.value = msg ?? (e as Error)?.message ?? 'the request failed before the server answered';
   } finally {
     busy.value = false;
   }
