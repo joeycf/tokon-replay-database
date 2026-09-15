@@ -269,6 +269,40 @@ route it uses guard on `import.meta.dev` and 404 otherwise,
 to them (the nav entry is compiled out of production builds). They read and write
 the committed JSON directly — there is no database.
 
+Note what that guard is not. `import.meta.dev` is a build-mode constant, true for
+every caller of a dev server wherever they are, and these routes write straight
+into tracked files. What keeps them private is the engine's `devServer.host`
+(v0.15.0+): the dev server binds `127.0.0.1`, so nothing off this machine can
+reach them.
+
+### Reviewing from another machine
+
+The frame cache is 58 GB and gitignored, so the tooling cannot move to another
+machine or a deployment — but it can be reached from one. Point a tunnel at
+localhost and set a token, which the engine's `dev-guard` middleware then
+requires on `/dev` and `/api/dev`:
+
+```bash
+tailscale serve --bg http://localhost:3000   # inbound proxy; terminates locally, so the loopback bind is not in the way
+DEV_REVIEW_TOKEN=$(openssl rand -hex 16) npm run dev
+```
+
+Open `https://<machine>.ts.net/tokon/dev?k=<token>` once per device: that sets a
+cookie and redirects, and every later request carries it — including the `/dev`
+index's own queue counts, which fail silently without it.
+
+On WSL2, `tailscaled` needs userspace networking
+(`sudo tailscaled --tun=userspace-networking --socks5-server=localhost:1055 &`),
+and `tailscale serve` is what makes inbound work in that mode. The fallback is
+Tailscale on the Windows host plus
+`netsh interface portproxy add v4tov4 listenport=3000 connectaddress=<wsl-ip> connectport=3000`,
+remembering the WSL IP changes on reboot.
+
+**Do not review and run the pipeline at the same time.** Both rewrite the whole
+of `data/overrides.json` with no locking, so whichever finishes second wins and
+the other's verdicts are gone. `npm run data:catchup -- --dry` exists for exactly
+this — see the note under the maintenance ritual above.
+
 | page                   | what it's for                                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/dev/source-review`   | **Plate reading.** Label the left and right nameplates on each sampled frame — no title, no handles, nothing to anchor on → `data/plate-labels.json` |
