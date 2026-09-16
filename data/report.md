@@ -5,23 +5,23 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-08-28)
-  The newest patch in scripts/patches.ts is 2026-08-28, 18 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
+  The newest patch in scripts/patches.ts is 2026-08-28, 19 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, that is fine: this warning costs one command.
 
-_Generated 2026-09-15T18:51:15.959Z_
+_Generated 2026-09-16T12:51:15.867Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 193 | 193 | 100.0% |
+| highLevelReplays | 195 | 195 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 815 | 118 | 14.5% |
-| replaysHub | 243 | 238 | 97.9% |
-| fightingStationX | 2848 | 190 | 6.7% |
-| fgcReplaysHub | 2650 | 40 | 1.5% |
+| hadoukenReplays | 816 | 119 | 14.6% |
+| replaysHub | 247 | 241 | 97.6% |
+| fightingStationX | 2854 | 194 | 6.8% |
+| fgcReplaysHub | 2653 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **888** | |
+| **total** | | **898** | |
 
 ## Index intakes
 
@@ -36,28 +36,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor did not move: the catalogue has taken no new Tōkon entry since_
-_the last pull — quieter still, and equally ordinary._
+_The cursor still advanced — a quiet day is the ordinary case here, not a_
+_failed one._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 1776 sides got its characters.
+How every one of the 1796 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 158 | 8.9% |
-| description | 473 | 26.6% |
-| index | 170 | 9.6% |
-| footage | 277 | 15.6% |
-| human | 674 | 38.0% |
-| review | 24 | 1.4% |
+| title | 170 | 9.5% |
+| description | 477 | 26.6% |
+| index | 170 | 9.5% |
+| footage | 273 | 15.2% |
+| human | 682 | 38.0% |
+| review | 24 | 1.3% |
 
-- complete (4/4): **1414/1776** (79.6%)
+- complete (4/4): **1426/1796** (79.4%)
 - oversize (>4, mid-set team change): **8** — counted in usage, excluded from pairing
-- bench alignment: handle 451 · ambiguous 5 · character-subset 27
-- title slot order: handle-first 1288 · chars-first 116 · parallel-lists 180
+- bench alignment: handle 456 · ambiguous 5 · character-subset 27
+- title slot order: handle-first 1299 · chars-first 117 · parallel-lists 188
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,15 +65,15 @@ How every one of the 1776 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 214 | 12.0% |
-| 2 | 81 | 4.6% |
-| 3 | 67 | 3.8% |
-| 4 | 1406 | 79.2% |
+| 1 | 226 | 12.6% |
+| 2 | 78 | 4.3% |
+| 3 | 66 | 3.7% |
+| 4 | 1418 | 79.0% |
 | 5 _(mid-set change)_ | 6 | 0.3% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.1% |
 
-- **362 side(s) awaiting a drain** across 220 record(s) — oldest published **30 day(s)** ago
+- **370 side(s) awaiting a drain** across 220 record(s) — oldest published **31 day(s)** ago
 
 > The bench queue is at 220 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
@@ -140,10 +140,10 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4031 |
-| not-tokon | 1096 |
+| other-game | 4034 |
+| not-tokon | 1098 |
 | pre-launch | 663 |
-| not-a-match | 144 |
+| not-a-match | 145 |
 | not-an-event | 35 |
 | short-duration | 28 |
 | char-unresolved | 14 |
@@ -174,7 +174,7 @@ garbled game name gets a human verdict instead of a quiet player page.
 
 | handle | records | example |
 | --- | ---: | --- |
-| `TOKON PLAYER` | 5 | A5I1zx7zStM |
+| `TOKON PLAYER` | 6 | 9G-yCsKqlDI |
 | `TOKON` | 4 | 4AIZDJ4nvSE |
 | `The Tokon Texan` | 2 | 26SqJz0Xlpo |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
