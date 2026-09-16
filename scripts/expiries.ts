@@ -29,7 +29,7 @@
  * Run: npm run data:expiries   (tsx scripts/expiries.ts --check)
  */
 
-import { PATCHES, SEASONS } from './patches';
+import { CONFIRMED_QUIET_THROUGH, PATCHES, SEASONS } from './patches';
 import type { Expiry } from '../types/index';
 
 /**
@@ -112,7 +112,10 @@ const daysBetween = (a: string, b: string) =>
   Math.floor((Date.parse(b) - Date.parse(a)) / 86_400_000);
 
 /** Everything whose date has now passed. Empty is the happy path. */
-export function dueExpiries(asOf: string = today()): Expiry[] {
+export function dueExpiries(
+  asOf: string = today(),
+  quietThrough: string = CONFIRMED_QUIET_THROUGH,
+): Expiry[] {
   const due: Expiry[] = [];
 
   for (const u of UNRELEASED) {
@@ -153,17 +156,31 @@ export function dueExpiries(asOf: string = today()): Expiry[] {
   // a patch missing from the table does not fail — it silently files every
   // replay since under the previous token, which renders, filters and passes
   // every count assertion while being wrong.
+  //
+  // Counted from the later of the newest patch and the last confirmed-quiet
+  // feed read (CONFIRMED_QUIET_THROUGH in scripts/patches.ts). A quiet date that
+  // is malformed or in the future is IGNORED rather than trusted: its age would
+  // be NaN or negative, both compare false against the threshold, and the alarm
+  // would never fire again.
   const newest = PATCHES.at(-1);
-  if (newest && daysBetween(newest.start, asOf) > STALE_PATCH_DAYS) {
+  const quiet = /^\d{4}-\d{2}-\d{2}$/.test(quietThrough) && quietThrough <= asOf ? quietThrough : '';
+  const since = newest && quiet > newest.start ? quiet : newest?.start;
+  if (newest && since && daysBetween(since, asOf) > STALE_PATCH_DAYS) {
+    const age = daysBetween(since, asOf);
     due.push({
       kind: 'stale-patch-table',
       id: 'patch-table',
-      date: newest.start,
+      date: since,
       action:
-        `The newest patch in scripts/patches.ts is ${newest.version}, ${daysBetween(newest.start, asOf)} days old. ` +
+        (since === newest.start
+          ? `The newest patch in scripts/patches.ts is ${newest.version}, ${age} days old. `
+          : `The newest patch in scripts/patches.ts is ${newest.version}, and the feed was last ` +
+            `confirmed quiet ${since}, ${age} days ago. `) +
         `Run \`npm run data:patch-check\` against the vendor's news feed. If a patch shipped and ` +
         `is not in the table, every replay since is filed under the previous token — silently ` +
-        `wrong. If genuinely nothing shipped, that is fine: this warning costs one command.`,
+        `wrong. If genuinely nothing shipped, run it as \`npm run data:patch-check -- ` +
+        `--confirm-quiet\` and commit scripts/patches.ts: that records today and quiets this ` +
+        `alarm for ${STALE_PATCH_DAYS} days.`,
     });
   }
 
@@ -192,7 +209,10 @@ if (isMain && process.argv.includes('--check')) {
   if (!due.length) {
     console.log(
       `✓ no expiries due — ${UNRELEASED.length} unreleased row(s) pending, ` +
-        `newest patch ${PATCHES.at(-1)?.version}`,
+        `newest patch ${PATCHES.at(-1)?.version}` +
+        (CONFIRMED_QUIET_THROUGH > (PATCHES.at(-1)?.start ?? '')
+          ? `, feed confirmed quiet ${CONFIRMED_QUIET_THROUGH}`
+          : ''),
     );
     process.exit(0);
   }

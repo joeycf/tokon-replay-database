@@ -153,7 +153,9 @@ jobs:
         # 2027-01-01, 2027-04-01 and 2027-07-01), and the patch table going more
         # than STALE_PATCH_DAYS (10) stale on a vendor that shipped twice in its
         # first five days.
-        # Clear it by doing the work, NOT by deleting this step.
+        # Clear it by doing the work, NOT by deleting this step. For the patch
+        # table, when the vendor has simply been quiet, the work is
+        # `npm run data:patch-check -- --confirm-quiet`, committed.
         run: npx tsx scripts/expiries.ts --check
 
       - name: Flag stale redirects

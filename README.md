@@ -130,7 +130,10 @@ deleting the check.
 
 Two things can trip them: a Year-1 character's announced window opening
 (`phoenix-cyclops`, 2026-10-01) and the patch table going 10 days stale on a
-vendor that shipped twice in its first five days.
+vendor that shipped twice in its first five days. When the vendor has simply
+shipped nothing, `npm run data:patch-check -- --confirm-quiet` records a clean
+feed read in `scripts/patches.ts`. Commit it, and the alarm counts its 10 days
+from that date instead.
 
 ## Scripts
 

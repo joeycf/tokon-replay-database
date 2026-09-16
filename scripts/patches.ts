@@ -94,7 +94,8 @@ export const SEASONS: SeasonBoundary[] = [
  *
  * Cadence warning for whoever reads this next: TWO patches shipped in the first
  * five days. scripts/expiries.ts carries a `stale-patch-table` check that goes
- * off if the newest row here is more than 10 days old, because a shipped patch
+ * off if the newest row here (or CONFIRMED_QUIET_THROUGH, below, whichever is
+ * later) is more than 10 days old, because a shipped patch
  * that is missing from this table does not fail — it silently files every
  * replay since under the previous token, which renders, filters and passes
  * every count assertion while being wrong.
@@ -151,6 +152,29 @@ export const PATCHES: PatchBoundary[] = [
     note: 'Patch Update - 28 August 2026',
   },
 ];
+
+/**
+ * The last day `npm run data:patch-check -- --confirm-quiet` saw the Steam feed
+ * with no patch missing from the table above.
+ *
+ * WHY IT EXISTS. The stale-patch-table alarm in scripts/expiries.ts read only
+ * the newest row and the clock, so a vendor that simply shipped nothing kept
+ * the cron red every day from 2026-09-08, with data:patch-check clean the whole
+ * time. Nothing a person could do cleared it short of a patch shipping, and a
+ * red run that means nothing teaches everyone to skim the red emails —
+ * including the ones that matter.
+ *
+ * The alarm now counts from whichever is LATER, this date or the newest patch.
+ * It still reads nothing but dates and the clock, so no vendor title change can
+ * blind it, and a patch that ships the day after a confirmation still trips it
+ * within STALE_PATCH_DAYS.
+ *
+ * WRITTEN BY patch-check.ts, NOT BY HAND. The flag refuses on any unclean run
+ * and first prints every post published since the newest patch, so the date
+ * means "a person read the feed", not "a person wanted the red to stop". A new
+ * PATCHES row supersedes it on its own; nothing needs resetting.
+ */
+export const CONFIRMED_QUIET_THROUGH = '2026-09-16';
 
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ERA_TOKEN = /^S\d+$/i;
@@ -236,6 +260,13 @@ export function validatePatches(
   }
 }
 
+/** A malformed or future quiet date would be ignored by the alarm (which keeps
+ *  firing, the safe direction); this makes the typo loud instead of puzzling. */
+export function validateQuietThrough(d: string = CONFIRMED_QUIET_THROUGH): void {
+  if (!ISO_DAY.test(d)) throw new Error(`CONFIRMED_QUIET_THROUGH "${d}" is not an ISO date`);
+  if (d > today()) throw new Error(`CONFIRMED_QUIET_THROUGH "${d}" is in the future (today ${today()})`);
+}
+
 /**
  * The era a date falls in.
  *
@@ -309,6 +340,7 @@ const isMain = !!process.argv[1] && import.meta.url.endsWith(process.argv[1].spl
 if (isMain && process.argv.includes('--check')) {
   validateSeasons();
   validatePatches();
+  validateQuietThrough();
   const windows = patchWindows();
   const ids = new Set<string>();
   for (const g of buildPatchGroups()) {

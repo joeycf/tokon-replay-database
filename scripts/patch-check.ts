@@ -33,10 +33,23 @@
  * names this command. That alarm was the only thing that fired when the parser
  * went blind, which is the argument for keeping it tighter than comfortable.
  *
- * Run: npm run data:patch-check
+ * --confirm-quiet IS HOW A QUIET VENDOR CLEARS THAT ALARM. On a clean run it
+ * lists every post published since the newest patch — the posts a renamed
+ * patch title would be hiding among, so read them — then records today as
+ * CONFIRMED_QUIET_THROUGH in scripts/patches.ts. Commit and push that; the cron
+ * reads the repo. Any unclean run writes nothing.
+ *
+ * Run: npm run data:patch-check                     (report only)
+ *      npm run data:patch-check -- --confirm-quiet  (record a quiet feed)
  */
 
-import { PATCHES } from './patches';
+import { readFile, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { CONFIRMED_QUIET_THROUGH, PATCHES } from './patches';
+
+const CONFIRM_QUIET = process.argv.includes('--confirm-quiet');
 
 const APPID = '3787240'; // MARVEL Tōkon: Fighting Souls
 const FEED = `https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=${APPID}&count=50&maxlength=1`;
@@ -140,4 +153,47 @@ if (unannounced.length) {
 }
 
 if (!missing.length) console.log('✓ the patch table matches every patch-titled Steam post');
+
+if (CONFIRM_QUIET) {
+  if (missing.length) {
+    console.log('\n--confirm-quiet: NOT recorded — the feed is not quiet. Add the rows above first.');
+  } else {
+    const newest = PATCHES.at(-1)!;
+    const day = (it: NewsItem) => new Date(it.date * 1000).toISOString().slice(0, 10);
+    // The feed is capped at `count`. If every post it returned is newer than
+    // the newest patch, older posts may be cut off, and "nothing since" cannot
+    // be claimed from a window that does not reach back that far.
+    if (!items.some((it) => day(it) <= newest.start)) {
+      console.error(
+        `\n✖ --confirm-quiet: every one of the ${items.length} posts returned is newer than ` +
+          `${newest.start}, so the feed may not reach back to the newest patch. Not recorded.`,
+      );
+      process.exit(1);
+    }
+    const since = items.filter((it) => day(it) > newest.start).sort((a, b) => a.date - b.date);
+    console.log(`\n${since.length} post(s) since the newest patch (${newest.start}) — read these titles:`);
+    for (const it of since) console.log(`    ${day(it)}  ${JSON.stringify(it.title)}`);
+    console.log('  A patch posted under a title this script does not know would be in this list.');
+
+    const today = new Date().toISOString().slice(0, 10);
+    if (CONFIRMED_QUIET_THROUGH === today) {
+      console.log(`\n✓ CONFIRMED_QUIET_THROUGH is already ${today}`);
+    } else {
+      const path = join(dirname(fileURLToPath(import.meta.url)), 'patches.ts');
+      const src = await readFile(path, 'utf8');
+      const LINE = /^export const CONFIRMED_QUIET_THROUGH = '[^']*';$/gm;
+      const found = src.match(LINE)?.length ?? 0;
+      if (found !== 1) {
+        console.error(`\n✖ expected one CONFIRMED_QUIET_THROUGH line in scripts/patches.ts, found ${found}. Not recorded.`);
+        process.exit(1);
+      }
+      await writeFile(path, src.replace(LINE, `export const CONFIRMED_QUIET_THROUGH = '${today}';`));
+      console.log(
+        `\n✓ CONFIRMED_QUIET_THROUGH ${CONFIRMED_QUIET_THROUGH} → ${today} in scripts/patches.ts.\n` +
+          '  Commit and push it: the cron reads the repo, not this machine.',
+      );
+    }
+  }
+}
+
 process.exit(missing.length ? 1 : 0);

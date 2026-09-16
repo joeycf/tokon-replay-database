@@ -27,7 +27,15 @@ import { alignBench, readBench } from './bench';
 import { buildBenchList } from '../server/utils/portraitWork';
 import { NOT_A_MATCH_RE } from './parse';
 import { emitGeneric } from './emit';
-import { SEASONS, buildPatchGroups, validatePatches, validateSeasons } from './patches';
+import { dueExpiries } from './expiries';
+import {
+  PATCHES,
+  SEASONS,
+  buildPatchGroups,
+  validatePatches,
+  validateQuietThrough,
+  validateSeasons,
+} from './patches';
 import { resolvePlayers } from './players';
 import type { MatchVideo, PlayerRecord, SeasonBoundary } from '../types/index';
 
@@ -759,6 +767,34 @@ try {
       }
     }
     check('patchGroups ids unique across parents AND children', !dupe, `${ids.size} ids`);
+
+    // The stale-patch-table alarm and the quiet date that can hold it off.
+    // Dates are derived from the committed newest patch so a new PATCHES row
+    // does not quietly turn these into tests of something else.
+    const newest = PATCHES.at(-1)!.start;
+    const plus = (iso: string, n: number) =>
+      new Date(Date.parse(iso) + n * 86_400_000).toISOString().slice(0, 10);
+    const stale = (asOf: string, quiet: string) =>
+      dueExpiries(asOf, quiet).find((d) => d.kind === 'stale-patch-table');
+    check('no quiet date: silent at 10 days', !stale(plus(newest, 10), newest), undefined);
+    check('no quiet date: fires at 11 days', !!stale(plus(newest, 11), newest), undefined);
+    const q = plus(newest, 19);
+    check('a quiet date holds the alarm off 10 more days', !stale(plus(q, 10), q), undefined);
+    check(
+      'and it fires again at 11, dated from the quiet date',
+      stale(plus(q, 11), q)?.date === q,
+      stale(plus(q, 11), q)?.date,
+    );
+    check(
+      'a quiet date OLDER than the newest patch is superseded',
+      !!stale(plus(newest, 11), plus(newest, -5)),
+      undefined,
+    );
+    check('a FUTURE quiet date is ignored, not trusted', !!stale(plus(newest, 11), '2099-01-01'), undefined);
+    check('a malformed quiet date is ignored, not trusted', !!stale(plus(newest, 11), '9/16/2026'), undefined);
+    check('the committed quiet date validates', (validateQuietThrough(), true), undefined);
+    await throws('a future quiet date is rejected', () => validateQuietThrough('2099-01-01'));
+    await throws('a malformed quiet date is rejected', () => validateQuietThrough('9/16/2026'));
   }
 
   // ── 4. the collapse guard + game marker, end to end ─────────────────────────
