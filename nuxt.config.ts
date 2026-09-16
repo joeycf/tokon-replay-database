@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync } from 'node:fs';
+import { copyFileSync, mkdirSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { joinURL } from 'ufo';
@@ -91,7 +91,14 @@ export default defineNuxtConfig({
       const dataDir = join(rootDir, 'public/data');
       mkdirSync(dataDir, { recursive: true });
       for (const f of ['replays.json', 'summary.json']) {
-        cpSync(join(rootDir, `data/${f}`), join(dataDir, f));
+        // Copy beside the target, then rename over it. `nuxt prepare` (lint,
+        // typecheck, postinstall) runs this hook too, so it can overlap a dev
+        // server reload, and two cpSync calls on one destination race: the
+        // loser throws ", Success '<path>'" and the dev server stays down.
+        // rename is atomic, so every overlapping copy succeeds.
+        const tmp = join(dataDir, `.${f}.${process.pid}.tmp`);
+        copyFileSync(join(rootDir, `data/${f}`), tmp);
+        renameSync(tmp, join(dataDir, f));
         console.log(`✓ copied data/${f} → public/data/${f}`);
       }
     },
