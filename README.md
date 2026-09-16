@@ -281,45 +281,52 @@ reach them.
 ### Reviewing from another machine
 
 The frame cache is 58 GB and gitignored, so the tooling cannot move to another
-machine or a deployment — but it can be reached from one. Point a tunnel at
-localhost and set a token, which the engine's `dev-guard` middleware then
-requires on `/dev` and `/api/dev`:
+machine or a deployment — but it can be reached from one. **How depends on
+whether the other device can run Tailscale.**
 
-```bash
-tailscale serve --bg http://localhost:3000   # inbound proxy; terminates locally, so the loopback bind is not in the way
-DEV_REVIEW_TOKEN=$(openssl rand -hex 16) npm run dev
+**Browser only (a phone, a machine you cannot install on).** The URL has to be
+public, and that changes what is safe. The engine's `DEV_REVIEW_TOKEN` guard
+runs inside Nitro, and Vite answers its own paths first: with the token enforced
+and no credentials, `/_nuxt/@fs/…` served `data/overrides.json` in full and
+route source code, and Nuxt DevTools answered 200. So authentication has to sit
+**in front of the whole dev server**, and the public tunnel must point at that,
+never at port 3000:
+
+```text
+browser ─▶ Tailscale Funnel (public HTTPS) ─▶ Caddy :3100 (password) ─▶ nuxt dev :3000
 ```
 
-Open `https://<machine>.ts.net/tokon/dev?k=<token>` once per device: that sets a
-cookie and redirects, and every later request carries it — including the `/dev`
-index's own queue counts, which fail silently without it.
+The pieces live outside the repo, in `~/.config/replay-review/`: a `Caddyfile`
+that demands a password before forwarding anything, the credentials, and a
+`start.sh` that brings the dev server and Caddy up together. Funnel is configured
+once and survives restarts:
 
-`tailscale serve` is not optional here: the dev server binds `127.0.0.1`, so the
-tailnet cannot reach the port directly — `serve` terminates in the daemon and
-proxies to localhost, which is the whole reason the bind and the tunnel coexist.
+```bash
+tailscale funnel --bg http://127.0.0.1:3100    # the proxy — NEVER :3000
+~/.config/replay-review/start.sh                # after every restart
+```
 
-On WSL2 the packaged `tailscaled` installs as a systemd unit and starts itself,
-so there is nothing to run by hand; `sudo tailscale up` is the only step. Two
-things to check before reaching for workarounds, because the usual WSL2 advice
-assumes both are missing: `systemctl is-active tailscaled`, and `ls /dev/net/tun`.
-Only if the unit is absent or there is no TUN device does the daemon need
-`sudo tailscaled --tun=userspace-networking --socks5-server=localhost:1055 &`,
-and running that while the service is up just collides on its socket. Failing
-both, run Tailscale on the Windows host and bridge with
-`netsh interface portproxy add v4tov4 listenport=3000 connectaddress=<wsl-ip> connectport=3000`,
-remembering the WSL IP changes on reboot.
+Then browse to `https://<machine>.ts.net/tokon/dev/bench-review?k=<token>`, sign
+in at the browser prompt, and the `?k=` swaps itself for a cookie. On a computer
+you do not own, use a private window: HTTP basic auth has no log-out, and the
+browser keeps the credentials until the window closes.
+
+**A device on your tailnet.** Only your own devices can resolve the name, so the
+proxy is optional — `tailscale serve --bg http://localhost:3000` plus the token
+is enough.
+
+**Either way:** `tailscale serve` or `funnel` is what bridges to the dev server,
+because it binds `127.0.0.1` and nothing else can reach it. On WSL2 the packaged
+`tailscaled` installs as a systemd unit and starts itself; check
+`systemctl is-active tailscaled` and `ls /dev/net/tun` before reaching for the
+`--tun=userspace-networking` workaround, which is for a WSL2 that has neither.
+WSL itself does not start with Windows, so after a reboot open a terminal first,
+or the machine shows offline and the link fails before it reaches anything.
 
 **Do not review and run the pipeline at the same time.** Both rewrite the whole
 of `data/overrides.json` with no locking, so whichever finishes second wins and
 the other's verdicts are gone. `npm run data:catchup -- --dry` exists for exactly
 this — see the note under the maintenance ritual above.
-
-| page                   | what it's for                                                                                                                                        |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/dev/source-review`   | **Plate reading.** Label the left and right nameplates on each sampled frame — no title, no handles, nothing to anchor on → `data/plate-labels.json` |
-| `/dev/bench-review`    | **Bench queue.** Drain the queue by reading the HUD portrait cluster — two frames per side, compared as sets                                         |
-| `/dev/portrait-review` | **Bench diamonds.** Three-way diamond labeller over 4x corner crops, keyboard-driven; nothing pre-selects                                            |
-| `/dev/disagreements`   | Human reads versus the automatic tiers — the cross-tier table and the off-bench read queue                                                           |
 
 ## Vercel
 
