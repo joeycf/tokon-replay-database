@@ -1,35 +1,35 @@
 {
   "totals": {
-    "replays": 898,
+    "replays": 913,
     "characters": 21,
-    "players": 568,
+    "players": 572,
     "byPatch": {
       "S0": 28,
-      "S1": 870
+      "S1": 885
     }
   },
   "characterUsage": {
-    "black-panther": 338,
-    "blade": 653,
-    "captain-america": 153,
-    "carnage": 358,
-    "champion": 175,
-    "danger": 91,
-    "deadpool": 254,
+    "black-panther": 341,
+    "blade": 656,
+    "captain-america": 155,
+    "carnage": 360,
+    "champion": 178,
+    "danger": 93,
+    "deadpool": 259,
     "doctor-doom": 322,
     "ghost-rider": 203,
     "green-goblin": 295,
-    "hulk": 206,
-    "iron-man": 205,
-    "loki": 283,
-    "magik": 645,
-    "magneto": 569,
+    "hulk": 209,
+    "iron-man": 206,
+    "loki": 287,
+    "magik": 651,
+    "magneto": 571,
     "ms-marvel": 118,
-    "peni-parker": 111,
-    "spider-man": 651,
-    "star-lord": 213,
-    "storm": 290,
-    "wolverine": 162
+    "peni-parker": 113,
+    "spider-man": 658,
+    "star-lord": 218,
+    "storm": 291,
+    "wolverine": 165
   },
   "byPatchUsage": {
     "S0": {
@@ -51,27 +51,27 @@
       "wolverine": 4
     },
     "S1": {
-      "black-panther": 320,
-      "blade": 641,
-      "captain-america": 149,
-      "carnage": 358,
-      "champion": 175,
-      "danger": 76,
-      "deadpool": 254,
+      "black-panther": 323,
+      "blade": 644,
+      "captain-america": 151,
+      "carnage": 360,
+      "champion": 178,
+      "danger": 78,
+      "deadpool": 259,
       "doctor-doom": 310,
       "ghost-rider": 190,
       "green-goblin": 277,
-      "hulk": 206,
-      "iron-man": 196,
-      "loki": 283,
-      "magik": 615,
-      "magneto": 551,
+      "hulk": 209,
+      "iron-man": 197,
+      "loki": 287,
+      "magik": 621,
+      "magneto": 553,
       "ms-marvel": 105,
-      "peni-parker": 96,
-      "spider-man": 639,
-      "star-lord": 200,
-      "storm": 272,
-      "wolverine": 158
+      "peni-parker": 98,
+      "spider-man": 646,
+      "star-lord": 205,
+      "storm": 273,
+      "wolverine": 161
     }
   },
   "playerCharacters": {
@@ -410,7 +410,8 @@
     },
     "caddyluke": {
       "carnage": 1,
-      "green-goblin": 2
+      "green-goblin": 2,
+      "magneto": 1
     },
     "canix": {
       "black-panther": 1,
@@ -423,7 +424,7 @@
       "storm": 1
     },
     "ceirnian": {
-      "danger": 2,
+      "danger": 3,
       "deadpool": 1,
       "doctor-doom": 1,
       "loki": 1
@@ -501,7 +502,7 @@
       "carnage": 2,
       "doctor-doom": 1,
       "magik": 6,
-      "star-lord": 11,
+      "star-lord": 12,
       "storm": 3,
       "wolverine": 1
     },
@@ -525,10 +526,10 @@
       "star-lord": 1
     },
     "clover": {
-      "captain-america": 9,
-      "loki": 6,
-      "magik": 7,
-      "spider-man": 6
+      "captain-america": 11,
+      "loki": 8,
+      "magik": 9,
+      "spider-man": 8
     },
     "cloverdragon": {
       "black-panther": 1,
@@ -697,6 +698,7 @@
       "peni-parker": 1
     },
     "dragon": {
+      "danger": 1,
       "doctor-doom": 1,
       "magik": 1,
       "magneto": 1,
@@ -743,7 +745,7 @@
     "ekram": {
       "blade": 4,
       "captain-america": 7,
-      "champion": 19,
+      "champion": 20,
       "deadpool": 1,
       "ghost-rider": 19,
       "magneto": 17
@@ -895,7 +897,7 @@
       "deadpool": 2
     },
     "gbx": {
-      "black-panther": 1,
+      "black-panther": 2,
       "magik": 1,
       "ms-marvel": 1,
       "storm": 1
@@ -912,11 +914,11 @@
       "hulk": 1,
       "storm": 1
     },
-    "ghostofevo": {
-      "black-panther": 1,
-      "blade": 1,
-      "hulk": 1,
-      "storm": 3
+    "ghost-of-evo": {
+      "black-panther": 2,
+      "blade": 2,
+      "hulk": 2,
+      "storm": 4
     },
     "giga": {
       "black-panther": 1,
@@ -1214,7 +1216,7 @@
       "blade": 15,
       "captain-america": 1,
       "carnage": 1,
-      "loki": 20,
+      "loki": 21,
       "magik": 3,
       "magneto": 12,
       "spider-man": 17
@@ -1232,13 +1234,13 @@
       "spider-man": 1
     },
     "hyde": {
-      "blade": 3,
+      "blade": 4,
       "carnage": 12,
-      "deadpool": 19,
+      "deadpool": 20,
       "ghost-rider": 1,
       "loki": 1,
-      "magik": 19,
-      "spider-man": 19
+      "magik": 20,
+      "spider-man": 20
     },
     "iago-killer": {
       "black-panther": 1,
@@ -1257,6 +1259,12 @@
       "magik": 1,
       "magneto": 1,
       "storm": 1
+    },
+    "impulse-chaos": {
+      "carnage": 1,
+      "deadpool": 1,
+      "peni-parker": 1,
+      "spider-man": 1
     },
     "indigo": {
       "ghost-rider": 1,
@@ -1769,17 +1777,17 @@
       "black-panther": 1,
       "captain-america": 8,
       "carnage": 4,
-      "champion": 14,
+      "champion": 15,
       "danger": 3,
-      "deadpool": 11,
+      "deadpool": 12,
       "ghost-rider": 1,
       "hulk": 11,
       "iron-man": 8,
-      "loki": 12,
+      "loki": 13,
       "magneto": 1,
       "ms-marvel": 2,
       "spider-man": 2,
-      "star-lord": 11,
+      "star-lord": 12,
       "wolverine": 4
     },
     "loversofpuns": {
@@ -1788,7 +1796,7 @@
       "champion": 1,
       "hulk": 1,
       "iron-man": 1,
-      "star-lord": 1,
+      "star-lord": 2,
       "wolverine": 1
     },
     "lucar": {
@@ -1798,14 +1806,14 @@
       "spider-man": 5
     },
     "lucky": {
-      "black-panther": 6,
-      "blade": 4,
+      "black-panther": 7,
+      "blade": 5,
       "hulk": 1,
-      "magik": 6,
+      "magik": 7,
       "magneto": 2,
       "peni-parker": 2,
       "spider-man": 1,
-      "star-lord": 5,
+      "star-lord": 7,
       "wolverine": 1
     },
     "luigi": {
@@ -1885,6 +1893,9 @@
       "carnage": 1,
       "deadpool": 1,
       "spider-man": 1
+    },
+    "maraton": {
+      "hulk": 1
     },
     "marben": {
       "deadpool": 5,
@@ -2298,7 +2309,7 @@
     "opal": {
       "black-panther": 2,
       "blade": 1,
-      "magik": 8,
+      "magik": 9,
       "magneto": 1,
       "spider-man": 6,
       "star-lord": 3,
@@ -2427,7 +2438,7 @@
       "hulk": 1,
       "magik": 35,
       "magneto": 39,
-      "spider-man": 43
+      "spider-man": 45
     },
     "quest-chip-fiend": {
       "blade": 3,
@@ -2570,7 +2581,7 @@
       "blade": 24,
       "doctor-doom": 24,
       "magneto": 24,
-      "wolverine": 26
+      "wolverine": 27
     },
     "romerulez": {
       "captain-america": 1,
@@ -2689,7 +2700,7 @@
       "champion": 20,
       "doctor-doom": 18,
       "ghost-rider": 1,
-      "hulk": 27,
+      "hulk": 28,
       "iron-man": 1,
       "magneto": 8,
       "spider-man": 1,
@@ -2777,10 +2788,10 @@
       "wolverine": 1
     },
     "slash": {
-      "carnage": 6,
-      "deadpool": 9,
-      "magneto": 8,
-      "spider-man": 8
+      "carnage": 7,
+      "deadpool": 11,
+      "magneto": 9,
+      "spider-man": 9
     },
     "slashooslash": {
       "carnage": 1,
@@ -2802,7 +2813,7 @@
     },
     "snake-eyez": {
       "blade": 2,
-      "champion": 64,
+      "champion": 65,
       "doctor-doom": 31,
       "green-goblin": 17,
       "hulk": 40,
@@ -2946,6 +2957,9 @@
       "blade": 1,
       "ghost-rider": 1,
       "magik": 1
+    },
+    "teemomvc": {
+      "wolverine": 1
     },
     "televisionneedchipotlespon": {
       "blade": 1,
@@ -3353,7 +3367,7 @@
       "hulk": 2,
       "peni-parker": 3,
       "star-lord": 2,
-      "wolverine": 3
+      "wolverine": 4
     },
     "yamii": {
       "deadpool": 1,
@@ -3366,7 +3380,7 @@
     },
     "yammini": {
       "black-panther": 2,
-      "iron-man": 7,
+      "iron-man": 8,
       "loki": 3,
       "magneto": 3
     },
@@ -3390,6 +3404,9 @@
     },
     "yosano": {
       "spider-man": 1
+    },
+    "yosen": {
+      "peni-parker": 1
     },
     "yosep": {
       "blade": 3,
@@ -3450,7 +3467,7 @@
       "spider-man": 25
     },
     "zippycorn": {
-      "magik": 2
+      "magik": 3
     },
     "zwei-not": {
       "blade": 1,
