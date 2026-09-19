@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-18T12:23:29.034Z_
+_Generated 2026-09-19T12:04:57.145Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 203 | 203 | 100.0% |
+| highLevelReplays | 206 | 206 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 820 | 123 | 15.0% |
-| replaysHub | 259 | 253 | 97.7% |
-| fightingStationX | 2873 | 203 | 7.1% |
-| fgcReplaysHub | 2661 | 40 | 1.5% |
+| hadoukenReplays | 822 | 125 | 15.2% |
+| replaysHub | 265 | 259 | 97.7% |
+| fightingStationX | 2881 | 206 | 7.2% |
+| fgcReplaysHub | 2665 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **931** | |
+| **total** | | **945** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 1862 sides got its characters.
+How every one of the 1890 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 220 | 11.8% |
-| description | 493 | 26.5% |
-| index | 170 | 9.1% |
-| footage | 273 | 14.7% |
-| human | 682 | 36.6% |
+| title | 242 | 12.8% |
+| description | 499 | 26.4% |
+| index | 170 | 9.0% |
+| footage | 273 | 14.4% |
+| human | 682 | 36.1% |
 | review | 24 | 1.3% |
 
-- complete (4/4): **1442/1862** (77.4%)
+- complete (4/4): **1448/1890** (76.6%)
 - oversize (>4, mid-set team change): **8** — counted in usage, excluded from pairing
-- bench alignment: character-subset 28 · handle 475 · ambiguous 5
-- title slot order: handle-first 1343 · chars-first 121 · parallel-lists 206
+- bench alignment: handle 484 · character-subset 28 · ambiguous 5
+- title slot order: handle-first 1363 · chars-first 123 · parallel-lists 212
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,24 +58,24 @@ How every one of the 1862 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 274 | 14.7% |
-| 2 | 80 | 4.3% |
+| 1 | 292 | 15.4% |
+| 2 | 84 | 4.4% |
 | 3 | 66 | 3.5% |
-| 4 | 1434 | 77.0% |
+| 4 | 1440 | 76.2% |
 | 5 _(mid-set change)_ | 6 | 0.3% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.1% |
 
-- **420 side(s) awaiting a drain** across 245 record(s) — oldest published **33 day(s)** ago
+- **442 side(s) awaiting a drain** across 256 record(s) — oldest published **34 day(s)** ago
 
-> The bench queue is at 245 (nudge threshold 40).
+> The bench queue is at 256 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **245**
+- bench queue (published, incomplete): **256**
 
 ## Player identity
 
@@ -135,12 +135,12 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4042 |
+| other-game | 4046 |
 | not-tokon | 1098 |
 | pre-launch | 663 |
-| not-a-match | 152 |
+| not-a-match | 155 |
 | not-an-event | 35 |
-| short-duration | 31 |
+| short-duration | 33 |
 | char-unresolved | 14 |
 | no-vs-title | 6 |
 | bench-conflict | 1 |
@@ -159,6 +159,7 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
+| `GreenGoblin` | 1 | gy5Cd9rpbng |
 | `Raked` | 1 | f_RPQ0HmHXE |
 
 ## Handles that resemble the game name
