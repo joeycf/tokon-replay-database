@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-19T12:04:57.145Z_
+_Generated 2026-09-20T12:38:23.237Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 206 | 206 | 100.0% |
+| highLevelReplays | 211 | 211 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 822 | 125 | 15.2% |
-| replaysHub | 265 | 259 | 97.7% |
-| fightingStationX | 2881 | 206 | 7.2% |
-| fgcReplaysHub | 2665 | 40 | 1.5% |
+| hadoukenReplays | 824 | 127 | 15.4% |
+| replaysHub | 271 | 265 | 97.8% |
+| fightingStationX | 2890 | 210 | 7.3% |
+| fgcReplaysHub | 2669 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **945** | |
+| **total** | | **962** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 1890 sides got its characters.
+How every one of the 1924 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 242 | 12.8% |
-| description | 499 | 26.4% |
-| index | 170 | 9.0% |
-| footage | 273 | 14.4% |
-| human | 682 | 36.1% |
-| review | 24 | 1.3% |
+| title | 266 | 13.8% |
+| description | 509 | 26.5% |
+| index | 170 | 8.8% |
+| footage | 273 | 14.2% |
+| human | 682 | 35.4% |
+| review | 24 | 1.2% |
 
-- complete (4/4): **1448/1890** (76.6%)
+- complete (4/4): **1458/1924** (75.8%)
 - oversize (>4, mid-set team change): **8** — counted in usage, excluded from pairing
-- bench alignment: handle 484 · character-subset 28 · ambiguous 5
-- title slot order: handle-first 1363 · chars-first 123 · parallel-lists 212
+- bench alignment: handle 494 · character-subset 29 · ambiguous 5
+- title slot order: handle-first 1387 · chars-first 125 · parallel-lists 220
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,24 +58,24 @@ How every one of the 1890 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 292 | 15.4% |
-| 2 | 84 | 4.4% |
-| 3 | 66 | 3.5% |
-| 4 | 1440 | 76.2% |
+| 1 | 314 | 16.3% |
+| 2 | 86 | 4.5% |
+| 3 | 66 | 3.4% |
+| 4 | 1450 | 75.4% |
 | 5 _(mid-set change)_ | 6 | 0.3% |
 | 6 _(mid-set change)_ | 1 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.1% |
 
-- **442 side(s) awaiting a drain** across 256 record(s) — oldest published **34 day(s)** ago
+- **466 side(s) awaiting a drain** across 268 record(s) — oldest published **35 day(s)** ago
 
-> The bench queue is at 256 (nudge threshold 40).
+> The bench queue is at 268 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
-- review queue (never published): **3** — character-completion 2 · bench-conflict 1
-- bench queue (published, incomplete): **256**
+- review queue (never published): **4** — character-completion 3 · bench-conflict 1
+- bench queue (published, incomplete): **268**
 
 ## Player identity
 
@@ -135,13 +135,13 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4046 |
+| other-game | 4050 |
 | not-tokon | 1098 |
 | pre-launch | 663 |
-| not-a-match | 155 |
+| not-a-match | 157 |
+| short-duration | 35 |
 | not-an-event | 35 |
-| short-duration | 33 |
-| char-unresolved | 14 |
+| char-unresolved | 15 |
 | no-vs-title | 6 |
 | bench-conflict | 1 |
 
@@ -170,9 +170,11 @@ garbled game name gets a human verdict instead of a quiet player page.
 
 | handle | records | example |
 | --- | ---: | --- |
+| `TOKON` | 6 | SHC4DyMK5ck |
 | `TOKON PLAYER` | 6 | 9G-yCsKqlDI |
-| `TOKON` | 5 | CeDmPWHCnO0 |
 | `The Tokon Texan` | 2 | 26SqJz0Xlpo |
+| `JOHN TOKON` | 1 | cfEGCQ02hmQ |
+| `Marvel larper` | 1 | Z1uK06owFng |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
 | `TOKON DEEZ` | 1 | R8ixtuzZlY4 |
 | `marvel chokon` | 1 | 8Y6fDQNgFPk |
