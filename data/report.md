@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-23T13:01:36.285Z_
+_Generated 2026-09-24T12:55:05.820Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 226 | 226 | 100.0% |
+| highLevelReplays | 231 | 231 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 830 | 133 | 16.0% |
-| replaysHub | 289 | 283 | 97.9% |
-| fightingStationX | 2921 | 216 | 7.4% |
-| fgcReplaysHub | 2682 | 40 | 1.5% |
+| hadoukenReplays | 832 | 135 | 16.2% |
+| replaysHub | 295 | 289 | 98.0% |
+| fightingStationX | 2930 | 218 | 7.4% |
+| fgcReplaysHub | 2684 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1007** | |
+| **total** | | **1022** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2014 sides got its characters.
+How every one of the 2044 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 326 | 16.2% |
-| description | 539 | 26.8% |
-| index | 170 | 8.4% |
-| footage | 273 | 13.6% |
-| human | 682 | 33.9% |
+| title | 242 | 11.8% |
+| description | 549 | 26.9% |
+| index | 170 | 8.3% |
+| footage | 123 | 6.0% |
+| human | 936 | 45.8% |
 | review | 24 | 1.2% |
 
-- complete (4/4): **1488/2014** (73.9%)
+- complete (4/4): **1752/2044** (85.7%)
 - oversize (>4, mid-set team change): **8** — counted in usage, excluded from pairing
-- bench alignment: handle 525 · character-subset 31 · ambiguous 5
-- title slot order: handle-first 1459 · chars-first 131 · parallel-lists 232
+- bench alignment: handle 536 · character-subset 31 · ambiguous 5
+- title slot order: handle-first 1483 · chars-first 133 · parallel-lists 236
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,38 +58,36 @@ How every one of the 2014 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 371 | 18.4% |
-| 2 | 89 | 4.4% |
-| 3 | 66 | 3.3% |
-| 4 | 1480 | 73.5% |
+| 1 | 240 | 11.7% |
+| 2 | 34 | 1.7% |
+| 3 | 18 | 0.9% |
+| 4 | 1744 | 85.3% |
 | 5 _(mid-set change)_ | 6 | 0.3% |
 | 6 _(mid-set change)_ | 1 | 0.0% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **526 side(s) awaiting a drain** across 298 record(s) — oldest published **38 day(s)** ago
+- **292 side(s) awaiting a drain** across 186 record(s) — oldest published **39 day(s)** ago
 
-> The bench queue is at 298 (nudge threshold 40).
+> The bench queue is at 186 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **7** — character-completion 6 · bench-conflict 1
-- bench queue (published, incomplete): **298**
+- bench queue (published, incomplete): **186**
 
 ## Player identity
 
-15 identity(s) resolved from more than one spelling. The
+13 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
 | canonical | absorbed |
 | --- | --- |
-| `balderberg` | `balder-berg` |
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
 | `caddyluke` | `caddy-luke` |
-| `chrisg` | `chris-g` |
 | `ghost-of-evo` | `ghostofevo` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
@@ -135,10 +133,10 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4068 |
-| not-tokon | 1098 |
+| other-game | 4070 |
+| not-tokon | 1099 |
 | pre-launch | 663 |
-| not-a-match | 170 |
+| not-a-match | 176 |
 | short-duration | 39 |
 | not-an-event | 35 |
 | char-unresolved | 18 |
