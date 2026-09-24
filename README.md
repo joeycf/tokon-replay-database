@@ -323,6 +323,13 @@ because it binds `127.0.0.1` and nothing else can reach it. On WSL2 the packaged
 WSL itself does not start with Windows, so after a reboot open a terminal first,
 or the machine shows offline and the link fails before it reaches anything.
 
+**The token applies at the desk too.** With `DEV_REVIEW_TOKEN` in `.env`, the
+guard cannot tell a local request from a tunnelled one, so `localhost` 404s on
+`/dev` just like a stranger would. The cookie from the remote link belongs to the
+`ts.net` origin and does nothing here. Open
+`http://localhost:3000/tokon/dev?k=<token>` once in the desk browser and it gets
+its own 30-day cookie.
+
 **Do not review and run the pipeline at the same time.** Both rewrite the whole
 of `data/overrides.json` with no locking, so whichever finishes second wins and
 the other's verdicts are gone. `npm run data:catchup -- --dry` exists for exactly
