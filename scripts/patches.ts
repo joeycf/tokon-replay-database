@@ -174,7 +174,7 @@ export const PATCHES: PatchBoundary[] = [
  * means "a person read the feed", not "a person wanted the red to stop". A new
  * PATCHES row supersedes it on its own; nothing needs resetting.
  */
-export const CONFIRMED_QUIET_THROUGH = '2026-09-16';
+export const CONFIRMED_QUIET_THROUGH = '2026-09-26';
 
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ERA_TOKEN = /^S\d+$/i;
