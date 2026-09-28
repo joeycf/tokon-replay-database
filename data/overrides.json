@@ -65316,24 +65316,35 @@
     "exclude": true
   },
   "T_S1buWLSTg": {
-    "//": "review verdict: a real match — \"HANDLE Ranked #N Fighter\" slots — the only two titles in that grammar, so hand-built rather than parsed [2026-09-28]",
+    "//": "bench-completion: read from footage [data:extract 2026-09-28]",
     "sides": [
       {
         "player": "glider",
-        "handle": "GLIDER",
+        "handle": "Glider",
         "characters": [
+          "green-goblin",
+          "storm",
+          "spider-man",
           "magik"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "magik"
           ],
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": true,
+          "fromFootage": [
+            "green-goblin",
+            "storm",
+            "spider-man",
+            "magik"
+          ],
+          "confidence": 0.761
         }
       },
       {
@@ -65343,39 +65354,53 @@
           "spider-man"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "spider-man"
           ],
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "spider-man"
+          ],
+          "confidence": 1
         }
       }
     ],
-    "resolvedBy": "human"
+    "resolvedBy": "human",
+    "confidence": 0.761,
+    "sideVotes": 59
   },
   "GAMCqoiDzpM": {
-    "//": "review verdict: a real match — \"HANDLE Ranked #N Fighter\" slots — the only two titles in that grammar, so hand-built rather than parsed [2026-09-28]",
+    "//": "bench-completion: read from footage [data:extract 2026-09-28]",
     "sides": [
       {
         "player": "eduardo-hook",
         "handle": "Eduardo Hook",
         "characters": [
-          "blade"
+          "blade",
+          "iron-man"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "blade"
           ],
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "blade",
+            "iron-man"
+          ],
+          "confidence": 1
         }
       },
       {
@@ -65385,19 +65410,26 @@
           "spider-man"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "spider-man"
           ],
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "spider-man"
+          ],
+          "confidence": 1
         }
       }
     ],
-    "resolvedBy": "human"
+    "resolvedBy": "human",
+    "confidence": 1,
+    "sideVotes": 62
   },
   "7LQbkltIzso": {
     "//": "review verdict: bench conflict settled as title ∪ description — the description lists SNAKE EYEZ with three and omits the point fighter [2026-09-28]",
