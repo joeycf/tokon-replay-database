@@ -27,11 +27,11 @@
 
       <nav class="strip">
         <button
-          v-for="it in items"
+          v-for="(it, k) in items"
           :key="it.i"
           class="tick"
-          :class="{ on: it.done, cur: it.i === cursor }"
-          @click="cursor = it.i"
+          :class="{ on: it.done, cur: k === cursor }"
+          @click="cursor = k"
         />
       </nav>
 
@@ -143,14 +143,7 @@
                  returned gameplay for the rest. -->
             <p class="dim">
               Handle placement varies by upload — look anywhere in this quadrant. Step the frames
-              above if it is not drawn at this moment, or
-              <a
-                class="src"
-                :href="`https://www.youtube.com/watch?v=${cur.video}&t=${secOf(0)}`"
-                target="_blank"
-                rel="noreferrer"
-                >open the source at {{ secOf(0) }}s ↗</a
-              >.
+              above if it is not drawn at this moment, or open the source linked below.
             </p>
             <img
               class="side-strip"
@@ -273,6 +266,19 @@
             A person's read REPLACES this side — it does not merge with the description. Four of 189
             hand-read slots named a fighter absent from both described benches, so when the pixels
             and the prose disagree the pixels win.
+          </p>
+          <!-- Always shown, not only when attribution is asked for: an uploader's
+               title can be wrong, and the upload itself is the tiebreaker. LAST in the
+               column so it is also last in tab order: tabbing out of the final pick
+               must reach "save side" without stopping on a link first. -->
+          <p class="source">
+            <a
+              class="src"
+              :href="`https://www.youtube.com/watch?v=${cur.video}&t=${secOf(0)}`"
+              target="_blank"
+              rel="noreferrer"
+              >youtube.com/watch?v={{ cur.video }} · {{ secOf(0) }}s ↗</a
+            >
           </p>
         </div>
       </section>
@@ -444,6 +450,10 @@ function loadPicks(): void {
   picks.value = blank();
   restored.value = null;
 }
+// The list shrinks under the cursor on every save; keep it on a real row.
+watch(items, (list) => {
+  if (cursor.value > list.length - 1) cursor.value = Math.max(0, list.length - 1);
+});
 watch(cursor, loadPicks);
 watch(items, loadPicks, { immediate: true });
 
@@ -485,8 +495,14 @@ async function save(force: boolean, union = false, keepTitled = false): Promise<
       disagree.value = null;
       titleMissing.value = null;
       refused.value = null;
+      const saved = { video: cur.value!.video, side: cur.value!.side };
       await refresh();
-      if (cursor.value < items.value.length - 1) cursor.value++;
+      // A SAVED SIDE LEAVES THE OPEN LIST, so the next one has already slid into
+      // this slot. Stepping forward as well skipped every other side and walked the
+      // cursor off the end, where the page said "bench queue is empty" over 48 open
+      // sides. Step only when the side is still listed, as it is under "show drained".
+      const at = items.value.findIndex((x) => x.video === saved.video && x.side === saved.side);
+      if (at >= 0) cursor.value = Math.min(at + 1, items.value.length - 1);
     } else if (r.disagree) {
       disagree.value = { a: r.a ?? [], b: r.b ?? [] };
     } else {
@@ -592,6 +608,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 }
 .src {
   color: var(--color-primary);
+}
+.source {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+  overflow-wrap: anywhere;
 }
 .slot {
   display: flex;
