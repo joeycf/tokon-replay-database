@@ -65316,7 +65316,7 @@
     "exclude": true
   },
   "T_S1buWLSTg": {
-    "//": "bench-completion: read from footage [data:extract 2026-09-28]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-28]",
     "sides": [
       {
         "player": "glider",
@@ -65351,23 +65351,47 @@
         "player": "senshii",
         "handle": "Senshii",
         "characters": [
-          "spider-man"
+          "spider-man",
+          "green-goblin",
+          "black-panther",
+          "magik"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "spider-man"
           ],
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "spider-man"
           ],
-          "confidence": 1
+          "confidence": 1,
+          "fromHuman": [
+            "spider-man",
+            "green-goblin",
+            "black-panther",
+            "magik"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "green-goblin",
+              "black-panther",
+              "magik"
+            ],
+            "b": [
+              "green-goblin",
+              "black-panther",
+              "magik"
+            ],
+            "forced": false
+          }
         }
       }
     ],
@@ -65376,54 +65400,101 @@
     "sideVotes": 59
   },
   "GAMCqoiDzpM": {
-    "//": "bench-completion: read from footage [data:extract 2026-09-28]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-28]",
     "sides": [
       {
         "player": "eduardo-hook",
         "handle": "Eduardo Hook",
         "characters": [
           "blade",
-          "iron-man"
+          "magik",
+          "iron-man",
+          "magneto"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "blade"
           ],
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "blade",
             "iron-man"
           ],
-          "confidence": 1
+          "confidence": 1,
+          "fromHuman": [
+            "blade",
+            "magik",
+            "iron-man",
+            "magneto"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "magik",
+              "iron-man",
+              "magneto"
+            ],
+            "b": [
+              "magik",
+              "blade",
+              "magneto"
+            ],
+            "forced": false
+          }
         }
       },
       {
         "player": "muzan",
         "handle": "Muzan",
         "characters": [
-          "spider-man"
+          "spider-man",
+          "blade",
+          "magneto",
+          "magik"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "spider-man"
           ],
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "spider-man"
           ],
-          "confidence": 1
+          "confidence": 1,
+          "fromHuman": [
+            "spider-man",
+            "blade",
+            "magneto",
+            "magik"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "blade",
+              "magneto",
+              "magik"
+            ],
+            "b": [
+              "blade",
+              "magneto",
+              "magik"
+            ],
+            "forced": false
+          }
         }
       }
     ],
