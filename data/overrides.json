@@ -65316,11 +65316,158 @@
     "exclude": true
   },
   "T_S1buWLSTg": {
-    "//": "review verdict: not a competitive match [2026-09-28]",
-    "exclude": true
+    "//": "review verdict: a real match — \"HANDLE Ranked #N Fighter\" slots — the only two titles in that grammar, so hand-built rather than parsed [2026-09-28]",
+    "sides": [
+      {
+        "player": "glider",
+        "handle": "GLIDER",
+        "characters": [
+          "magik"
+        ],
+        "provenance": {
+          "tier": "title",
+          "tiers": [
+            "title"
+          ],
+          "fromTitle": [
+            "magik"
+          ],
+          "slotOrder": "handle-first",
+          "complete": false
+        }
+      },
+      {
+        "player": "senshii",
+        "handle": "Senshii",
+        "characters": [
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "title",
+          "tiers": [
+            "title"
+          ],
+          "fromTitle": [
+            "spider-man"
+          ],
+          "slotOrder": "handle-first",
+          "complete": false
+        }
+      }
+    ],
+    "resolvedBy": "human"
   },
   "GAMCqoiDzpM": {
-    "//": "review verdict: not a competitive match [2026-09-28]",
-    "exclude": true
+    "//": "review verdict: a real match — \"HANDLE Ranked #N Fighter\" slots — the only two titles in that grammar, so hand-built rather than parsed [2026-09-28]",
+    "sides": [
+      {
+        "player": "eduardo-hook",
+        "handle": "Eduardo Hook",
+        "characters": [
+          "blade"
+        ],
+        "provenance": {
+          "tier": "title",
+          "tiers": [
+            "title"
+          ],
+          "fromTitle": [
+            "blade"
+          ],
+          "slotOrder": "handle-first",
+          "complete": false
+        }
+      },
+      {
+        "player": "muzan",
+        "handle": "Muzan",
+        "characters": [
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "title",
+          "tiers": [
+            "title"
+          ],
+          "fromTitle": [
+            "spider-man"
+          ],
+          "slotOrder": "handle-first",
+          "complete": false
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "7LQbkltIzso": {
+    "//": "review verdict: bench conflict settled as title ∪ description — the description lists SNAKE EYEZ with three and omits the point fighter [2026-09-28]",
+    "sides": [
+      {
+        "player": "nohs",
+        "handle": "NOHS",
+        "characters": [
+          "doctor-doom",
+          "deadpool",
+          "magneto",
+          "magik"
+        ],
+        "provenance": {
+          "tier": "description",
+          "tiers": [
+            "title",
+            "description"
+          ],
+          "fromTitle": [
+            "doctor-doom"
+          ],
+          "fromDescription": [
+            "doctor-doom",
+            "deadpool",
+            "magneto",
+            "magik"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      },
+      {
+        "player": "snake-eyez",
+        "handle": "SNAKE EYEZ",
+        "characters": [
+          "champion",
+          "hulk",
+          "magneto",
+          "magik"
+        ],
+        "provenance": {
+          "tier": "review",
+          "tiers": [
+            "title",
+            "description",
+            "review"
+          ],
+          "fromTitle": [
+            "champion",
+            "hulk"
+          ],
+          "fromDescription": [
+            "hulk",
+            "magneto",
+            "magik"
+          ],
+          "fromHuman": [
+            "champion",
+            "hulk",
+            "magneto",
+            "magik"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      }
+    ],
+    "resolvedBy": "human"
   }
 }
