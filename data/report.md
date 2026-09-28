@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-28T21:26:47.122Z_
+_Generated 2026-09-28T21:38:23.136Z_
 
 ## Coverage
 
@@ -10,7 +10,7 @@ _Generated 2026-09-28T21:26:47.122Z_
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 840 | 141 | 16.8% |
 | replaysHub | 321 | 315 | 98.1% |
-| fightingStationX | 2968 | 222 | 7.5% |
+| fightingStationX | 2969 | 222 | 7.5% |
 | fgcReplaysHub | 2703 | 40 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
@@ -40,14 +40,14 @@ How every one of the 2142 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 10 | 0.5% |
+| title | 0 | 0.0% |
 | description | 575 | 26.8% |
 | index | 170 | 7.9% |
-| footage | 141 | 6.6% |
-| human | 1222 | 57.0% |
+| footage | 110 | 5.1% |
+| human | 1263 | 59.0% |
 | review | 24 | 1.1% |
 
-- complete (4/4): **2101/2142** (98.1%)
+- complete (4/4): **2142/2142** (100.0%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
 - bench alignment: handle 575 · character-subset 31 · ambiguous 5
 - title slot order: handle-first 1567 · chars-first 139 · parallel-lists 244
@@ -58,20 +58,17 @@ How every one of the 2142 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 19 | 0.9% |
-| 2 | 10 | 0.5% |
-| 3 | 12 | 0.6% |
-| 4 | 2091 | 97.6% |
+| 4 | 2132 | 99.5% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **41 side(s) awaiting a drain** across 23 record(s) — oldest published **2 day(s)** ago
+- **0 side(s) awaiting a drain** across 0 record(s)
 
 ## Queues
 
 - review queue (never published): **8** — character-completion 7 · bench-conflict 1
-- bench queue (published, incomplete): **23**
+- bench queue (published, incomplete): **0**
 
 ## Player identity
 
@@ -129,7 +126,7 @@ No disagreements on that sweep.
 | reason | count |
 | --- | ---: |
 | other-game | 4092 |
-| not-tokon | 1115 |
+| not-tokon | 1116 |
 | pre-launch | 663 |
 | not-a-match | 191 |
 | short-duration | 40 |
