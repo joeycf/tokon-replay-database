@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-28T21:53:15.788Z_
+_Generated 2026-09-28T22:00:58.217Z_
 
 ## Coverage
 
@@ -9,12 +9,12 @@ _Generated 2026-09-28T21:53:15.788Z_
 | highLevelReplays | 244 | 244 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 840 | 142 | 16.9% |
-| replaysHub | 321 | 315 | 98.1% |
+| replaysHub | 322 | 316 | 98.1% |
 | fightingStationX | 2969 | 224 | 7.5% |
 | fgcReplaysHub | 2703 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1075** | |
+| **total** | | **1076** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2150 sides got its characters.
+How every one of the 2152 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 0 | 0.0% |
+| title | 2 | 0.1% |
 | description | 576 | 26.8% |
 | index | 170 | 7.9% |
-| footage | 114 | 5.3% |
-| human | 1263 | 58.7% |
+| footage | 111 | 5.2% |
+| human | 1266 | 58.8% |
 | review | 27 | 1.3% |
 
-- complete (4/4): **2147/2150** (99.9%)
+- complete (4/4): **2150/2152** (99.9%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: handle 575 · character-subset 31 · ambiguous 5
-- title slot order: handle-first 1567 · chars-first 139 · parallel-lists 244
+- bench alignment: handle 576 · character-subset 31 · ambiguous 5
+- title slot order: handle-first 1569 · chars-first 139 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -59,18 +59,17 @@ How every one of the 2150 sides got its characters.
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
 | 1 | 2 | 0.1% |
-| 2 | 1 | 0.0% |
-| 4 | 2137 | 99.4% |
+| 4 | 2140 | 99.4% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **3 side(s) awaiting a drain** across 2 record(s) — oldest published **42 day(s)** ago
+- **2 side(s) awaiting a drain** across 1 record(s) — oldest published **0 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **0** — —
-- bench queue (published, incomplete): **2**
+- bench queue (published, incomplete): **1**
 
 ## Player identity
 
