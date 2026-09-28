@@ -2409,6 +2409,68 @@
     ]
   },
   {
+    "id": "OBfMREpbSJs",
+    "channel": "hadoukenReplays",
+    "intake": "hadoukenReplays",
+    "title": "TOKON ▰ ROCK MF (CaptainAmerica) vs (Champion) SNAKE EYEZ 👊[MARVEL TŌKON: Fighting Souls]",
+    "publishedAt": "2026-09-26T10:54:16Z",
+    "durationSec": 640,
+    "viewCount": 9524,
+    "season": 1,
+    "sides": [
+      {
+        "player": "rock-mf",
+        "handle": "Rock mf",
+        "characters": [
+          "captain-america",
+          "ms-marvel",
+          "green-goblin",
+          "wolverine"
+        ],
+        "provenance": {
+          "tier": "review",
+          "tiers": [
+            "review"
+          ],
+          "fromTitle": [],
+          "fromHuman": [
+            "captain-america",
+            "ms-marvel",
+            "green-goblin",
+            "wolverine"
+          ],
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      },
+      {
+        "player": "snake-eyez",
+        "handle": "Snake eyez",
+        "characters": [
+          "champion",
+          "green-goblin",
+          "spider-man",
+          "magik"
+        ],
+        "provenance": {
+          "tier": "review",
+          "tiers": [
+            "review"
+          ],
+          "fromTitle": [],
+          "fromHuman": [
+            "champion",
+            "green-goblin",
+            "spider-man",
+            "magik"
+          ],
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      }
+    ]
+  },
+  {
     "id": "osOWY3OuhgE",
     "channel": "highLevelReplays",
     "intake": "highLevelReplays",
@@ -56676,6 +56738,83 @@
     ]
   },
   {
+    "id": "7LQbkltIzso",
+    "channel": "fgcReplaysHub",
+    "intake": "fgcReplaysHub",
+    "title": "Marvel Tokon ▰ NOHS (Doctor Doom) vs SNAKE EYEZ (Champion Hulk) ▰ High Level Gameplay",
+    "publishedAt": "2026-08-26T09:00:32Z",
+    "durationSec": 695,
+    "viewCount": 16,
+    "season": 1,
+    "sides": [
+      {
+        "player": "nohs",
+        "handle": "NOHS",
+        "characters": [
+          "doctor-doom",
+          "deadpool",
+          "magneto",
+          "magik"
+        ],
+        "provenance": {
+          "tier": "description",
+          "tiers": [
+            "title",
+            "description"
+          ],
+          "fromTitle": [
+            "doctor-doom"
+          ],
+          "fromDescription": [
+            "doctor-doom",
+            "deadpool",
+            "magneto",
+            "magik"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      },
+      {
+        "player": "snake-eyez",
+        "handle": "Snake eyez",
+        "characters": [
+          "champion",
+          "hulk",
+          "magneto",
+          "magik"
+        ],
+        "provenance": {
+          "tier": "review",
+          "tiers": [
+            "title",
+            "description",
+            "review"
+          ],
+          "fromTitle": [
+            "champion",
+            "hulk"
+          ],
+          "fromDescription": [
+            "hulk",
+            "magneto",
+            "magik"
+          ],
+          "fromHuman": [
+            "champion",
+            "hulk",
+            "magneto",
+            "magik"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      }
+    ]
+  },
+  {
     "id": "gRBcuK4inRw",
     "channel": "fightingStationX",
     "intake": "fightingStationX",
@@ -72416,6 +72555,70 @@
     ]
   },
   {
+    "id": "T_S1buWLSTg",
+    "channel": "fightingStationX",
+    "intake": "fightingStationX",
+    "title": "MARVEL TOKON ▰ GLIDER Ranked #13 Magik vs Senshii Ranked #9 Spider Man ▰ High Level Gameplay",
+    "publishedAt": "2026-08-17T18:15:32Z",
+    "durationSec": 373,
+    "viewCount": 102,
+    "season": 1,
+    "sides": [
+      {
+        "player": "glider",
+        "handle": "Glider",
+        "characters": [
+          "green-goblin",
+          "storm",
+          "spider-man",
+          "magik"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "magik"
+          ],
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromFootage": [
+            "green-goblin",
+            "storm",
+            "spider-man",
+            "magik"
+          ],
+          "confidence": 0.761
+        }
+      },
+      {
+        "player": "senshii",
+        "handle": "Senshii",
+        "characters": [
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "spider-man"
+          ],
+          "slotOrder": "handle-first",
+          "complete": false,
+          "fromFootage": [
+            "spider-man"
+          ],
+          "confidence": 1
+        }
+      }
+    ]
+  },
+  {
     "id": "-Ew5DbfSWEo",
     "channel": "replaysHub",
     "intake": "replaysHub",
@@ -72674,6 +72877,66 @@
             ],
             "forced": false
           }
+        }
+      }
+    ]
+  },
+  {
+    "id": "GAMCqoiDzpM",
+    "channel": "fightingStationX",
+    "intake": "fightingStationX",
+    "title": "MARVEL TOKON ▰ Eduardo Hook Ranked #1 Blade vs Muzan Ranked #5 Spider Man ▰ High Level Gameplay",
+    "publishedAt": "2026-08-17T15:15:02Z",
+    "durationSec": 206,
+    "viewCount": 100,
+    "season": 1,
+    "sides": [
+      {
+        "player": "eduardo-hook",
+        "handle": "Eduardo Hook",
+        "characters": [
+          "blade",
+          "iron-man"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "blade"
+          ],
+          "slotOrder": "handle-first",
+          "complete": false,
+          "fromFootage": [
+            "blade",
+            "iron-man"
+          ],
+          "confidence": 1
+        }
+      },
+      {
+        "player": "muzan",
+        "handle": "Muzan",
+        "characters": [
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "spider-man"
+          ],
+          "slotOrder": "handle-first",
+          "complete": false,
+          "fromFootage": [
+            "spider-man"
+          ],
+          "confidence": 1
         }
       }
     ]

@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-28T21:38:23.136Z_
+_Generated 2026-09-28T21:53:15.788Z_
 
 ## Coverage
 
@@ -8,13 +8,13 @@ _Generated 2026-09-28T21:38:23.136Z_
 | --- | ---: | ---: | ---: |
 | highLevelReplays | 244 | 244 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 840 | 141 | 16.8% |
+| hadoukenReplays | 840 | 142 | 16.9% |
 | replaysHub | 321 | 315 | 98.1% |
-| fightingStationX | 2969 | 222 | 7.5% |
-| fgcReplaysHub | 2703 | 40 | 1.5% |
+| fightingStationX | 2969 | 224 | 7.5% |
+| fgcReplaysHub | 2703 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1071** | |
+| **total** | | **1075** | |
 
 ## Index intakes
 
@@ -36,18 +36,18 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2142 sides got its characters.
+How every one of the 2150 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
 | title | 0 | 0.0% |
-| description | 575 | 26.8% |
+| description | 576 | 26.8% |
 | index | 170 | 7.9% |
-| footage | 110 | 5.1% |
-| human | 1263 | 59.0% |
-| review | 24 | 1.1% |
+| footage | 114 | 5.3% |
+| human | 1263 | 58.7% |
+| review | 27 | 1.3% |
 
-- complete (4/4): **2142/2142** (100.0%)
+- complete (4/4): **2147/2150** (99.9%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
 - bench alignment: handle 575 · character-subset 31 · ambiguous 5
 - title slot order: handle-first 1567 · chars-first 139 · parallel-lists 244
@@ -58,17 +58,19 @@ How every one of the 2142 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 4 | 2132 | 99.5% |
+| 1 | 2 | 0.1% |
+| 2 | 1 | 0.0% |
+| 4 | 2137 | 99.4% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **0 side(s) awaiting a drain** across 0 record(s)
+- **3 side(s) awaiting a drain** across 2 record(s) — oldest published **42 day(s)** ago
 
 ## Queues
 
-- review queue (never published): **8** — character-completion 7 · bench-conflict 1
-- bench queue (published, incomplete): **0**
+- review queue (never published): **0** — —
+- bench queue (published, incomplete): **2**
 
 ## Player identity
 
@@ -128,12 +130,11 @@ No disagreements on that sweep.
 | other-game | 4092 |
 | not-tokon | 1116 |
 | pre-launch | 663 |
-| not-a-match | 191 |
+| not-a-match | 195 |
 | short-duration | 40 |
 | not-an-event | 35 |
 | char-unresolved | 19 |
 | no-vs-title | 6 |
-| bench-conflict | 1 |
 
 - `marvelTokonYT` events-only gate: **35** upload(s) carried no known event brand.
   - MARVEL Tokon ▰ Save The Queen (Magik) vs FilipinoChamp (Black Phanter) High Level Match
