@@ -169,6 +169,15 @@ log.
 Extraction never runs here. YouTube blocks datacenter IPs, so the footage tier
 is local-only and the cron carries committed overrides forward.
 
+**Redirects are regenerated before the commit, and can hold it.** `parse.ts`
+grows `data/player-redirects.json` from its own automatic player merges, and
+`npm run data:redirects` rewrites `vercel.json` from it. Then
+`redirects.ts --drift` refuses to commit, holding the whole day's data, if a row
+cannot ship: a redirect into a 404, a redirect away from a live profile, or a
+redirect the ledger lost. The refusal names the row and its fix. Before
+2026-09-28 this was a post-deploy check that went red only after the 404 was
+live.
+
 ## Keeping the corpus complete — the local half
 
 **The cron cannot finish a record, and this is by design, not a gap.** It adds

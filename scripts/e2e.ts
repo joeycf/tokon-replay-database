@@ -688,12 +688,20 @@ function testCronGuard(): void {
   // artifact" into "case B: real change commits" going red, with nothing in the
   // failure naming the actual cause. Adding data/player-redirects.json to the
   // workflow is exactly how that was found.
-  const staged = (guard.match(/git add ((?:data\/\S+\s*)+)/)?.[1] ?? '')
+  const staged = (guard.match(/git add ((?:(?:data\/\S+|vercel\.json)\s*)+)/)?.[1] ?? '')
     .split(/\s+/)
     // .md as well as .json: report.md is a pipeline output like any other and
     // the .json-only filter silently exempted it from the staging check below.
-    .filter((f) => f.startsWith('data/') && (f.endsWith('.json') || f.endsWith('.md')));
+    // vercel.json too: since 2026-09-28 the cron's "Regenerate player redirects"
+    // step writes it, so unstaged a new redirect is regenerated and thrown away
+    // every morning — this repo's own seventeen-row gap, rebuilt.
+    .filter(
+      (f) =>
+        (f.startsWith('data/') && (f.endsWith('.json') || f.endsWith('.md'))) ||
+        f === 'vercel.json',
+    );
   expect(staged.length > 0, `workflow's git add names data files (${staged.length})`);
+  expect(staged.includes('vercel.json'), 'workflow stages vercel.json (the regenerated redirects)');
   // Every file the pipeline WRITES must be staged, or the cron regenerates it
   // and throws it away. Checked by name rather than by count so adding a
   // pipeline output and forgetting the workflow is a failure here, not a

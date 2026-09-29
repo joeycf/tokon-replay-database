@@ -69,6 +69,29 @@ jobs:
       - name: Parse and emit
         run: npm run data:parse
 
+      # THE ROUTING IS REGENERATED HERE, SO IT LANDS IN THE SAME COMMIT AS THE
+      # LEDGER IT IS DERIVED FROM. parse.ts grows data/player-redirects.json from
+      # its own automatic player merges; vercel.json used to wait for a human to
+      # run this, and every day it waited was a live 404 on an indexed,
+      # prerendered player URL. Seventeen had piled up by 2026-09-10, five more
+      # were found 404ing and fixed on 2026-09-24, and Tekken's voila-99 went
+      # dead three days later.
+      # scripts/redirects.ts records why "the data commit has no business
+      # touching routing" was reversed on 2026-09-28.
+      - name: Regenerate player redirects
+        run: npm run data:redirects
+
+      # AND NOTHING IS COMMITTED WHEN A ROW CANNOT SHIP. This replaces the
+      # post-deploy "Flag stale redirects" step, which ran the same check but
+      # could only go red once the 404 was already live. Here it is the one gate
+      # in this workflow that goes red BEFORE the commit, so a failure holds the
+      # whole day's data — which is the point: a redirect into a 404, a redirect
+      # away from a live profile, or a redirect the ledger lost would otherwise
+      # land and deploy. The refusal names each row and its fix, and a held day
+      # loses nothing because every run re-fetches every upload.
+      - name: Refuse redirect drift
+        run: npx tsx scripts/redirects.ts --drift
+
       - name: Commit if changed
         run: |
           git config user.name "tokon-data-refresh[bot]"
@@ -96,7 +119,11 @@ jobs:
           # theater-disagreements.json is the cross-check's output. Unlike
           # review-queue.json those rows ARE published — e2e gates exactly that —
           # so the file is a record of contested readings, not a holding pen.
-          git add data/videos.json data/replays.json data/stats.json data/players.json data/patchGroups.json data/patchBoundaries.json data/summary.json data/seasonBoundaries.json data/review-queue.json data/bench-queue.json data/player-redirects.json data/source-pins.json data/theater-cursor.json data/theater-disagreements.json data/report.md
+          # vercel.json is the routing "Regenerate player redirects" derived from
+          # player-redirects.json. It ships with the ledger or a merged player's
+          # old URL 404s until someone notices; on a day with no new merge it is
+          # byte-identical, so it never makes a commit on its own.
+          git add data/videos.json data/replays.json data/stats.json data/players.json data/patchGroups.json data/patchBoundaries.json data/summary.json data/seasonBoundaries.json data/review-queue.json data/bench-queue.json data/player-redirects.json data/source-pins.json data/theater-cursor.json data/theater-disagreements.json data/report.md vercel.json
           # report.md's "_Generated <timestamp>_" line changes every run; a diff
           # that is ONLY that line is not a data change — drop it so a no-change
           # day produces no commit (and no deploy). report.md still ships
@@ -157,31 +184,3 @@ jobs:
         # table, when the vendor has simply been quiet, the work is
         # `npm run data:patch-check -- --confirm-quiet`, committed.
         run: npx tsx scripts/expiries.ts --check
-
-      - name: Flag stale redirects
-        # `if: always()` because the step above is DESIGNED to go red, and a red
-        # step stops the ones after it. These two gates are independent, and both
-        # have to be able to report on the same run.
-        #
-        # WHY THIS CHECKS RATHER THAN REGENERATES. vercel.json is build
-        # configuration, and scripts/redirects.ts is emphatic that the daily data
-        # commit has no business writing it: a data refresh that quietly changes
-        # routing is a different and worse thing than one that changes data. So
-        # the cron does not fix this. It refuses to stay quiet about it.
-        #
-        # IT DRIFTS WITH NOBODY TOUCHING THE REPO, which is why a human-triggered
-        # check was not enough. redirects.ts's header says the retired set "only
-        # changes when a person edits scripts/players.ts" — that stopped being
-        # true when parse.ts started growing data/player-redirects.json from its
-        # own automatic player merges, and the cron commits that ledger nightly.
-        # vercel.json, the routing DERIVED from it, was left behind every time.
-        #
-        # Every row in the ledger and not in vercel.json is a live 404 on an
-        # indexed, prerendered player URL — there is no other redirect layer on
-        # this platform. Seventeen had accumulated by 2026-09-10, and the only
-        # reason anyone noticed was an unrelated `npm run typecheck`, which is
-        # where the --check already lived and which the cron does not run.
-        #
-        # Clear it with `npm run data:redirects` and commit vercel.json.
-        if: always()
-        run: npx tsx scripts/redirects.ts --check
