@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-29T14:22:17.483Z_
+_Generated 2026-09-30T14:15:31.358Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 246 | 246 | 100.0% |
+| highLevelReplays | 249 | 249 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 840 | 142 | 16.9% |
-| replaysHub | 325 | 319 | 98.2% |
-| fightingStationX | 2975 | 224 | 7.5% |
-| fgcReplaysHub | 2708 | 41 | 1.5% |
+| hadoukenReplays | 842 | 144 | 17.1% |
+| replaysHub | 332 | 326 | 98.2% |
+| fightingStationX | 2984 | 224 | 7.5% |
+| fgcReplaysHub | 2714 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1081** | |
+| **total** | | **1093** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2162 sides got its characters.
+How every one of the 2186 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 8 | 0.4% |
-| description | 580 | 26.8% |
-| index | 170 | 7.9% |
+| title | 26 | 1.2% |
+| description | 586 | 26.8% |
+| index | 170 | 7.8% |
 | footage | 111 | 5.1% |
-| human | 1266 | 58.6% |
+| human | 1266 | 57.9% |
 | review | 27 | 1.2% |
 
-- complete (4/4): **2154/2162** (99.6%)
+- complete (4/4): **2160/2186** (98.8%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: handle 581 · character-subset 31 · ambiguous 5
-- title slot order: handle-first 1579 · chars-first 139 · parallel-lists 244
+- bench alignment: handle 591 · character-subset 31 · ambiguous 5
+- title slot order: handle-first 1601 · chars-first 141 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,22 +58,22 @@ How every one of the 2162 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 8 | 0.4% |
-| 4 | 2144 | 99.2% |
+| 1 | 26 | 1.2% |
+| 4 | 2150 | 98.4% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **8 side(s) awaiting a drain** across 4 record(s) — oldest published **0 day(s)** ago
+- **26 side(s) awaiting a drain** across 13 record(s) — oldest published **1 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **0** — —
-- bench queue (published, incomplete): **4**
+- bench queue (published, incomplete): **13**
 
 ## Player identity
 
-12 identity(s) resolved from more than one spelling. The
+13 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -84,6 +84,7 @@ after changing scripts/players.ts, or the old URLs 404.
 | `ghost-of-evo` | `ghostofevo` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
+| `kingafrica` | `king-africa` |
 | `kingcreed` | `king-creed` |
 | `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
@@ -126,11 +127,11 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4097 |
-| not-tokon | 1119 |
+| other-game | 4105 |
+| not-tokon | 1125 |
 | pre-launch | 663 |
 | not-a-match | 197 |
-| short-duration | 41 |
+| short-duration | 42 |
 | not-an-event | 35 |
 | char-unresolved | 19 |
 | no-vs-title | 6 |
