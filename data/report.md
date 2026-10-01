@@ -7,21 +7,21 @@
 - **phoenix-cyclops** (unreleased-character, due 2026-10-01)
   phoenix-cyclops should now be playable. If it is: add --char-phoenix-cyclops to design/handoff/tokens.css (the handoff already derived #FF9D57 — contrast ≥4.5:1 on --color-surface and a hue ≥8–12° off its roster neighbours), add the same hex to accents in app/app.config.ts, add the fighter to ROSTER in scripts/characters.ts, drop this entry from UNRELEASED, then run `npm run data:characters` and `npm run data:art`. If it has NOT shipped, re-date this row to the new window — do not delete it.
 
-_Generated 2026-10-01T08:01:16.386Z_
+_Generated 2026-10-01T13:47:42.495Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 250 | 250 | 100.0% |
+| highLevelReplays | 252 | 252 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 844 | 146 | 17.3% |
-| replaysHub | 335 | 329 | 98.2% |
-| fightingStationX | 2989 | 224 | 7.5% |
-| fgcReplaysHub | 2716 | 41 | 1.5% |
+| replaysHub | 337 | 331 | 98.2% |
+| fightingStationX | 2993 | 224 | 7.5% |
+| fgcReplaysHub | 2718 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1099** | |
+| **total** | | **1103** | |
 
 ## Index intakes
 
@@ -43,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2198 sides got its characters.
+How every one of the 2206 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 22 | 1.0% |
-| description | 588 | 26.8% |
+| title | 2 | 0.1% |
+| description | 592 | 26.8% |
 | index | 170 | 7.7% |
-| footage | 123 | 5.6% |
-| human | 1268 | 57.7% |
+| footage | 115 | 5.2% |
+| human | 1300 | 58.9% |
 | review | 27 | 1.2% |
 
-- complete (4/4): **2166/2198** (98.5%)
+- complete (4/4): **2203/2206** (99.9%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: handle 595 · character-subset 31 · ambiguous 5
-- title slot order: handle-first 1611 · chars-first 143 · parallel-lists 244
+- bench alignment: handle 599 · character-subset 31 · ambiguous 5
+- title slot order: handle-first 1619 · chars-first 143 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,24 +65,23 @@ How every one of the 2198 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 26 | 1.2% |
-| 2 | 2 | 0.1% |
-| 3 | 4 | 0.2% |
-| 4 | 2156 | 98.1% |
+| 1 | 2 | 0.1% |
+| 3 | 1 | 0.0% |
+| 4 | 2193 | 99.4% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **32 side(s) awaiting a drain** across 17 record(s) — oldest published **2 day(s)** ago
+- **3 side(s) awaiting a drain** across 2 record(s) — oldest published **0 day(s)** ago
 
 ## Queues
 
-- review queue (never published): **0** — —
-- bench queue (published, incomplete): **17**
+- review queue (never published): **1** — character-completion 1
+- bench queue (published, incomplete): **2**
 
 ## Player identity
 
-14 identity(s) resolved from more than one spelling. The
+12 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -90,11 +89,9 @@ after changing scripts/players.ts, or the old URLs 404.
 | --- | --- |
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
-| `d-a-c` | `dac` |
 | `ghost-of-evo` | `ghostofevo` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
-| `kingafrica` | `king-africa` |
 | `kingcreed` | `king-creed` |
 | `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
@@ -133,17 +130,21 @@ disagreement — which, at two sides a record, would have been 6 here.
 
 No disagreements on that sweep.
 
+## Tournament placements — Liquipedia Tier 1–2, CC BY-SA 3.0
+
+No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tournaments.ts `LIQUIPEDIA_GAME` is null). The day one appears, set the constant and run `npm run data:tournaments` (manual, network) to pull its winner and runner-up tables.
+
 ## Misses
 
 | reason | count |
 | --- | ---: |
-| other-game | 4107 |
-| not-tokon | 1128 |
+| other-game | 4109 |
+| not-tokon | 1129 |
 | pre-launch | 663 |
-| not-a-match | 199 |
+| not-a-match | 201 |
 | short-duration | 42 |
 | not-an-event | 35 |
-| char-unresolved | 19 |
+| char-unresolved | 20 |
 | no-vs-title | 6 |
 
 - `marvelTokonYT` events-only gate: **35** upload(s) carried no known event brand.
