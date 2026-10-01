@@ -1,20 +1,27 @@
 # Tōkon pipeline report
 
-_Generated 2026-09-30T14:15:31.358Z_
+## ⚠ ACTION REQUIRED
+
+1 self-expiring gate(s) are due:
+
+- **phoenix-cyclops** (unreleased-character, due 2026-10-01)
+  phoenix-cyclops should now be playable. If it is: add --char-phoenix-cyclops to design/handoff/tokens.css (the handoff already derived #FF9D57 — contrast ≥4.5:1 on --color-surface and a hue ≥8–12° off its roster neighbours), add the same hex to accents in app/app.config.ts, add the fighter to ROSTER in scripts/characters.ts, drop this entry from UNRELEASED, then run `npm run data:characters` and `npm run data:art`. If it has NOT shipped, re-date this row to the new window — do not delete it.
+
+_Generated 2026-10-01T08:01:16.386Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 249 | 249 | 100.0% |
+| highLevelReplays | 250 | 250 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 842 | 144 | 17.1% |
-| replaysHub | 332 | 326 | 98.2% |
-| fightingStationX | 2984 | 224 | 7.5% |
-| fgcReplaysHub | 2714 | 41 | 1.5% |
+| hadoukenReplays | 844 | 146 | 17.3% |
+| replaysHub | 335 | 329 | 98.2% |
+| fightingStationX | 2989 | 224 | 7.5% |
+| fgcReplaysHub | 2716 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1093** | |
+| **total** | | **1099** | |
 
 ## Index intakes
 
@@ -29,28 +36,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 2186 sides got its characters.
+How every one of the 2198 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 26 | 1.2% |
-| description | 586 | 26.8% |
-| index | 170 | 7.8% |
-| footage | 111 | 5.1% |
-| human | 1266 | 57.9% |
+| title | 22 | 1.0% |
+| description | 588 | 26.8% |
+| index | 170 | 7.7% |
+| footage | 123 | 5.6% |
+| human | 1268 | 57.7% |
 | review | 27 | 1.2% |
 
-- complete (4/4): **2160/2186** (98.8%)
+- complete (4/4): **2166/2198** (98.5%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: handle 591 · character-subset 31 · ambiguous 5
-- title slot order: handle-first 1601 · chars-first 141 · parallel-lists 244
+- bench alignment: handle 595 · character-subset 31 · ambiguous 5
+- title slot order: handle-first 1611 · chars-first 143 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -59,21 +66,23 @@ How every one of the 2186 sides got its characters.
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
 | 1 | 26 | 1.2% |
-| 4 | 2150 | 98.4% |
+| 2 | 2 | 0.1% |
+| 3 | 4 | 0.2% |
+| 4 | 2156 | 98.1% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **26 side(s) awaiting a drain** across 13 record(s) — oldest published **1 day(s)** ago
+- **32 side(s) awaiting a drain** across 17 record(s) — oldest published **2 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **0** — —
-- bench queue (published, incomplete): **13**
+- bench queue (published, incomplete): **17**
 
 ## Player identity
 
-13 identity(s) resolved from more than one spelling. The
+14 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -81,6 +90,7 @@ after changing scripts/players.ts, or the old URLs 404.
 | --- | --- |
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
+| `d-a-c` | `dac` |
 | `ghost-of-evo` | `ghostofevo` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
@@ -127,10 +137,10 @@ No disagreements on that sweep.
 
 | reason | count |
 | --- | ---: |
-| other-game | 4105 |
-| not-tokon | 1125 |
+| other-game | 4107 |
+| not-tokon | 1128 |
 | pre-launch | 663 |
-| not-a-match | 197 |
+| not-a-match | 199 |
 | short-duration | 42 |
 | not-an-event | 35 |
 | char-unresolved | 19 |
