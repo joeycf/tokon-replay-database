@@ -65666,33 +65666,55 @@
     "resolvedBy": "human"
   },
   "5edpjDpENmU": {
-    "//": "bench-completion: read from footage [data:extract 2026-10-01]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
     "sides": [
       {
         "player": "kintaro",
         "handle": "KINTARO",
         "characters": [
-          "doctor-doom",
+          "carnage",
           "ghost-rider",
-          "carnage"
+          "doctor-doom",
+          "black-panther"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "doctor-doom"
           ],
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "doctor-doom",
             "ghost-rider",
             "carnage"
           ],
-          "confidence": 0.965
+          "confidence": 0.965,
+          "fromHuman": [
+            "carnage",
+            "ghost-rider",
+            "doctor-doom",
+            "black-panther"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "ghost-rider",
+              "doctor-doom",
+              "black-panther"
+            ],
+            "b": [
+              "ghost-rider",
+              "doctor-doom",
+              "black-panther"
+            ],
+            "forced": false
+          }
         }
       },
       {
@@ -65700,33 +65722,56 @@
         "handle": "Gropis",
         "characters": [
           "carnage",
-          "green-goblin"
+          "spider-man",
+          "green-goblin",
+          "doctor-doom"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "carnage"
           ],
           "slotOrder": "chars-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "carnage",
             "green-goblin"
           ],
-          "confidence": 0.892
+          "confidence": 0.892,
+          "fromHuman": [
+            "carnage",
+            "spider-man",
+            "green-goblin",
+            "doctor-doom"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "spider-man",
+              "green-goblin",
+              "doctor-doom"
+            ],
+            "b": [
+              "spider-man",
+              "green-goblin",
+              "doctor-doom"
+            ],
+            "forced": false
+          }
         }
       }
     ],
-    "resolvedBy": "extractor",
+    "resolvedBy": "human",
     "confidence": 0.892,
     "sideVotes": 44
   },
   "9YMRZ6NA3CA": {
-    "//": "bench-completion: read from footage [data:extract 2026-10-01]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
     "sides": [
       {
         "player": "glider",
@@ -65762,115 +65807,211 @@
         "player": "verix",
         "handle": "Verix",
         "characters": [
-          "captain-america",
           "ghost-rider",
+          "blade",
+          "captain-america",
           "magneto"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "ghost-rider"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "captain-america",
             "ghost-rider",
             "magneto"
           ],
-          "confidence": 0.754
+          "confidence": 0.754,
+          "fromHuman": [
+            "ghost-rider",
+            "blade",
+            "captain-america",
+            "magneto"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "blade",
+              "captain-america",
+              "magneto"
+            ],
+            "b": [
+              "blade",
+              "captain-america",
+              "magneto"
+            ],
+            "forced": false
+          }
         }
       }
     ],
-    "resolvedBy": "extractor",
+    "resolvedBy": "human",
     "confidence": 0.754,
     "sideVotes": 46
   },
   "UktsxB8yw94": {
-    "//": "bench-completion: read from footage [data:extract 2026-10-01]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
     "sides": [
       {
         "player": "clover",
         "handle": "Clover",
         "characters": [
-          "captain-america"
+          "captain-america",
+          "spider-man",
+          "loki",
+          "magik"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "captain-america"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "captain-america"
           ],
-          "confidence": 1
+          "confidence": 1,
+          "fromHuman": [
+            "captain-america",
+            "spider-man",
+            "loki",
+            "magik"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "captain-america",
+              "spider-man",
+              "loki",
+              "magik"
+            ],
+            "b": [
+              "captain-america",
+              "spider-man",
+              "loki",
+              "magik"
+            ],
+            "forced": false
+          }
         }
       },
       {
         "player": "shiesty",
         "handle": "Shiesty",
         "characters": [
-          "hulk"
+          "hulk",
+          "champion",
+          "doctor-doom",
+          "magneto"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "hulk"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "hulk"
           ],
-          "confidence": 1
+          "confidence": 1,
+          "fromHuman": [
+            "hulk",
+            "champion",
+            "doctor-doom",
+            "magneto"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "champion",
+              "doctor-doom",
+              "magneto"
+            ],
+            "b": [
+              "champion",
+              "doctor-doom",
+              "magneto"
+            ],
+            "forced": false
+          }
         }
       }
     ],
-    "resolvedBy": "extractor",
+    "resolvedBy": "human",
     "confidence": 1,
     "sideVotes": 68
   },
   "kHCsWfebFEo": {
-    "//": "bench-completion: read from footage [data:extract 2026-10-01]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
     "sides": [
       {
         "player": "chino",
         "handle": "Chino",
         "characters": [
-          "champion"
+          "champion",
+          "carnage",
+          "wolverine",
+          "hulk"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "champion"
           ],
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "champion"
           ],
-          "confidence": 1
+          "confidence": 1,
+          "fromHuman": [
+            "champion",
+            "carnage",
+            "wolverine",
+            "hulk"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "carnage",
+              "wolverine",
+              "hulk"
+            ],
+            "b": [
+              "carnage",
+              "wolverine",
+              "hulk"
+            ],
+            "forced": false
+          }
         }
       },
       {
@@ -65878,56 +66019,103 @@
         "handle": "TWISTED",
         "characters": [
           "wolverine",
-          "iron-man"
+          "carnage",
+          "iron-man",
+          "black-panther"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "wolverine"
           ],
           "slotOrder": "chars-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "wolverine",
             "iron-man"
           ],
-          "confidence": 0.771
+          "confidence": 0.771,
+          "fromHuman": [
+            "wolverine",
+            "carnage",
+            "iron-man",
+            "black-panther"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "carnage",
+              "iron-man",
+              "black-panther"
+            ],
+            "b": [
+              "carnage",
+              "iron-man",
+              "black-panther"
+            ],
+            "forced": false
+          }
         }
       }
     ],
-    "resolvedBy": "extractor",
+    "resolvedBy": "human",
     "confidence": 0.771,
     "sideVotes": 65
   },
   "GCaAAuGinOY": {
-    "//": "bench-completion: read from footage [data:extract 2026-10-01]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
     "sides": [
       {
         "player": "chino",
         "handle": "Chino",
         "characters": [
-          "champion"
+          "champion",
+          "carnage",
+          "wolverine",
+          "hulk"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "champion"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "champion"
           ],
-          "confidence": 1
+          "confidence": 1,
+          "fromHuman": [
+            "champion",
+            "carnage",
+            "wolverine",
+            "hulk"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "carnage",
+              "wolverine",
+              "hulk"
+            ],
+            "b": [
+              "carnage",
+              "wolverine",
+              "hulk"
+            ],
+            "forced": false
+          }
         }
       },
       {
@@ -65935,63 +66123,107 @@
         "handle": "BATCHEE",
         "characters": [
           "star-lord",
+          "blade",
           "wolverine",
           "magneto"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "wolverine"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "star-lord",
             "wolverine",
             "magneto"
           ],
-          "confidence": 0.942
+          "confidence": 0.942,
+          "fromHuman": [
+            "star-lord",
+            "blade",
+            "wolverine",
+            "magneto"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "blade",
+              "wolverine",
+              "magneto"
+            ],
+            "b": [
+              "blade",
+              "star-lord",
+              "wolverine"
+            ],
+            "forced": false
+          }
         }
       }
     ],
-    "resolvedBy": "extractor",
+    "resolvedBy": "human",
     "confidence": 0.942,
     "sideVotes": 64
   },
   "okd_3SCAN3U": {
-    "//": "bench-completion: read from footage [data:extract 2026-10-01]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
     "sides": [
       {
         "player": "slash",
         "handle": "Slash",
         "characters": [
           "magneto",
+          "carnage",
           "deadpool",
           "spider-man"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "deadpool"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "magneto",
             "deadpool",
             "spider-man"
           ],
-          "confidence": 0.945
+          "confidence": 0.945,
+          "fromHuman": [
+            "magneto",
+            "carnage",
+            "deadpool",
+            "spider-man"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "carnage",
+              "deadpool",
+              "spider-man"
+            ],
+            "b": [
+              "carnage",
+              "deadpool",
+              "spider-man"
+            ],
+            "forced": false
+          }
         }
       },
       {
@@ -66025,8 +66257,1020 @@
         }
       }
     ],
-    "resolvedBy": "extractor",
+    "resolvedBy": "human",
     "confidence": 0.766,
     "sideVotes": -54
+  },
+  "7Rev6gfq8HA": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "kbc",
+        "handle": "KBC",
+        "characters": [
+          "wolverine",
+          "carnage",
+          "spider-man",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "wolverine"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "wolverine",
+            "carnage",
+            "spider-man",
+            "green-goblin"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "carnage",
+              "spider-man",
+              "green-goblin"
+            ],
+            "b": [
+              "carnage",
+              "spider-man",
+              "green-goblin"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "d-a-c",
+        "handle": "D.A.C",
+        "characters": [
+          "ms-marvel",
+          "ghost-rider",
+          "iron-man",
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "ms-marvel"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "ms-marvel",
+            "ghost-rider",
+            "iron-man",
+            "spider-man"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "ghost-rider",
+              "iron-man",
+              "spider-man"
+            ],
+            "b": [
+              "ghost-rider",
+              "iron-man",
+              "spider-man"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "9I18WyJFY9E": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "tenma",
+        "handle": "Tenma",
+        "characters": [
+          "peni-parker",
+          "ms-marvel",
+          "deadpool",
+          "black-panther"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "peni-parker"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "peni-parker",
+            "ms-marvel",
+            "deadpool",
+            "black-panther"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "ms-marvel",
+              "deadpool",
+              "black-panther"
+            ],
+            "b": [
+              "ms-marvel",
+              "black-panther",
+              "deadpool"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "totsugeki",
+        "handle": "TOTSUGEKI",
+        "characters": [
+          "black-panther",
+          "magik",
+          "peni-parker",
+          "storm"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "peni-parker"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "black-panther",
+            "magik",
+            "peni-parker",
+            "storm"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "magik",
+              "peni-parker",
+              "storm"
+            ],
+            "b": [
+              "magik",
+              "black-panther",
+              "storm"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "DfwHcwGw3g8": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "gropis",
+        "handle": "Gropis",
+        "characters": [
+          "carnage",
+          "spider-man",
+          "doctor-doom",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "carnage"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "carnage",
+            "spider-man",
+            "doctor-doom",
+            "green-goblin"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "spider-man",
+              "doctor-doom",
+              "green-goblin"
+            ],
+            "b": [
+              "carnage",
+              "doctor-doom",
+              "spider-man"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "matraton",
+        "handle": "MATRATON",
+        "characters": [
+          "hulk",
+          "blade",
+          "ghost-rider",
+          "magneto"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "hulk"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "hulk",
+            "blade",
+            "ghost-rider",
+            "magneto"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "blade",
+              "ghost-rider",
+              "magneto"
+            ],
+            "b": [
+              "blade",
+              "ghost-rider",
+              "magneto"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "ELTcdTLtdos": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "slash",
+        "handle": "Slash",
+        "characters": [
+          "deadpool",
+          "magneto",
+          "carnage",
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "deadpool"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "deadpool",
+            "magneto",
+            "carnage",
+            "spider-man"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "magneto",
+              "carnage",
+              "spider-man"
+            ],
+            "b": [
+              "carnage",
+              "spider-man",
+              "magneto"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "lord-venom",
+        "handle": "Lord Venom",
+        "characters": [
+          "magneto",
+          "carnage",
+          "loki",
+          "doctor-doom"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "loki"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "magneto",
+            "carnage",
+            "loki",
+            "doctor-doom"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "carnage",
+              "loki",
+              "doctor-doom"
+            ],
+            "b": [
+              "carnage",
+              "magneto",
+              "loki"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "J_9vYbotCZQ": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "buss",
+        "handle": "BUSS",
+        "characters": [
+          "hulk",
+          "blade",
+          "danger",
+          "magneto"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "hulk"
+          ],
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "hulk",
+            "blade",
+            "danger",
+            "magneto"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "hulk",
+              "blade",
+              "danger",
+              "magneto"
+            ],
+            "b": [
+              "hulk",
+              "blade",
+              "danger",
+              "magneto"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "ghost-of-evo",
+        "handle": "Ghost of Evo",
+        "characters": [
+          "storm",
+          "blade",
+          "black-panther",
+          "hulk"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "storm"
+          ],
+          "slotOrder": "chars-first",
+          "complete": true,
+          "fromHuman": [
+            "storm",
+            "blade",
+            "black-panther",
+            "hulk"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "storm",
+              "blade",
+              "black-panther",
+              "hulk"
+            ],
+            "b": [
+              "storm",
+              "blade",
+              "black-panther",
+              "hulk"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "T-qzlkT9nFA": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "lupro",
+        "handle": "Lupro",
+        "characters": [
+          "ms-marvel",
+          "loki",
+          "peni-parker",
+          "doctor-doom"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "ms-marvel"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "ms-marvel",
+            "loki",
+            "peni-parker",
+            "doctor-doom"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "loki",
+              "peni-parker",
+              "doctor-doom"
+            ],
+            "b": [
+              "loki",
+              "peni-parker",
+              "doctor-doom"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "dandy",
+        "handle": "DANDY",
+        "characters": [
+          "ms-marvel",
+          "storm",
+          "captain-america",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "ms-marvel"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "ms-marvel",
+            "storm",
+            "captain-america",
+            "green-goblin"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "storm",
+              "captain-america",
+              "green-goblin"
+            ],
+            "b": [
+              "storm",
+              "captain-america",
+              "green-goblin"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "cZd6L-yISrY": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "lord-venom",
+        "handle": "Lord Venom",
+        "characters": [
+          "magneto",
+          "carnage",
+          "loki",
+          "doctor-doom"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "loki"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "magneto",
+            "carnage",
+            "loki",
+            "doctor-doom"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "carnage",
+              "loki",
+              "doctor-doom"
+            ],
+            "b": [
+              "carnage",
+              "doctor-doom",
+              "magneto"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "keazer",
+        "handle": "Keazer",
+        "characters": [
+          "danger",
+          "hulk",
+          "magik",
+          "magneto"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "danger"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "danger",
+            "hulk",
+            "magik",
+            "magneto"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "hulk",
+              "magik",
+              "magneto"
+            ],
+            "b": [
+              "hulk",
+              "magik",
+              "magneto"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "loSLy7mlJYI": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "fenritti",
+        "handle": "FENRITTI",
+        "characters": [
+          "magik",
+          "star-lord",
+          "spider-man",
+          "magneto"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "magik"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "magik",
+            "star-lord",
+            "spider-man",
+            "magneto"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "star-lord",
+              "spider-man",
+              "magneto"
+            ],
+            "b": [
+              "star-lord",
+              "spider-man",
+              "magneto"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "tonosama",
+        "handle": "TONOSAMA",
+        "characters": [
+          "black-panther",
+          "star-lord",
+          "carnage",
+          "magneto"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "carnage"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "black-panther",
+            "star-lord",
+            "carnage",
+            "magneto"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "star-lord",
+              "carnage",
+              "magneto"
+            ],
+            "b": [
+              "star-lord",
+              "black-panther",
+              "magneto"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "lxLdYNGQe9w": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "yammini",
+        "handle": "Yammini",
+        "characters": [
+          "iron-man",
+          "magneto",
+          "loki",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "iron-man"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "iron-man",
+            "magneto",
+            "loki",
+            "green-goblin"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "magneto",
+              "loki",
+              "green-goblin"
+            ],
+            "b": [
+              "magneto",
+              "loki",
+              "green-goblin"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "lord-venom",
+        "handle": "Lord Venom",
+        "characters": [
+          "loki",
+          "carnage",
+          "magneto",
+          "doctor-doom"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "loki"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "loki",
+            "carnage",
+            "magneto",
+            "doctor-doom"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "carnage",
+              "magneto",
+              "doctor-doom"
+            ],
+            "b": [
+              "carnage",
+              "doctor-doom",
+              "magneto"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "t3Lowzm7GJA": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "leffen",
+        "handle": "Leffen",
+        "characters": [
+          "spider-man",
+          "blade",
+          "storm",
+          "magik"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "storm"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "spider-man",
+            "blade",
+            "storm",
+            "magik"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "blade",
+              "storm",
+              "magik"
+            ],
+            "b": [
+              "magik",
+              "blade",
+              "spider-man"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "majin-goblin",
+        "handle": "MAJIN GOBLIN",
+        "characters": [
+          "wolverine",
+          "blade",
+          "black-panther",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "wolverine"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "wolverine",
+            "blade",
+            "black-panther",
+            "green-goblin"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "blade",
+              "black-panther",
+              "green-goblin"
+            ],
+            "b": [
+              "blade",
+              "black-panther",
+              "green-goblin"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
+  },
+  "y7GHruRKnLY": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "kingafrica",
+        "handle": "Kingafrica",
+        "characters": [
+          "storm",
+          "captain-america",
+          "magneto",
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "captain-america"
+          ],
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "storm",
+            "captain-america",
+            "magneto",
+            "spider-man"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "captain-america",
+              "magneto",
+              "spider-man"
+            ],
+            "b": [
+              "magneto",
+              "captain-america",
+              "spider-man"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "ggs",
+        "handle": "GGS",
+        "characters": [
+          "deadpool",
+          "loki",
+          "star-lord",
+          "magneto"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "deadpool"
+          ],
+          "slotOrder": "chars-first",
+          "complete": true,
+          "fromHuman": [
+            "deadpool",
+            "loki",
+            "star-lord",
+            "magneto"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "loki",
+              "star-lord",
+              "magneto"
+            ],
+            "b": [
+              "loki",
+              "star-lord",
+              "magneto"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
   }
 }
