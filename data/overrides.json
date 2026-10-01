@@ -65572,5 +65572,97 @@
       }
     ],
     "resolvedBy": "human"
+  },
+  "tBU6xbuvO90": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "yammini",
+        "handle": "Yammini",
+        "characters": [
+          "iron-man",
+          "magneto",
+          "loki",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "iron-man"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "iron-man",
+            "magneto",
+            "loki",
+            "green-goblin"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "magneto",
+              "loki",
+              "green-goblin"
+            ],
+            "b": [
+              "magneto",
+              "iron-man",
+              "green-goblin"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "nissan",
+        "handle": "NISSAN",
+        "characters": [
+          "deadpool",
+          "blade",
+          "doctor-doom",
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "doctor-doom"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "deadpool",
+            "blade",
+            "doctor-doom",
+            "spider-man"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "blade",
+              "doctor-doom",
+              "spider-man"
+            ],
+            "b": [
+              "blade",
+              "doctor-doom",
+              "spider-man"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
   }
 }
