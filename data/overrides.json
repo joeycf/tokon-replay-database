@@ -67272,5 +67272,71 @@
       }
     ],
     "resolvedBy": "human"
+  },
+  "0mWCmq9ZnVY": {
+    "//": "bench-completion: read from footage [data:extract 2026-10-01]",
+    "sides": [
+      {
+        "player": "gropis",
+        "handle": "Gropis",
+        "characters": [
+          "green-goblin",
+          "carnage",
+          "doctor-doom"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "carnage"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": false,
+          "fromFootage": [
+            "green-goblin",
+            "carnage",
+            "doctor-doom"
+          ],
+          "confidence": 0.989
+        }
+      },
+      {
+        "player": "doseurs",
+        "handle": "DOSEURS",
+        "characters": [
+          "doctor-doom",
+          "storm",
+          "black-panther",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "doctor-doom"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromFootage": [
+            "doctor-doom",
+            "storm",
+            "black-panther",
+            "green-goblin"
+          ],
+          "confidence": 0.997
+        }
+      }
+    ],
+    "resolvedBy": "extractor",
+    "confidence": 0.989,
+    "sideVotes": 201
   }
 }
