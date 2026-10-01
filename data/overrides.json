@@ -67274,34 +67274,56 @@
     "resolvedBy": "human"
   },
   "0mWCmq9ZnVY": {
-    "//": "bench-completion: read from footage [data:extract 2026-10-01]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
     "sides": [
       {
         "player": "gropis",
         "handle": "Gropis",
         "characters": [
           "green-goblin",
+          "spider-man",
           "carnage",
           "doctor-doom"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "carnage"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false,
+          "complete": true,
           "fromFootage": [
             "green-goblin",
             "carnage",
             "doctor-doom"
           ],
-          "confidence": 0.989
+          "confidence": 0.989,
+          "fromHuman": [
+            "green-goblin",
+            "spider-man",
+            "carnage",
+            "doctor-doom"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "spider-man",
+              "carnage",
+              "doctor-doom"
+            ],
+            "b": [
+              "spider-man",
+              "carnage",
+              "doctor-doom"
+            ],
+            "forced": false
+          }
         }
       },
       {
@@ -67309,15 +67331,16 @@
         "handle": "DOSEURS",
         "characters": [
           "doctor-doom",
+          "green-goblin",
           "storm",
-          "black-panther",
-          "green-goblin"
+          "black-panther"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "doctor-doom"
@@ -67331,12 +67354,124 @@
             "black-panther",
             "green-goblin"
           ],
-          "confidence": 0.997
+          "confidence": 0.997,
+          "fromHuman": [
+            "doctor-doom",
+            "green-goblin",
+            "storm",
+            "black-panther"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "green-goblin",
+              "storm",
+              "black-panther"
+            ],
+            "b": [
+              "green-goblin",
+              "storm",
+              "black-panther"
+            ],
+            "forced": false
+          }
         }
       }
     ],
-    "resolvedBy": "extractor",
+    "resolvedBy": "human",
     "confidence": 0.989,
     "sideVotes": 201
+  },
+  "w4JQg4nYyi0": {
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-01]",
+    "sides": [
+      {
+        "player": "acnologic",
+        "handle": "ACNOLOGIC",
+        "characters": [
+          "magik",
+          "blade",
+          "carnage",
+          "black-panther"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "carnage"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "magik",
+            "blade",
+            "carnage",
+            "black-panther"
+          ],
+          "humanScreenSide": "L",
+          "humanPicks": {
+            "a": [
+              "blade",
+              "carnage",
+              "black-panther"
+            ],
+            "b": [
+              "magik",
+              "black-panther",
+              "blade"
+            ],
+            "forced": false
+          }
+        }
+      },
+      {
+        "player": "hookgang",
+        "handle": "HOOKGANG",
+        "characters": [
+          "spider-man",
+          "iron-man",
+          "deadpool",
+          "doctor-doom"
+        ],
+        "provenance": {
+          "tier": "human",
+          "tiers": [
+            "title",
+            "human"
+          ],
+          "fromTitle": [
+            "deadpool"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromHuman": [
+            "spider-man",
+            "iron-man",
+            "deadpool",
+            "doctor-doom"
+          ],
+          "humanScreenSide": "R",
+          "humanPicks": {
+            "a": [
+              "iron-man",
+              "deadpool",
+              "doctor-doom"
+            ],
+            "b": [
+              "iron-man",
+              "deadpool",
+              "doctor-doom"
+            ],
+            "forced": false
+          }
+        }
+      }
+    ],
+    "resolvedBy": "human"
   }
 }
