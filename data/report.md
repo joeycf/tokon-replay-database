@@ -7,21 +7,21 @@
 - **phoenix-cyclops** (unreleased-character, due 2026-10-01)
   phoenix-cyclops should now be playable. If it is: add --char-phoenix-cyclops to design/handoff/tokens.css (the handoff already derived #FF9D57 — contrast ≥4.5:1 on --color-surface and a hue ≥8–12° off its roster neighbours), add the same hex to accents in app/app.config.ts, add the fighter to ROSTER in scripts/characters.ts, drop this entry from UNRELEASED, then run `npm run data:characters` and `npm run data:art`. If it has NOT shipped, re-date this row to the new window — do not delete it.
 
-_Generated 2026-10-01T13:47:42.495Z_
+_Generated 2026-10-01T14:47:36.045Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 252 | 252 | 100.0% |
+| highLevelReplays | 253 | 253 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 844 | 146 | 17.3% |
-| replaysHub | 337 | 331 | 98.2% |
+| replaysHub | 338 | 332 | 98.2% |
 | fightingStationX | 2993 | 224 | 7.5% |
 | fgcReplaysHub | 2718 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1103** | |
+| **total** | | **1105** | |
 
 ## Index intakes
 
@@ -36,28 +36,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor did not move: the catalogue has taken no new Tōkon entry since_
-_the last pull — quieter still, and equally ordinary._
+_The cursor still advanced — a quiet day is the ordinary case here, not a_
+_failed one._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 2206 sides got its characters.
+How every one of the 2210 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 2 | 0.1% |
-| description | 592 | 26.8% |
+| title | 28 | 1.3% |
+| description | 594 | 26.9% |
 | index | 170 | 7.7% |
-| footage | 115 | 5.2% |
-| human | 1300 | 58.9% |
+| footage | 123 | 5.6% |
+| human | 1268 | 57.4% |
 | review | 27 | 1.2% |
 
-- complete (4/4): **2203/2206** (99.9%)
+- complete (4/4): **2172/2210** (98.3%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: handle 599 · character-subset 31 · ambiguous 5
-- title slot order: handle-first 1619 · chars-first 143 · parallel-lists 244
+- bench alignment: handle 601 · character-subset 31 · ambiguous 5
+- title slot order: handle-first 1623 · chars-first 143 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,23 +65,24 @@ How every one of the 2206 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 2 | 0.1% |
-| 3 | 1 | 0.0% |
-| 4 | 2193 | 99.4% |
+| 1 | 32 | 1.4% |
+| 2 | 2 | 0.1% |
+| 3 | 4 | 0.2% |
+| 4 | 2162 | 97.8% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **3 side(s) awaiting a drain** across 2 record(s) — oldest published **0 day(s)** ago
+- **38 side(s) awaiting a drain** across 20 record(s) — oldest published **2 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **2**
+- bench queue (published, incomplete): **20**
 
 ## Player identity
 
-12 identity(s) resolved from more than one spelling. The
+14 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -89,9 +90,11 @@ after changing scripts/players.ts, or the old URLs 404.
 | --- | --- |
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
+| `d-a-c` | `dac` |
 | `ghost-of-evo` | `ghostofevo` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
+| `kingafrica` | `king-africa` |
 | `kingcreed` | `king-creed` |
 | `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
@@ -129,10 +132,6 @@ handles before reading fighters, so a swapped pair is not scored as a character
 disagreement — which, at two sides a record, would have been 6 here.
 
 No disagreements on that sweep.
-
-## Tournament placements — Liquipedia Tier 1–2, CC BY-SA 3.0
-
-No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tournaments.ts `LIQUIPEDIA_GAME` is null). The day one appears, set the constant and run `npm run data:tournaments` (manual, network) to pull its winner and runner-up tables.
 
 ## Misses
 
