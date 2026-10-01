@@ -137,24 +137,59 @@ from that date instead.
 
 ## Scripts
 
-| command                     | what it does                                                                |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `npm run data:fetch`        | every upload from the seven channels → `raw/`, plus a recon report          |
-| `npm run data:parse`        | gate, parse, bench, merge, emit — the daily path                            |
-| `npm run data:build`        | fetch + parse                                                               |
-| `npm run data:emit`         | re-emit the engine artifacts from the substrate                             |
-| `npm run data:characters`   | rebuild the roster (accents from the design tokens; fails loud on a gap)    |
-| `npm run data:art`          | scrape character art from the Marvel Database manifest                      |
-| `npm run data:art-tile`     | generate the comic-register fallback tile / cutout ground                   |
-| `npm run data:og`           | regenerate `public/og-default.png`                                          |
-| `npm run data:patch-check`  | diff the patch table against the vendor's news feed                         |
-| `npm run data:roster-check` | diff the roster against Sony's Hero Select block                            |
-| `npm run data:expiries`     | the self-expiring gates (`--check`)                                         |
-| `npm run data:catchup`      | **the maintenance ritual** — fetch → parse → read new footage → what's left |
-| `npm run data:replay-dupes` | cross-channel duplicate audit — report-only, never drops                    |
-| `npm run verify:gates`      | positive-control every gate                                                 |
-| `npm run test:e2e`          | the audit suite (needs `npm run generate` first)                            |
-| `npm run verify:deployed`   | post-deploy smoke check against production                                  |
+| command                     | what it does                                                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `npm run data:fetch`        | every upload from the seven channels → `raw/`, plus a recon report                                                            |
+| `npm run data:parse`        | gate, parse, bench, merge, emit — the daily path                                                                              |
+| `npm run data:build`        | fetch + parse                                                                                                                 |
+| `npm run data:emit`         | re-emit the engine artifacts from the substrate                                                                               |
+| `npm run data:characters`   | rebuild the roster (accents from the design tokens; fails loud on a gap)                                                      |
+| `npm run data:art`          | scrape character art from the Marvel Database manifest                                                                        |
+| `npm run data:art-tile`     | generate the comic-register fallback tile / cutout ground                                                                     |
+| `npm run data:og`           | regenerate `public/og-default.png`                                                                                            |
+| `npm run data:patch-check`  | diff the patch table against the vendor's news feed                                                                           |
+| `npm run data:roster-check` | diff the roster against Sony's Hero Select block                                                                              |
+| `npm run data:tournaments`  | Liquipedia Tier 1–2 placements → `data/tournaments.json`. Manual; `--match`, `--check`. No page for Tōkon yet → `UNSUPPORTED` |
+| `npm run data:expiries`     | the self-expiring gates (`--check`)                                                                                           |
+| `npm run data:catchup`      | **the maintenance ritual** — fetch → parse → read new footage → what's left                                                   |
+| `npm run data:replay-dupes` | cross-channel duplicate audit — report-only, never drops                                                                      |
+| `npm run verify:gates`      | positive-control every gate                                                                                                   |
+| `npm run test:e2e`          | the audit suite (needs `npm run generate` first)                                                                              |
+| `npm run verify:deployed`   | post-deploy smoke check against production                                                                                    |
+
+## Featured players come from tournament results
+
+A player is **featured** when they won or placed second at a Liquipedia Tier 1 or
+Tier 2 event, or when they rank in the top 2% of the unflagged players by
+appearances (engine v0.17.0; the old rule was a flat "25+ replays"). The
+placements are `data/tournaments.json`, pulled by `npm run data:tournaments` —
+**manual, network, never in the cron** — through Liquipedia's MediaWiki API (its
+HTML pages are bot-walled and off limits by its terms; the API wants gzip, a
+contact User-Agent and one `parse` call per 30 s). The daily parse re-matches
+the file against the registry it just built and stamps `featured: true` +
+`extra.titles` on every hit, so a champion with no replay yet costs nothing today
+and is featured the morning their first video is ingested.
+
+**Tōkon has no Liquipedia coverage yet.** `scripts/tournaments.ts` carries
+`LIQUIPEDIA_GAME = null`, so the fetch prints `tournaments: UNSUPPORTED` and
+exits 0, `data/tournaments.json` does not exist, and the parse hook matches
+nobody. Everything else is wired — the hook in `scripts/parse.ts`, the
+`--check` validator inside `npm run typecheck`, `data/tournament-aliases.json`
+(empty), the e2e block (skips visibly) and the `verify:gates` controls — so the
+day the wiki opens a page for the game, the game-constants block at the top of
+`scripts/tournaments.ts` is the only thing that changes.
+
+The matcher never guesses between people. A name that is also a fighter
+(`Storm`, `Blade`), has under three alphanumerics, or resolves to two registry
+ids is reported in `data/report.md` and `npm run data:tournaments -- --match`,
+and a human closes it in `data/tournament-aliases.json` (an id, or `null` to
+ignore). Both readers match against the same view of the registry: every
+absorbed spelling in `data/player-redirects.json` is offered as an alias of its
+canonical id (`withAbsorbedAliases` in `scripts/tournaments.ts`), so a wiki name
+that slugs to a retired spelling still lands on the right player, and the two
+reports never disagree. Liquipedia's content is **CC BY-SA 3.0**: the credit is in the file's
+`source` block and the engine renders it beside every title on the player page.
+Pacing across all games is `../sync-tournaments.sh`.
 
 ## Daily data refresh
 

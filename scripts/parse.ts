@@ -24,6 +24,15 @@ import { resolveKey, resolvePlayers, undeclaredCollisions } from './players';
 import { dueExpiries, expiryBlock } from './expiries';
 import { LAUNCH, SEASONS, seasonForDate } from './patches';
 import { buildAliasMatcher, loadCharacters, playerId, stripLeaderboard } from './roster';
+import {
+  LIQUIPEDIA_GAME,
+  applyTournamentTitles,
+  describeOutcome,
+  matchTournaments,
+  readAliases,
+  readTournaments,
+  withAbsorbedAliases,
+} from './tournaments';
 import type {
   BenchQueueItem,
   CharacterRecord,
@@ -1386,6 +1395,78 @@ async function main() {
     }
   }
   const players = [...playerMap.values()].sort((a, b) => a.id.localeCompare(b.id));
+
+  /**
+   * THE RETIRED-ID LEDGER — append-only, and that is the whole point.
+   *
+   * A merged spelling's id is only observable at the moment of the merge: once
+   * data/videos.json is canonicalised, the old spelling is gone from the corpus
+   * and nothing can rediscover it. Recomputing this set from the committed data
+   * therefore yields nothing, which is how the first attempt at the redirect
+   * emitter silently produced zero.
+   *
+   * Worse, it decays. If the last record carrying the old spelling is deleted
+   * upstream — the Tōkon channels unlist videos routinely — a recomputed set
+   * would drop that redirect and the indexed URL would 404 again months later,
+   * with no diff to explain it.
+   *
+   * So the ledger MERGES with what is already committed and never shrinks. It is
+   * the input to `npm run data:redirects`, and a row leaves it only by hand.
+   *
+   * It is computed HERE, before the tournament match, because the match reads
+   * it too (withAbsorbedAliases below) — written to data/player-redirects.json
+   * in the write block further down.
+   */
+  const priorRedirects: Record<string, string> = await readJson('player-redirects.json', {});
+  const proposed: Record<string, string> = { ...priorRedirects };
+  for (const [canonical, absorbed] of mergeReport.merged) {
+    for (const old of absorbed) proposed[old] = canonical;
+  }
+  // Two rows are dropped rather than carried: one pointing at itself (a spelling
+  // that later won the id back — Vercel serves a self-redirect as a loop), and
+  // one whose target no longer exists (the whole player left the corpus, so the
+  // redirect would land on a 404 of its own).
+  const redirects = Object.fromEntries(
+    Object.entries(proposed).filter(([from, to]) => from !== to && playerMap.has(to)),
+  );
+
+  // ── tournament placements → featured + extra.titles ───────────────────────
+  // data/tournaments.json is Liquipedia's Tier 1–2 winners and runners-up,
+  // fetched by hand (scripts/tournaments.ts — NETWORK, MANUAL, NEVER IN THE
+  // CRON). The match runs HERE, against the registry this run just built and
+  // before anything is written, so a champion with no replay yet costs nothing
+  // today and is featured the morning their first video is ingested. Keys are
+  // compared through `playerId` — the function that minted every `s.player`
+  // above — so a match IS the id. Names the matcher will not decide on its own
+  // (a fighter's name, under three alphanumerics, two candidates) are reported
+  // for data/tournament-aliases.json, never guessed: a wrong person featured is
+  // worse than a right one missed. `players` and `playerMap` hold the SAME
+  // record objects, so stamping the map is stamping the array written below.
+  //
+  // The matcher also indexes `extra.aliases`. Tōkon's registry does not carry
+  // them (players.json is `{ id, handle }`), but resolvePlayers absorbs
+  // alternate spellings into their canonical id — a Liquipedia display name
+  // that is one of those spellings slugs to the ABSORBED id, not the canonical
+  // one, and would otherwise land in "waiting for footage". So the matcher is
+  // handed withAbsorbedAliases(players, redirects): the ledger computed just
+  // above, folded onto each canonical record as aliases. `npm run
+  // data:tournaments -- --match` builds the SAME view from the committed
+  // data/player-redirects.json, so report.md and the offline worklist agree;
+  // the records in `players`/`playerMap` are untouched and players.json is
+  // unchanged.
+  //
+  // Tōkon has no Liquipedia page yet (LIQUIPEDIA_GAME is null, no
+  // tournaments.json), so today this matches nothing — the wiring is in place
+  // for the day it does.
+  const tournaments = matchTournaments(
+    withAbsorbedAliases(players, redirects),
+    readTournaments(),
+    readAliases().aliases,
+    playerId,
+    (h) => matcher.ids(h).length > 0,
+  );
+  const titled = applyTournamentTitles(playerMap, tournaments);
+
   const collisions = undeclaredCollisions(players);
 
   // ── re-pin every index intake rebuilt from a dump this run — AND IT ONLY
@@ -1601,36 +1682,8 @@ async function main() {
   }
 
   // ── write ──────────────────────────────────────────────────────────────────
-  /**
-   * THE RETIRED-ID LEDGER — append-only, and that is the whole point.
-   *
-   * A merged spelling's id is only observable at the moment of the merge: once
-   * data/videos.json is canonicalised, the old spelling is gone from the corpus
-   * and nothing can rediscover it. Recomputing this set from the committed data
-   * therefore yields nothing, which is how the first attempt at the redirect
-   * emitter silently produced zero.
-   *
-   * Worse, it decays. If the last record carrying the old spelling is deleted
-   * upstream — the Tōkon channels unlist videos routinely — a recomputed set
-   * would drop that redirect and the indexed URL would 404 again months later,
-   * with no diff to explain it.
-   *
-   * So the ledger MERGES with what is already committed and never shrinks. It is
-   * the input to `npm run data:redirects`, and a row leaves it only by hand.
-   */
-  const priorRedirects: Record<string, string> = await readJson('player-redirects.json', {});
-  const proposed: Record<string, string> = { ...priorRedirects };
-  for (const [canonical, absorbed] of mergeReport.merged) {
-    for (const old of absorbed) proposed[old] = canonical;
-  }
-  // Two rows are dropped rather than carried: one pointing at itself (a spelling
-  // that later won the id back — Vercel serves a self-redirect as a loop), and
-  // one whose target no longer exists (the whole player left the corpus, so the
-  // redirect would land on a 404 of its own).
-  const redirects = Object.fromEntries(
-    Object.entries(proposed).filter(([from, to]) => from !== to && playerMap.has(to)),
-  );
-
+  // `redirects` is the retired-id ledger computed before the tournament match
+  // (see THE RETIRED-ID LEDGER above the hook).
   await write('videos.json', withOverrides);
   await write('players.json', players);
   await write(
@@ -2006,6 +2059,23 @@ async function main() {
 
   lines.push(...formatCrossCheck(witnessArtifact));
 
+  // ── tournament placements (Liquipedia, CC BY-SA 3.0) ─────────────────────
+  lines.push(
+    '## Tournament placements — Liquipedia Tier 1–2, CC BY-SA 3.0',
+    '',
+    ...(tournaments.events
+      ? describeOutcome(tournaments, players.length)
+      : [
+          LIQUIPEDIA_GAME
+            ? 'No data/tournaments.json — run `npm run data:tournaments` (manual, network) to pull ' +
+              "Liquipedia's winner and runner-up tables."
+            : 'No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tournaments.ts ' +
+              '`LIQUIPEDIA_GAME` is null). The day one appears, set the constant and run ' +
+              '`npm run data:tournaments` (manual, network) to pull its winner and runner-up tables.',
+          '',
+        ]),
+  );
+
   lines.push('## Misses', '');
   lines.push('| reason | count |', '| --- | ---: |');
   for (const [reason, n] of Object.entries(byReason).sort((a, b) => b[1] - a[1])) {
@@ -2121,7 +2191,7 @@ async function main() {
 
   console.log(
     `\n✔ parsed ${withOverrides.length} records from ${CHANNELS.length} channels ` +
-      `(${misses.length} misses)`,
+      `(${misses.length} misses) · ${players.length} players · ${titled} titled`,
   );
   console.log(
     `  provenance: ${fmtTally(tierCount)}  ·  complete ${completeSides}/${sideTotal}` +

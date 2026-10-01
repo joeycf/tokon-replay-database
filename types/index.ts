@@ -396,12 +396,25 @@ export interface MatchVideo {
  *  be friction that teaches people to skip the check. */
 export type SourcePins = Partial<Record<ChannelKey, number>>;
 
+/** One tournament placement (mirrors the engine's PlayerTitle, v0.17.0).
+ *  Set by parse.ts from data/tournaments.json — Liquipedia, CC BY-SA 3.0 —
+ *  onto `PlayerRecord.extra.titles`; carrying one makes the player
+ *  `featured`. Tōkon has no Liquipedia page yet, so today nobody carries one. */
+export interface PlayerTitle {
+  event: string;
+  /** 1 = winner, 2 = runner-up. */
+  place: 1 | 2;
+  /** ISO end date of the event. */
+  date: string;
+  url?: string;
+}
+
 /** data/players.json entry (mirrors the engine's Player). */
 export interface PlayerRecord {
   id: string;
   handle: string;
   featured?: boolean;
-  extra?: { aliases?: string[] };
+  extra?: { aliases?: string[]; titles?: PlayerTitle[] };
 }
 
 /** data/characters.json entry (mirrors the engine's Character). `aliases` is

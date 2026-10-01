@@ -16,6 +16,7 @@
  * Run: npm run verify:gates
  */
 
+import { existsSync } from 'node:fs';
 import { cp, mkdir, mkdtemp, readFile, rm, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -37,6 +38,7 @@ import {
   validateSeasons,
 } from './patches';
 import { resolvePlayers } from './players';
+import { LIQUIPEDIA_GAME, SOURCE_PAGE, validate as validateTournaments } from './tournaments';
 import type { MatchVideo, PlayerRecord, SeasonBoundary } from '../types/index';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -699,6 +701,99 @@ try {
     });
   }
 
+  // ── 2c. tournament placements ───────────────────────────────────────────────
+  console.log('\n[2c] tournament placements — the validator, and the keep-the-file guarantee');
+  {
+    // PURE controls through validate(), the function `tsx scripts/tournaments.ts
+    // --check` runs inside `npm run typecheck`. Tōkon has no Liquipedia page
+    // and no data/tournaments.json, so the defects are hand-built here rather
+    // than injected into a committed file — the validator must already refuse
+    // them on the day the file first exists, because parse.ts features whoever
+    // the file names.
+    const event = {
+      name: 'Control Open 2026',
+      page: 'Control_Open/2026',
+      url: 'https://liquipedia.net/fighters/Control_Open/2026',
+      date: '2026-09-01',
+      tier: 1,
+      entrants: 64,
+      prize: null,
+      location: null,
+      winner: { name: 'CTLWINNER', page: 'CTLWINNER', flag: null, character: null },
+      runnerUp: null,
+    };
+    const file = (events: (typeof event)[]) => ({
+      source: {
+        name: 'Liquipedia Fighting Games Wiki',
+        url: SOURCE_PAGE,
+        licence: 'CC BY-SA 3.0',
+        licenceUrl: 'https://creativecommons.org/licenses/by-sa/3.0/',
+        game: LIQUIPEDIA_GAME ?? 'tokon',
+        tiers: [1, 2],
+      },
+      generatedAt: '2026-09-02',
+      events,
+    });
+    const registry: PlayerRecord[] = [{ id: 'ctlwinner', handle: 'CTLWINNER' }];
+
+    const clean = validateTournaments(file([event]), { aliases: {} }, registry);
+    check('tournaments: a well-formed file validates clean', clean.length === 0, clean.join('; '));
+
+    const dup = validateTournaments(file([event, { ...event }]), { aliases: {} }, registry);
+    check(
+      'tournaments: the same event page listed twice (a double-counted title) is refused',
+      dup.some((e) => /duplicate event page/.test(e)),
+      dup.join('; ') || 'no error',
+    );
+
+    const stale = validateTournaments(
+      file([event]),
+      { aliases: { CTLWINNER: 'no-such-player' } },
+      registry,
+    );
+    check(
+      'tournaments: an alias row pointing at a player who is not in the registry is refused',
+      stale.some((e) => /unknown player id "no-such-player"/.test(e)),
+      stale.join('; ') || 'no error',
+    );
+
+    // THE KEEP-THE-FILE GUARANTEE. A fetch that cannot reach Liquipedia must
+    // exit 0 with a yellow trailer and leave data/tournaments.json exactly as it
+    // was — a failure that wrote an empty file would un-feature every champion
+    // on the next parse. While LIQUIPEDIA_GAME is null the script never fetches
+    // and the trailer is UNSUPPORTED; the day the constant is set, the endpoint
+    // below (a closed local port, no real network) makes it UNVERIFIED. Either
+    // way: exit 0, the right trailer, and the file untouched — absent stays
+    // absent.
+    const tPath = join(ROOT, 'data', 'tournaments.json');
+    const before = existsSync(tPath) ? await readFile(tPath) : null;
+    let run: { code: number; out: string };
+    try {
+      const out = execFileSync('npx', ['tsx', 'scripts/tournaments.ts'], {
+        cwd: ROOT,
+        stdio: 'pipe',
+        encoding: 'utf8',
+        env: { ...process.env, TOURNAMENTS_URL: 'http://127.0.0.1:9/api.php' },
+      });
+      run = { code: 0, out };
+    } catch (e) {
+      const err = e as { status?: number; stdout?: string; stderr?: string };
+      run = { code: err.status ?? 1, out: `${err.stdout ?? ''}${err.stderr ?? ''}` };
+    }
+    const wantTrailer = LIQUIPEDIA_GAME ? 'tournaments: UNVERIFIED' : 'tournaments: UNSUPPORTED';
+    check(
+      `tournaments: Liquipedia unreachable → exit 0 with "${wantTrailer}"`,
+      run.code === 0 && run.out.includes(wantTrailer),
+      `exit ${run.code}; ${run.out.trim().split('\n').pop()}`,
+    );
+    const after = existsSync(tPath) ? await readFile(tPath) : null;
+    check(
+      'tournaments: data/tournaments.json untouched by the failed fetch',
+      before === null ? after === null : after !== null && before.equals(after),
+      before === null ? (after === null ? 'absent, still absent' : 'CREATED') : 'byte-identical',
+    );
+  }
+
   // ── 3. the patch table ──────────────────────────────────────────────────────
   console.log('\n[3] patch table validators');
   {
@@ -790,8 +885,16 @@ try {
       !!stale(plus(newest, 11), plus(newest, -5)),
       undefined,
     );
-    check('a FUTURE quiet date is ignored, not trusted', !!stale(plus(newest, 11), '2099-01-01'), undefined);
-    check('a malformed quiet date is ignored, not trusted', !!stale(plus(newest, 11), '9/16/2026'), undefined);
+    check(
+      'a FUTURE quiet date is ignored, not trusted',
+      !!stale(plus(newest, 11), '2099-01-01'),
+      undefined,
+    );
+    check(
+      'a malformed quiet date is ignored, not trusted',
+      !!stale(plus(newest, 11), '9/16/2026'),
+      undefined,
+    );
     check('the committed quiet date validates', (validateQuietThrough(), true), undefined);
     await throws('a future quiet date is rejected', () => validateQuietThrough('2099-01-01'));
     await throws('a malformed quiet date is rejected', () => validateQuietThrough('9/16/2026'));
