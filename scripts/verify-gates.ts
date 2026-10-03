@@ -905,12 +905,14 @@ try {
   {
     const parse = (args: string[] = []) => {
       try {
-        execFileSync('npx', ['tsx', 'scripts/parse.ts', ...args], {
+        // stdout is kept on success too: the departure control asserts what a
+        // completed run SAID, not only that it completed.
+        const out = execFileSync('npx', ['tsx', 'scripts/parse.ts', ...args], {
           cwd: ROOT,
           stdio: 'pipe',
           encoding: 'utf8',
         });
-        return { code: 0, out: '' };
+        return { code: 0, out };
       } catch (e) {
         const err = e as { status?: number; stdout?: string; stderr?: string };
         return { code: err.status ?? 1, out: `${err.stdout ?? ''}${err.stderr ?? ''}` };
@@ -1279,6 +1281,55 @@ try {
           pruned.code === 0,
           `exit ${pruned.code}`,
         );
+        await writeFile(hlPath, JSON.stringify(hlRows, null, 1));
+
+        // THE DEPARTURE CARVE-OUT, FROM BOTH SIDES. The trimmed dump above is
+        // also exactly what a fetch returns when the channel deletes its newest
+        // upload and posts nothing after it, which is how this guard stopped
+        // Strive's cron on 2026-10-02 with every dump fresh. data:fetch now
+        // confirms that with YouTube and writes raw/<id>.departed.json, bound to
+        // the dump beside it. A file bound to a DIFFERENT dump must change
+        // nothing, or a leftover from an earlier fetch could launder a
+        // genuinely stale dump. That half runs first: the bound run prunes the
+        // record from the committed corpus, after which nothing is stale.
+        const departedPath = join(ROOT, 'raw', 'highLevelReplays.departed.json');
+        const newestOf = (rows: { publishedAt: string }[]) =>
+          rows.reduce((a, r) => (r.publishedAt > a ? r.publishedAt : a), '');
+        const trimmedNewest = newestOf(trimmed);
+        const gone = committedNow
+          .filter((v) => v.intake === 'highLevelReplays' && v.publishedAt > trimmedNewest)
+          .map((v) => v.id);
+        const departure = (newestInDump: string) =>
+          writeFile(
+            departedPath,
+            JSON.stringify({
+              channel: 'highLevelReplays',
+              newestInDump,
+              checkedAt: 'verify-gates',
+              ids: gone,
+            }),
+          );
+        await writeFile(hlPath, JSON.stringify(trimmed, null, 1));
+        await departure(newestOf(hlRows));
+        const unbound = parse();
+        check(
+          'a departure file bound to a different dump is ignored (the guard stays strict)',
+          newestOf(hlRows) !== trimmedNewest && unbound.code !== 0 && /is stale/.test(unbound.out),
+          `exit ${unbound.code}`,
+        );
+        await departure(trimmedNewest);
+        const departed = parse();
+        const published = (
+          JSON.parse(await readFile(join(ROOT, 'data', 'videos.json'), 'utf8')) as MatchVideo[]
+        ).filter((v) => gone.includes(v.id)).length;
+        check(
+          'a departure the fetch confirmed is pruned, not refused as stale',
+          departed.code === 0 &&
+            /Pruned, not read as staleness/.test(departed.out) &&
+            published === 0,
+          `exit ${departed.code}; ${gone.length} departed id(s), ${published} still published`,
+        );
+        await rm(departedPath, { force: true });
         await writeFile(hlPath, JSON.stringify(hlRows, null, 1));
       }
     } finally {
