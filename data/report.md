@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-03T12:45:07.440Z_
+_Generated 2026-10-04T00:07:02.428Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 258 | 258 | 100.0% |
+| highLevelReplays | 259 | 259 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 848 | 150 | 17.7% |
-| replaysHub | 349 | 343 | 98.3% |
-| fightingStationX | 3012 | 224 | 7.4% |
-| fgcReplaysHub | 2725 | 41 | 1.5% |
+| replaysHub | 351 | 345 | 98.3% |
+| fightingStationX | 3016 | 224 | 7.4% |
+| fgcReplaysHub | 2727 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1125** | |
+| **total** | | **1128** | |
 
 ## Index intakes
 
@@ -29,28 +29,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 2250 sides got its characters.
+How every one of the 2256 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 32 | 1.4% |
-| description | 604 | 26.8% |
-| index | 170 | 7.6% |
-| footage | 113 | 5.0% |
-| human | 1304 | 58.0% |
+| title | 0 | 0.0% |
+| description | 606 | 26.9% |
+| index | 170 | 7.5% |
+| footage | 118 | 5.2% |
+| human | 1335 | 59.2% |
 | review | 27 | 1.2% |
 
-- complete (4/4): **2218/2250** (98.6%)
+- complete (4/4): **2256/2256** (100.0%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: handle 616 · character-subset 31 · ambiguous 6
-- title slot order: handle-first 1659 · chars-first 147 · parallel-lists 244
+- bench alignment: handle 619 · character-subset 31 · ambiguous 6
+- title slot order: handle-first 1665 · chars-first 147 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,23 +58,21 @@ How every one of the 2250 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 29 | 1.3% |
-| 2 | 3 | 0.1% |
-| 4 | 2208 | 98.1% |
+| 4 | 2246 | 99.6% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **32 side(s) awaiting a drain** across 16 record(s) — oldest published **1 day(s)** ago
+- **0 side(s) awaiting a drain** across 0 record(s)
 
 ## Queues
 
 - review queue (never published): **2** — character-completion 2
-- bench queue (published, incomplete): **16**
+- bench queue (published, incomplete): **0**
 
 ## Player identity
 
-13 identity(s) resolved from more than one spelling. The
+12 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -86,7 +84,6 @@ after changing scripts/players.ts, or the old URLs 404.
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
 | `kingcreed` | `king-creed` |
-| `majin-burno` | `majinburno` |
 | `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
 | `nychrisg` | `nychris-g` |
@@ -132,8 +129,8 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4117 |
-| not-tokon | 1142 |
+| other-game | 4120 |
+| not-tokon | 1145 |
 | pre-launch | 663 |
 | not-a-match | 205 |
 | short-duration | 42 |
