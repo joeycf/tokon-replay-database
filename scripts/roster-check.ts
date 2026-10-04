@@ -5,14 +5,20 @@
  * fails no build and trips no assertion, they just leave every match they
  * appear in filed with one side missing. See ../check-rosters.sh.
  *
- * THE HERO SELECT BLOCK, AND WHY NOT ANYTHING ELSE ON THE PAGE. Sony's product
- * page mentions every fighter's name many times over in prose, trailer
- * descriptions and SEO text — "Storm" alone appears 25 times — so counting name
- * occurrences would be meaningless. The block titled "Hero Select" is the one
- * STRUCTURED enumeration: each fighter is an `id="<slug>_title"` element whose
+ * THE HERO SELECT BLOCK, AND WHY NOT ANYTHING ELSE ON THE PAGE. Sony's pages
+ * mention every fighter's name many times over in prose, trailer descriptions
+ * and SEO text — "Storm" alone appears 25 times — so counting name occurrences
+ * would be meaningless. The block titled "Hero Select" is the one STRUCTURED
+ * enumeration: each fighter is an `id="<slug>_title"` element whose
  * `<p class="txt-style-base">` carries the display name, paired with a matching
- * `id="<slug>_subtitle"` epithet. Twenty of each, verified 2026-09-09. This
- * reads that, and nothing else.
+ * `id="<slug>_subtitle"` epithet. This reads that, and nothing else.
+ *
+ * IT HAS MOVED ONCE. Verified on the product page on 2026-09-09 with twenty of
+ * each. By 2026-10-02 the product page had no Hero Select block and this check
+ * read UNREADABLE; the block had moved, in the same markup, to the product
+ * page's "Characters and Combat" subpage (PAGE below), now twenty-one of each.
+ * If it reads UNREADABLE again, look at where the product page links before
+ * re-deriving the parser: the block itself has been stable, its address has not.
  *
  * TWO SIGNALS, ONE COMPARISON. The names are what this repo's roster is
  * canonically spelled from (see scripts/characters.ts), so names are what the
@@ -20,12 +26,13 @@
  * titles and subtitles ever stop pairing up, the block is not what this parser
  * thinks it is and no verdict about our roster would mean anything.
  *
- * CHAMPION IS EXPECTED TO BE ABSENT UPSTREAM, AND THAT IS THE WHOLE REASON THIS
- * SCRIPT NEEDS AN EXEMPTION RULE. He is a hidden unlockable who shipped in the
- * base game and appears on no roster page — Sony's block lists 20, our roster
- * holds 21, and both are correct. The exemption keys on the roster's OWN
- * statement about itself (`extra.availability` beginning "Unlockable"), not on a
- * hardcoded id, so a second unlockable would be handled without editing this file.
+ * AN UNLOCKABLE MAY BE ABSENT UPSTREAM, AND THAT IS WHY THIS SCRIPT HAS AN
+ * EXEMPTION RULE. Champion is a hidden unlockable who shipped in the base game.
+ * Sony's block left him out until the move above (20 listed, our roster 21,
+ * both correct); the subpage lists him (21 and 21). Either is CURRENT. The
+ * exemption keys on the roster's OWN statement about itself
+ * (`extra.availability` beginning "Unlockable"), not on a hardcoded id, so a
+ * second unlockable would be handled without editing this file.
  *
  * A TRAP FOUND WHILE BUILDING THIS, WORTH NOT REDISCOVERING: 84 uploads in
  * raw/ carry a YouTube `tags` array whose Tōkon block lists the 20 launch names
@@ -47,7 +54,8 @@ import { UNRELEASED } from './expiries';
 import type { CharacterRecord } from '../types/index';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PAGE = 'https://www.playstation.com/en-us/games/marvel-tokon-fighting-souls/';
+const PAGE =
+  'https://www.playstation.com/en-us/games/marvel-tokon-fighting-souls/characters-and-combat/';
 const UA =
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36';
 
@@ -88,8 +96,9 @@ async function main(): Promise<void> {
   if (start < 0)
     return void verdict(
       'UNREADABLE',
-      '✖ no "Hero Select" block on Sony’s page — the page changed shape.\n' +
-        '  Re-derive the parse target before trusting any roster verdict.',
+      `✖ no "Hero Select" block at ${PAGE} — the page changed shape.\n` +
+        '  The block moved once before, intact, to another page (see the header).\n' +
+        '  Find it, or re-derive the parse target, before trusting any roster verdict.',
     );
   const block = html.slice(start, start + 40_000);
 
@@ -129,10 +138,13 @@ async function main(): Promise<void> {
   console.log(
     `  ${titles.length} fighter(s) in Sony's Hero Select · ${local.length} in characters.json`,
   );
-  if (unlockable.size)
+  if (unlockable.size) {
+    const absent = [...unlockable].filter((id) => !known.has(id));
     console.log(
-      `  ${unlockable.size} unlockable, expected absent upstream: ${[...unlockable].join(', ')}`,
+      `  ${unlockable.size} unlockable (${[...unlockable].join(', ')}), exempt if absent upstream: ` +
+        (absent.length ? `absent ${absent.join(', ')}` : 'all listed'),
     );
+  }
   if (gated.size) console.log(`  ${gated.size} announced and gated: ${[...gated].join(', ')}`);
 
   if (!unknown.length && !extra.length)

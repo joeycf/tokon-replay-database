@@ -56,9 +56,10 @@ export const UNRELEASED: { id: string; releases: string; accent?: string; note?:
       'hard date. Fired at WINDOW OPEN on 2026-10-01 and was NOT playable on 2026-10-02: ' +
       'Sony\'s product page still reads "Phoenix Cyclops arrives in Fall 2026. Stay tuned", ' +
       'and no date has been announced. Re-dated two weeks out, not to the window close, ' +
-      'because nothing else is watching: data:roster-check reads UNREADABLE since Sony ' +
-      'dropped the Hero Select block. Re-date to the release day once one is announced; if ' +
-      'the window slips, re-date the row — do not delete it.',
+      "because the only other watch, data:roster-check (Sony's Hero Select block, which " +
+      'already lists the 21 shipped fighters), is manual and never runs in the cron. ' +
+      'Re-date to the release day once one is announced; if the window slips, re-date the ' +
+      'row — do not delete it.',
   },
   // ── THE REMAINING YEAR-1 SLOTS, ONE ROW PER WINDOW ─────────────────────────
   // These three replace a single 'year1-remainder' row dated 2027-12-31. That
