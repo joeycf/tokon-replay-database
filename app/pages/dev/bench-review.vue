@@ -19,6 +19,12 @@
           >
             {{ showResolved ? 'back to open' : 'show drained' }}
           </button>
+          <span
+            v-if="awaiting.length"
+            class="ml-2 text-warning"
+            :title="awaiting.join('\n')"
+            >· {{ awaiting.length }} record(s) awaiting footage</span
+          >
         </p>
         <p class="ml-auto font-mono text-[12px] text-text-muted">
           ⏎ save · ←/→ move · type in a box to jump to a fighter
@@ -46,6 +52,15 @@
         class="mt-6 font-mono text-body text-warning"
       >
         {{ error }}
+      </p>
+      <!-- Empty is not the same as drained: a record the cron added from its
+           title has no footage to show until a catchup downloads it. -->
+      <p
+        v-else-if="!cur && awaiting.length && !showResolved"
+        class="mt-6 font-mono text-body text-warning"
+      >
+        nothing to read yet — {{ awaiting.length }} queued record(s) have no footage downloaded. Run
+        <code>npm run data:catchup</code>, then reload.
       </p>
       <p
         v-else-if="!cur"
@@ -373,6 +388,7 @@ function stepFrame(fi: number, d: number): void {
 const { data, pending, error, refresh } = await useFetch<{
   total: number;
   done: number;
+  awaitingFootage: string[];
   roster: { id: string; name: string }[];
   counts: { total: number; pending: number; done: number; unreadable: number };
   items: Item[];
@@ -387,6 +403,7 @@ const items = computed(() =>
 );
 const total = computed(() => data.value?.total ?? 0);
 const done = computed(() => data.value?.done ?? 0);
+const awaiting = computed(() => data.value?.awaitingFootage ?? []);
 const roster = computed(() => data.value?.roster ?? []);
 const cur = computed(() => items.value[cursor.value]);
 const ready = computed(() => {

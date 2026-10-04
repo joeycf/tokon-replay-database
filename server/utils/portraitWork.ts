@@ -179,6 +179,21 @@ export interface BenchItem {
  * attribute keeps its cheaper three-pick flow untouched.
  */
 export function buildBenchList(): BenchItem[] {
+  return buildBench().items;
+}
+
+/**
+ * The worklist plus the queued records it could NOT offer because their footage
+ * has never been read — no geometry in extracted.json, or no frames on disk.
+ *
+ * Without this the page could not tell "drained" from "not downloaded yet". The
+ * cron adds ~12 title-only records a day and never downloads footage, so between
+ * catchups the queue grows while the worklist stays empty. On 2026-10-03 the page
+ * said "bench queue is empty 🎉" over 16 queued records (32 incomplete sides), all
+ * uploaded after the last extract. Those records need `npm run data:catchup`, not
+ * a reviewer, and the page should say that.
+ */
+export function buildBench(): { items: BenchItem[]; awaitingFootage: string[] } {
   const extracted = readJson<Record<string, Extracted>>('cache/tokon/extracted.json', {});
   const queue = readJson<{ id: string }[]>('data/bench-queue.json', []);
   const videos = readJson<
@@ -204,11 +219,15 @@ export function buildBenchList(): BenchItem[] {
   }
 
   const out: BenchItem[] = [];
+  const awaitingFootage: string[] = [];
   for (const id of [...queued].sort()) {
     const v = byId.get(id);
     const e = extracted[id];
-    if (!v || !e?.geom || v.sides.length !== 2) continue;
-    if (!existsSync(join(process.cwd(), 'cache/tokon/frames', id))) continue;
+    if (!v || v.sides.length !== 2) continue;
+    if (!e?.geom || !existsSync(join(process.cwd(), 'cache/tokon/frames', id))) {
+      awaitingFootage.push(id);
+      continue;
+    }
 
     const handles = v.sides.map((s) => s.handle) as [string, string];
     // A second where EITHER plate resolved is a second where the HUD was legible.
@@ -352,5 +371,5 @@ export function buildBenchList(): BenchItem[] {
       });
     }
   }
-  return out;
+  return { items: out, awaitingFootage };
 }

@@ -16,7 +16,7 @@ import { partitionReviewQueue } from '@engine/server/utils/reviewQueue';
 export default defineEventHandler(() => {
   if (!import.meta.dev) throw createError({ statusCode: 404 });
 
-  const work = buildBenchList();
+  const { items: work, awaitingFootage } = buildBench();
   const roster = readJson<{ id: string; name: string }[]>('data/characters.json', []);
   const nameOf = new Map(roster.map((c) => [c.id, c.name]));
   const overrides = readJson<
@@ -89,6 +89,9 @@ export default defineEventHandler(() => {
   return {
     total: items.length,
     done: items.filter((x) => x.done).length,
+    // queued records with no footage read yet. Not work for a reviewer, and
+    // without this count an empty worklist looks like a drained queue.
+    awaitingFootage,
     roster: [...roster].sort((a, b) => a.name.localeCompare(b.name)),
     ...queue,
   };
