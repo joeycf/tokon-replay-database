@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-04T13:30:05.845Z_
+_Generated 2026-10-05T03:16:25.172Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 260 | 260 | 100.0% |
+| highLevelReplays | 262 | 262 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 849 | 151 | 17.8% |
-| replaysHub | 355 | 349 | 98.3% |
-| fightingStationX | 3025 | 224 | 7.4% |
-| fgcReplaysHub | 2730 | 41 | 1.5% |
+| hadoukenReplays | 851 | 153 | 18.0% |
+| replaysHub | 359 | 353 | 98.3% |
+| fightingStationX | 3031 | 224 | 7.4% |
+| fgcReplaysHub | 2733 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1134** | |
+| **total** | | **1142** | |
 
 ## Index intakes
 
@@ -29,28 +29,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 2268 sides got its characters.
+How every one of the 2284 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 10 | 0.4% |
-| description | 608 | 26.8% |
-| index | 170 | 7.5% |
-| footage | 118 | 5.2% |
-| human | 1335 | 58.9% |
+| title | 0 | 0.0% |
+| description | 612 | 26.8% |
+| index | 170 | 7.4% |
+| footage | 119 | 5.2% |
+| human | 1356 | 59.4% |
 | review | 27 | 1.2% |
 
-- complete (4/4): **2258/2268** (99.6%)
+- complete (4/4): **2284/2284** (100.0%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: handle 624 · character-subset 31 · ambiguous 6
-- title slot order: handle-first 1676 · chars-first 148 · parallel-lists 244
+- bench alignment: handle 630 · character-subset 31 · ambiguous 6
+- title slot order: handle-first 1690 · chars-first 150 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,19 +58,17 @@ How every one of the 2268 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 8 | 0.4% |
-| 2 | 2 | 0.1% |
-| 4 | 2248 | 99.1% |
+| 4 | 2274 | 99.6% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **10 side(s) awaiting a drain** across 5 record(s) — oldest published **0 day(s)** ago
+- **0 side(s) awaiting a drain** across 0 record(s)
 
 ## Queues
 
 - review queue (never published): **3** — character-completion 3
-- bench queue (published, incomplete): **5**
+- bench queue (published, incomplete): **0**
 
 ## Player identity
 
@@ -131,8 +129,8 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4124 |
-| not-tokon | 1150 |
+| other-game | 4127 |
+| not-tokon | 1156 |
 | pre-launch | 663 |
 | not-a-match | 206 |
 | short-duration | 43 |
@@ -154,6 +152,7 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
+| `SipderMan` | 1 | 7Muj4Ha1FyI |
 | `GreenGoblin` | 1 | gy5Cd9rpbng |
 | `Raked` | 1 | f_RPQ0HmHXE |
 
@@ -165,7 +164,7 @@ garbled game name gets a human verdict instead of a quiet player page.
 
 | handle | records | example |
 | --- | ---: | --- |
-| `TOKON` | 6 | SHC4DyMK5ck |
+| `TOKON` | 7 | B_l-2g79hEI |
 | `TOKON PLAYER` | 6 | 9G-yCsKqlDI |
 | `The Tokon Texan` | 2 | 26SqJz0Xlpo |
 | `JOHN TOKON` | 1 | cfEGCQ02hmQ |
