@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-05T16:24:24.928Z_
+_Generated 2026-10-06T14:29:34.534Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 265 | 265 | 100.0% |
+| highLevelReplays | 266 | 266 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 851 | 153 | 18.0% |
-| replaysHub | 362 | 356 | 98.3% |
-| fightingStationX | 3038 | 224 | 7.4% |
-| fgcReplaysHub | 2737 | 41 | 1.5% |
+| hadoukenReplays | 853 | 155 | 18.2% |
+| replaysHub | 368 | 361 | 98.1% |
+| fightingStationX | 3048 | 224 | 7.3% |
+| fgcReplaysHub | 2740 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1148** | |
+| **total** | | **1156** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2296 sides got its characters.
+How every one of the 2312 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 6 | 0.3% |
-| description | 618 | 26.9% |
+| title | 20 | 0.9% |
+| description | 620 | 26.8% |
 | index | 170 | 7.4% |
-| footage | 119 | 5.2% |
-| human | 1356 | 59.1% |
+| footage | 119 | 5.1% |
+| human | 1356 | 58.7% |
 | review | 27 | 1.2% |
 
-- complete (4/4): **2290/2296** (99.7%)
+- complete (4/4): **2292/2312** (99.1%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: handle 634 · character-subset 32 · ambiguous 6
-- title slot order: handle-first 1702 · chars-first 150 · parallel-lists 244
+- bench alignment: handle 640 · character-subset 32 · ambiguous 7
+- title slot order: handle-first 1716 · chars-first 152 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -58,22 +58,23 @@ How every one of the 2296 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 6 | 0.3% |
-| 4 | 2280 | 99.3% |
+| 1 | 18 | 0.8% |
+| 2 | 2 | 0.1% |
+| 4 | 2282 | 98.7% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **6 side(s) awaiting a drain** across 3 record(s) — oldest published **0 day(s)** ago
+- **20 side(s) awaiting a drain** across 10 record(s) — oldest published **1 day(s)** ago
 
 ## Queues
 
-- review queue (never published): **4** — character-completion 4
-- bench queue (published, incomplete): **3**
+- review queue (never published): **5** — character-completion 5
+- bench queue (published, incomplete): **10**
 
 ## Player identity
 
-12 identity(s) resolved from more than one spelling. The
+13 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -81,6 +82,7 @@ after changing scripts/players.ts, or the old URLs 404.
 | --- | --- |
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
+| `chrisg` | `chris-g` |
 | `ghost-of-evo` | `ghostofevo` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
@@ -130,13 +132,13 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4132 |
-| not-tokon | 1159 |
+| other-game | 4138 |
+| not-tokon | 1165 |
 | pre-launch | 663 |
-| not-a-match | 207 |
+| not-a-match | 208 |
 | short-duration | 43 |
 | not-an-event | 35 |
-| char-unresolved | 23 |
+| char-unresolved | 24 |
 | no-vs-title | 7 |
 
 - `marvelTokonYT` events-only gate: **35** upload(s) carried no known event brand.
@@ -167,8 +169,8 @@ garbled game name gets a human verdict instead of a quiet player page.
 | --- | ---: | --- |
 | `TOKON` | 7 | B_l-2g79hEI |
 | `TOKON PLAYER` | 6 | 9G-yCsKqlDI |
+| `JOHN TOKON` | 2 | M2dq8OT8l38 |
 | `The Tokon Texan` | 2 | 26SqJz0Xlpo |
-| `JOHN TOKON` | 1 | cfEGCQ02hmQ |
 | `Marvel larper` | 1 | Z1uK06owFng |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
 | `TOKON DEEZ` | 1 | R8ixtuzZlY4 |
