@@ -5,9 +5,9 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-09-26)
-  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-09-26, 12 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
+  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-09-26, 13 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-10-08T14:58:04.115Z_
+_Generated 2026-10-09T14:41:20.055Z_
 
 ## Coverage
 
@@ -15,13 +15,13 @@ _Generated 2026-10-08T14:58:04.115Z_
 | --- | ---: | ---: | ---: |
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 857 | 159 | 18.6% |
-| replaysHub | 380 | 371 | 97.6% |
-| fightingStationX | 3066 | 224 | 7.3% |
-| fgcReplaysHub | 2748 | 41 | 1.5% |
+| hadoukenReplays | 859 | 161 | 18.7% |
+| replaysHub | 386 | 377 | 97.7% |
+| fightingStationX | 3077 | 224 | 7.3% |
+| fgcReplaysHub | 2752 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1172** | |
+| **total** | | **1180** | |
 
 ## Index intakes
 
@@ -43,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2344 sides got its characters.
+How every one of the 2360 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 48 | 2.0% |
-| description | 624 | 26.6% |
-| index | 170 | 7.3% |
-| footage | 119 | 5.1% |
-| human | 1356 | 57.8% |
-| review | 27 | 1.2% |
+| title | 64 | 2.7% |
+| description | 624 | 26.4% |
+| index | 170 | 7.2% |
+| footage | 119 | 5.0% |
+| human | 1356 | 57.5% |
+| review | 27 | 1.1% |
 
-- complete (4/4): **2296/2344** (98.0%)
+- complete (4/4): **2296/2360** (97.3%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 651 · ambiguous 7
-- title slot order: handle-first 1744 · chars-first 156 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 657 · ambiguous 7
+- title slot order: handle-first 1758 · chars-first 158 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,19 +65,19 @@ How every one of the 2344 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 40 | 1.7% |
+| 1 | 56 | 2.4% |
 | 2 | 8 | 0.3% |
-| 4 | 2286 | 97.5% |
+| 4 | 2286 | 96.9% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **48 side(s) awaiting a drain** across 24 record(s) — oldest published **3 day(s)** ago
+- **64 side(s) awaiting a drain** across 32 record(s) — oldest published **4 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **7** — character-completion 7
-- bench queue (published, incomplete): **24**
+- bench queue (published, incomplete): **32**
 
 ## Player identity
 
@@ -139,11 +139,11 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4146 |
-| not-tokon | 1178 |
+| other-game | 4151 |
+| not-tokon | 1187 |
 | pre-launch | 663 |
 | not-a-match | 211 |
-| short-duration | 44 |
+| short-duration | 45 |
 | not-an-event | 35 |
 | char-unresolved | 26 |
 | no-vs-title | 7 |
