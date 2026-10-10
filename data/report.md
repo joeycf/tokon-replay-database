@@ -5,9 +5,9 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-09-26)
-  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-09-26, 13 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
+  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-09-26, 14 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-10-09T14:41:20.055Z_
+_Generated 2026-10-10T13:59:17.543Z_
 
 ## Coverage
 
@@ -15,13 +15,13 @@ _Generated 2026-10-09T14:41:20.055Z_
 | --- | ---: | ---: | ---: |
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 859 | 161 | 18.7% |
-| replaysHub | 386 | 377 | 97.7% |
-| fightingStationX | 3077 | 224 | 7.3% |
-| fgcReplaysHub | 2752 | 41 | 1.5% |
+| hadoukenReplays | 861 | 163 | 18.9% |
+| replaysHub | 388 | 379 | 97.7% |
+| fightingStationX | 3087 | 224 | 7.3% |
+| fgcReplaysHub | 2755 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1180** | |
+| **total** | | **1184** | |
 
 ## Index intakes
 
@@ -36,28 +36,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 2360 sides got its characters.
+How every one of the 2368 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 64 | 2.7% |
+| title | 72 | 3.0% |
 | description | 624 | 26.4% |
 | index | 170 | 7.2% |
 | footage | 119 | 5.0% |
-| human | 1356 | 57.5% |
+| human | 1356 | 57.3% |
 | review | 27 | 1.1% |
 
-- complete (4/4): **2296/2360** (97.3%)
+- complete (4/4): **2296/2368** (97.0%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 657 · ambiguous 7
-- title slot order: handle-first 1758 · chars-first 158 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 659 · ambiguous 7
+- title slot order: handle-first 1764 · chars-first 160 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,19 +65,19 @@ How every one of the 2360 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 56 | 2.4% |
+| 1 | 64 | 2.7% |
 | 2 | 8 | 0.3% |
-| 4 | 2286 | 96.9% |
+| 4 | 2286 | 96.5% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **64 side(s) awaiting a drain** across 32 record(s) — oldest published **4 day(s)** ago
+- **72 side(s) awaiting a drain** across 36 record(s) — oldest published **5 day(s)** ago
 
 ## Queues
 
-- review queue (never published): **7** — character-completion 7
-- bench queue (published, incomplete): **32**
+- review queue (never published): **8** — character-completion 8
+- bench queue (published, incomplete): **36**
 
 ## Player identity
 
@@ -139,13 +139,13 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4151 |
-| not-tokon | 1187 |
+| other-game | 4156 |
+| not-tokon | 1193 |
 | pre-launch | 663 |
-| not-a-match | 211 |
+| not-a-match | 212 |
 | short-duration | 45 |
 | not-an-event | 35 |
-| char-unresolved | 26 |
+| char-unresolved | 27 |
 | no-vs-title | 7 |
 | bad-handle | 1 |
 
