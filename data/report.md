@@ -5,9 +5,9 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-09-26)
-  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-09-26, 14 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
+  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-09-26, 15 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-10-10T13:59:17.543Z_
+_Generated 2026-10-11T14:23:50.020Z_
 
 ## Coverage
 
@@ -15,13 +15,13 @@ _Generated 2026-10-10T13:59:17.543Z_
 | --- | ---: | ---: | ---: |
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 861 | 163 | 18.9% |
-| replaysHub | 388 | 379 | 97.7% |
-| fightingStationX | 3087 | 224 | 7.3% |
-| fgcReplaysHub | 2755 | 41 | 1.5% |
+| hadoukenReplays | 863 | 165 | 19.1% |
+| replaysHub | 393 | 384 | 97.7% |
+| fightingStationX | 3097 | 224 | 7.2% |
+| fgcReplaysHub | 2757 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1184** | |
+| **total** | | **1191** | |
 
 ## Index intakes
 
@@ -43,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2368 sides got its characters.
+How every one of the 2382 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 72 | 3.0% |
-| description | 624 | 26.4% |
-| index | 170 | 7.2% |
+| title | 86 | 3.6% |
+| description | 624 | 26.2% |
+| index | 170 | 7.1% |
 | footage | 119 | 5.0% |
-| human | 1356 | 57.3% |
+| human | 1356 | 56.9% |
 | review | 27 | 1.1% |
 
-- complete (4/4): **2296/2368** (97.0%)
+- complete (4/4): **2296/2382** (96.4%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 659 · ambiguous 7
-- title slot order: handle-first 1764 · chars-first 160 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 664 · ambiguous 7
+- title slot order: handle-first 1776 · chars-first 162 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,19 +65,23 @@ How every one of the 2368 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 64 | 2.7% |
+| 1 | 78 | 3.3% |
 | 2 | 8 | 0.3% |
-| 4 | 2286 | 96.5% |
+| 4 | 2286 | 96.0% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **72 side(s) awaiting a drain** across 36 record(s) — oldest published **5 day(s)** ago
+- **86 side(s) awaiting a drain** across 43 record(s) — oldest published **6 day(s)** ago
+
+> The bench queue is at 43 (nudge threshold 40).
+> Run `npm run data:catchup` locally — the cron cannot do this: extraction
+> needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
-- review queue (never published): **8** — character-completion 8
-- bench queue (published, incomplete): **36**
+- review queue (never published): **9** — character-completion 9
+- bench queue (published, incomplete): **43**
 
 ## Player identity
 
@@ -139,13 +143,13 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4156 |
-| not-tokon | 1193 |
+| other-game | 4158 |
+| not-tokon | 1202 |
 | pre-launch | 663 |
 | not-a-match | 212 |
 | short-duration | 45 |
 | not-an-event | 35 |
-| char-unresolved | 27 |
+| char-unresolved | 28 |
 | no-vs-title | 7 |
 | bad-handle | 1 |
 
