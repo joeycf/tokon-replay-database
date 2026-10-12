@@ -5,9 +5,9 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-09-26)
-  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-09-26, 15 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
+  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-09-26, 16 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-10-11T14:23:50.020Z_
+_Generated 2026-10-12T17:01:48.378Z_
 
 ## Coverage
 
@@ -15,13 +15,13 @@ _Generated 2026-10-11T14:23:50.020Z_
 | --- | ---: | ---: | ---: |
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 863 | 165 | 19.1% |
-| replaysHub | 393 | 384 | 97.7% |
-| fightingStationX | 3097 | 224 | 7.2% |
-| fgcReplaysHub | 2757 | 41 | 1.5% |
+| hadoukenReplays | 864 | 166 | 19.2% |
+| replaysHub | 397 | 388 | 97.7% |
+| fightingStationX | 3108 | 224 | 7.2% |
+| fgcReplaysHub | 2762 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1191** | |
+| **total** | | **1196** | |
 
 ## Index intakes
 
@@ -43,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2382 sides got its characters.
+How every one of the 2392 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 86 | 3.6% |
-| description | 624 | 26.2% |
+| title | 96 | 4.0% |
+| description | 624 | 26.1% |
 | index | 170 | 7.1% |
 | footage | 119 | 5.0% |
-| human | 1356 | 56.9% |
+| human | 1356 | 56.7% |
 | review | 27 | 1.1% |
 
-- complete (4/4): **2296/2382** (96.4%)
+- complete (4/4): **2296/2392** (96.0%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 664 · ambiguous 7
-- title slot order: handle-first 1776 · chars-first 162 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 668 · ambiguous 7
+- title slot order: handle-first 1785 · chars-first 163 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - decomposed-Ō titles seen: 0
 
@@ -65,23 +65,23 @@ How every one of the 2382 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 78 | 3.3% |
+| 1 | 88 | 3.7% |
 | 2 | 8 | 0.3% |
-| 4 | 2286 | 96.0% |
+| 4 | 2286 | 95.6% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **86 side(s) awaiting a drain** across 43 record(s) — oldest published **6 day(s)** ago
+- **96 side(s) awaiting a drain** across 48 record(s) — oldest published **7 day(s)** ago
 
-> The bench queue is at 43 (nudge threshold 40).
+> The bench queue is at 48 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **9** — character-completion 9
-- bench queue (published, incomplete): **43**
+- bench queue (published, incomplete): **48**
 
 ## Player identity
 
@@ -143,14 +143,14 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4158 |
-| not-tokon | 1202 |
+| other-game | 4166 |
+| not-tokon | 1208 |
 | pre-launch | 663 |
-| not-a-match | 212 |
+| not-a-match | 213 |
 | short-duration | 45 |
 | not-an-event | 35 |
 | char-unresolved | 28 |
-| no-vs-title | 7 |
+| no-vs-title | 8 |
 | bad-handle | 1 |
 
 - `marvelTokonYT` events-only gate: **35** upload(s) carried no known event brand.
