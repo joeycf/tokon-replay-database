@@ -24,6 +24,7 @@ import { resolveKey, resolvePlayers, undeclaredCollisions } from './players';
 import { dueExpiries, expiryBlock } from './expiries';
 import { LAUNCH, SEASONS, seasonForDate } from './patches';
 import { buildAliasMatcher, loadCharacters, playerId, stripLeaderboard } from './roster';
+import { refutationProblems, titleClaim, unaccountedTitle, unmetTitle } from './title-refutation';
 import {
   LIQUIPEDIA_GAME,
   applyTournamentTitles,
@@ -631,6 +632,11 @@ async function main() {
    * there is no third state where it is both.
    */
   type Verdict = 'excluded' | 'adopted' | null;
+  /** Records published FROM a verdict. Their sides are the override's, never a
+   *  parse of the title, so the title-drift report below has no fresh title to
+   *  compare them with — and a review verdict writes `fromTitle: []` by design
+   *  (review-queue.post.ts), which is deliberate, not a trim. */
+  const adopted = new Set<string>();
   const applyVerdict = (
     v: RawVideoRecord,
     ch: (typeof ACTIVE_CHANNELS)[number],
@@ -669,6 +675,7 @@ async function main() {
       season: seasonForDate(v.publishedAt.slice(0, 10)),
       sides: ov.sides as [MatchSide, MatchSide],
     });
+    adopted.add(v.id);
     void handles;
     return 'adopted';
   };
@@ -1346,6 +1353,10 @@ async function main() {
     }
   }
 
+  // The title check, over the final records — reported at the top of report.md,
+  // never a reason to stop (see titleCheckBlock).
+  const titleCheck = checkTitles(records, withOverrides, overrides, adopted);
+
   // THE BENCH QUEUE IS REBUILT FROM THE FINAL RECORDS, FOR THE SAME REASON.
   //
   // The tally above was fixed once and the queue beside it was left accumulating
@@ -1978,6 +1989,10 @@ async function main() {
   lines.push(`- bench alignment: ${fmtTally(alignCount) || '—'}`);
   lines.push(`- title slot order: ${fmtTally(slotOrders)}`);
   lines.push(`- tier conflicts (queued for review): ${conflicts}`);
+  lines.push(
+    `- title refutations (a person ruled the title wrong): **${titleCheck.refutedSides}** side(s) — ` +
+      'named, with their evidence, by `npm run test:e2e`',
+  );
   lines.push(`- decomposed-Ō titles seen: ${decomposedOnly}`);
   lines.push('');
 
@@ -2161,10 +2176,14 @@ async function main() {
   // A residue string on 3+ records is a roster event, not noise.
   const bigResidue = [...residues].filter(([, e]) => e.n >= 3);
   const actionRequired: string[] = [];
+  // The heading once, whichever block comes first. Keyed on `due` alone, the
+  // collision and residue blocks each printed their own heading whenever no
+  // expiry was due — two headings on a day with both.
+  const heading = (): string[] => (actionRequired.length ? [] : ['## ⚠ ACTION REQUIRED', '']);
   if (due.length) actionRequired.push(...expiryBlock(due));
   if (collisions.length) {
     actionRequired.push(
-      ...(due.length ? [] : ['## ⚠ ACTION REQUIRED', '']),
+      ...heading(),
       `${collisions.length} normalised player key(s) still hold more than one player:`,
       ...collisions.map((c) => `- \`${c.key}\` — ${c.handles.join(' · ')}`),
       '',
@@ -2177,7 +2196,7 @@ async function main() {
   }
   if (bigResidue.length) {
     actionRequired.push(
-      ...(due.length ? [] : ['## ⚠ ACTION REQUIRED', '']),
+      ...heading(),
       `${bigResidue.length} unmatched character-slot string(s) appear on 3+ records:`,
       ...bigResidue.map(([t, e]) => `- \`${t}\` × ${e.n} (e.g. ${e.ids[0]})`),
       '',
@@ -2186,6 +2205,7 @@ async function main() {
       '',
     );
   }
+  actionRequired.push(...titleCheckBlock(titleCheck, heading));
   if (actionRequired.length) lines.splice(2, 0, ...actionRequired);
 
   await writeFile(join(DATA, 'report.md'), lines.join('\n') + '\n', 'utf8');
@@ -2209,12 +2229,194 @@ async function main() {
     console.log(`  ⚠ ACTION REQUIRED: ${bigResidue.length} residue string(s) on 3+ records`);
   if (collisions.length)
     console.log(`  ⚠ ACTION REQUIRED: ${collisions.length} undeclared player key collision(s)`);
+  if (titleCheck.unmet.length)
+    console.log(
+      `  ⚠ ACTION REQUIRED: ${titleCheck.unmet.length} side(s) fail their title check with no verdict`,
+    );
+  if (titleCheck.badRefutations.length)
+    console.log(
+      `  ⚠ ACTION REQUIRED: ${titleCheck.badRefutations.length} title refutation(s) are not a recorded verdict`,
+    );
+  if (titleCheck.drift.length)
+    console.log(
+      `  ⚠ ACTION REQUIRED: ${titleCheck.drift.length} human side(s) unaccounted for by today's title`,
+    );
   if (due.length) {
     // Loud, but NOT fatal — see the note above the block. The workflow's final
     // step is what turns this red, after the data is safely pushed.
     console.log(`\n  ⚠ ${due.length} EXPIRY(S) DUE — written to report.md, not exiting here:`);
     for (const d of due) console.log(`      ${d.id} (${d.kind}, due ${d.date})`);
   }
+}
+
+// ── the title check ──────────────────────────────────────────────────────────
+/**
+ * THE TITLE CHECK, REPORTED — NEVER A REASON TO STOP (2026-10-14).
+ *
+ * e2e's `fromTitle ⊆ characters` went red on 2026-09-24 and stayed red for three
+ * weeks, because the cron has no e2e step and five correct reads of wrong titles
+ * had been saved with nothing recording that the title was wrong. A hard throw
+ * here was considered and rejected: this file's own policy for soft gates (see
+ * "the soft severity of the self-expiring gates" below) is that a hard exit stops
+ * the daily refresh, which is strictly worse than what it warns about — measured
+ * on real history, a throw on 2026-09-24 would have held 15 new records and 254
+ * hand-read sides over two sides whose published characters were right. It is
+ * enforced hard where a person runs it before a commit: e2e and verify-gates.
+ *
+ * Three findings, each with the edit that settles it:
+ *  · unmet          a published side failing the e2e predicate itself.
+ *  · badRefutations a `titleRefuted` that is not a person's recorded verdict
+ *                   (scripts/title-refutation.ts refutationProblems).
+ *  · drift          a HUMAN side whose title, as parsed TODAY, names a fighter
+ *                   its verdict neither confirms nor refutes — `fromTitle`
+ *                   trimmed by hand, the uploader editing the title after the
+ *                   verdict, or a roster addition resolving a name the title
+ *                   already had. e2e cannot see these: it reads the verdict's
+ *                   own `fromTitle`, never the title. Records adopted from a
+ *                   verdict are skipped, because their sides never came from a
+ *                   parse of the title (see `adopted`).
+ */
+interface TitleCheck {
+  unmet: { id: string; k: number; missing: string[]; edit: string }[];
+  badRefutations: { id: string; k: number; problems: string[] }[];
+  drift: { id: string; k: number; unaccounted: string[]; stale: string[]; edit: string }[];
+  refutedSides: number;
+}
+
+/** One overrides.json provenance fragment, ready to paste. Placeholders rather
+ *  than today's date: report.md must not change on a day nothing else did, or
+ *  the cron's no-change-no-commit guard commits it every morning. */
+function provenanceEdit(fromTitle: string[], titleRefuted: string[]): string {
+  const ids = (xs: string[]) => `[${xs.map((x) => JSON.stringify(x)).join(', ')}]`;
+  return (
+    `"fromTitle": ${ids(fromTitle)}` +
+    (titleRefuted.length
+      ? `, "titleRefuted": ${ids(titleRefuted)}, "titleRefutedWhy": "<the evidence>", ` +
+        '"titleRefutedAt": "YYYY-MM-DD"'
+      : '')
+  );
+}
+
+function checkTitles(
+  fresh: MatchVideo[],
+  published: MatchVideo[],
+  overrides: Record<string, VideoOverride>,
+  adopted: ReadonlySet<string>,
+): TitleCheck {
+  const freshById = new Map(fresh.map((r) => [r.id, r]));
+  const out: TitleCheck = { unmet: [], badRefutations: [], drift: [], refutedSides: 0 };
+  for (const r of published) {
+    r.sides.forEach((s, k) => {
+      const p = s.provenance;
+      if (p.titleRefuted?.length) out.refutedSides += 1;
+
+      const missing = unmetTitle(s);
+      if (missing.length) {
+        const claim = titleClaim(p);
+        out.unmet.push({
+          id: r.id,
+          k,
+          missing,
+          edit: provenanceEdit(
+            claim.filter((t) => s.characters.includes(t)),
+            claim.filter((t) => !s.characters.includes(t)),
+          ),
+        });
+      }
+
+      const problems = refutationProblems(s);
+      if (problems.length) out.badRefutations.push({ id: r.id, k, problems });
+
+      if (!overrides[r.id]?.sides || adopted.has(r.id)) return;
+      const today = freshById.get(r.id)?.sides[k]?.provenance.fromTitle ?? [];
+      const { unaccounted, stale } = unaccountedTitle(today, s);
+      if (!unaccounted.length && !stale.length) return;
+      // Keep every verdict today's title still supports, and classify only what
+      // is new: an id the reading contains is confirmed, any other needs a
+      // person's refutation (or a team change).
+      out.drift.push({
+        id: r.id,
+        k,
+        unaccounted,
+        stale,
+        edit: provenanceEdit(
+          [
+            ...(p.fromTitle ?? []).filter((t) => today.includes(t)),
+            ...unaccounted.filter((t) => s.characters.includes(t)),
+          ],
+          [
+            ...(p.titleRefuted ?? []).filter((t) => today.includes(t)),
+            ...unaccounted.filter((t) => !s.characters.includes(t)),
+          ],
+        ),
+      });
+    });
+  }
+  return out;
+}
+
+function titleCheckBlock(c: TitleCheck, heading: () => string[]): string[] {
+  const out: string[] = [];
+  const at = (id: string, k: number) =>
+    `\`data/overrides.json\` → \`"${id}".sides[${k}].provenance\``;
+  if (c.unmet.length) {
+    out.push(
+      ...heading(),
+      `${c.unmet.length} published side(s) fail their own title check (\`fromTitle ⊆ characters\`)`,
+      'and nothing records why:',
+      '',
+      ...c.unmet.flatMap((u) => [
+        `- \`${u.id}\` side ${u.k}: the title names **${u.missing.join(', ')}**, which the reading ` +
+          'does not include. If the title is wrong, record it — "the title is wrong" in',
+        `  /dev/bench-review, or by hand at ${at(u.id, u.k)}:`,
+        `  \`${u.edit}\``,
+      ]),
+      '',
+      'If the team changed mid-set instead, keep both ("also keep … — team changed"). Never trim',
+      '`fromTitle` alone: that hides the claim rather than answering it, and the drift check',
+      'below reports it.',
+      '',
+    );
+  }
+  if (c.badRefutations.length) {
+    out.push(
+      ...heading(),
+      `${c.badRefutations.length} title refutation(s) are not a recorded verdict:`,
+      '',
+      ...c.badRefutations.map((b) => `- \`${b.id}\` side ${b.k}: ${b.problems.join('; ')}`),
+      '',
+      'A refutation sits on a side a person read, stays out of `fromTitle`, and carries its',
+      'evidence (`titleRefutedWhy`) and day (`titleRefutedAt`, YYYY-MM-DD) —',
+      'scripts/title-refutation.ts. Anything less is a way to make the title check pass.',
+      '',
+    );
+  }
+  if (c.drift.length) {
+    out.push(
+      ...heading(),
+      `${c.drift.length} human-read side(s) where today's title and the recorded verdict disagree:`,
+      '',
+      ...c.drift.flatMap((d) => [
+        `- \`${d.id}\` side ${d.k}:` +
+          (d.unaccounted.length
+            ? ` today's title names **${d.unaccounted.join(', ')}**, which the verdict neither ` +
+              'confirms nor refutes.'
+            : '') +
+          (d.stale.length
+            ? ` \`titleRefuted\` names **${d.stale.join(', ')}**, which today's title no longer states.`
+            : ''),
+        `  At ${at(d.id, d.k)}:`,
+        `  \`${d.edit}\``,
+      ]),
+      '',
+      'Either `fromTitle` was trimmed by hand without recording a refutation, or the uploader',
+      'edited the title after the verdict, or a roster addition now resolves a name the title',
+      'already had. e2e reads the verdict, not the title, so it stays green on all three; this',
+      'is the only place they show.',
+      '',
+    );
+  }
+  return out;
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────

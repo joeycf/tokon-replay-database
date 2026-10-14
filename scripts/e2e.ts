@@ -33,6 +33,7 @@ import { DISTINCT_KEYS } from './players';
 import { CHANNELS } from './channels';
 import type { Disagreement, WitnessArtifact } from './crosscheck';
 import { newerThanCursor } from './theater-delta';
+import { refutationProblems } from './title-refutation';
 import { PATCHES, SEASONS, seasonToken } from './patches';
 import type {
   BenchQueueItem,
@@ -302,13 +303,59 @@ function testSubstrate(): void {
     oversize.every((s) => s.provenance?.complete === true),
     `every oversize side (${oversize.length}) is complete, not incomplete`,
   );
-  const conflictFree = videos.filter((v) =>
-    v.sides.some(
-      (s) =>
-        !s.provenance.conflict && !s.provenance.fromTitle.every((c) => s.characters.includes(c)),
+  // NAMED, NOT COUNTED. This line was red from 2026-09-24 to 2026-10-14 and
+  // printed no side, so finding the five that failed meant re-deriving the
+  // predicate by hand. The predicate itself is unchanged.
+  const titleUnmet = videos.flatMap((v) =>
+    v.sides.flatMap((s, k) =>
+      !s.provenance.conflict && !s.provenance.fromTitle.every((c) => s.characters.includes(c))
+        ? [`${v.id}#${k}`]
+        : [],
     ),
   );
-  expect(conflictFree.length === 0, 'fromTitle ⊆ characters on every non-conflicted side');
+  expect(
+    titleUnmet.length === 0,
+    `fromTitle ⊆ characters on every non-conflicted side${
+      titleUnmet.length ? ` — ${titleUnmet.join(', ')}` : ''
+    }`,
+  );
+
+  // ITS COMPANION: THE SIDES WHERE A PERSON RULED THE TITLE WRONG.
+  //
+  // `titleRefuted` is the one record that lets the line above pass without the
+  // title being met, so it is held to the standard of the named list below
+  // ("a NAMED LIST WITH ITS EVIDENCE rather than a softened rule"): each one must
+  // be a person's read, apart from fromTitle, with its evidence and its date —
+  // and every one is printed on every run, so a refutation can never be a quiet
+  // way to make this suite green. The rules: scripts/title-refutation.ts.
+  const refutedSides = videos.flatMap((v) =>
+    v.sides.flatMap((s, k) =>
+      s.provenance.titleRefuted !== undefined ||
+      s.provenance.titleRefutedWhy !== undefined ||
+      s.provenance.titleRefutedAt !== undefined
+        ? [{ at: `${v.id}#${k}`, s }]
+        : [],
+    ),
+  );
+  const badRefuted = refutedSides
+    .map(({ at, s }) => ({ at, problems: refutationProblems(s) }))
+    .filter((r) => r.problems.length);
+  expect(
+    badRefuted.length === 0,
+    `every title refutation is a person's recorded verdict — human-read, apart from fromTitle, ` +
+      `with its evidence and day (${refutedSides.length} on record${
+        badRefuted.length
+          ? `; ${badRefuted.map((r) => `${r.at}: ${r.problems.join('; ')}`).join(' | ')}`
+          : ''
+      })`,
+  );
+  for (const { at, s } of refutedSides) {
+    const p = s.provenance;
+    console.log(
+      `      ${at}  ruled wrong: ${(p.titleRefuted ?? []).join(', ') || '—'}` +
+        `  [${p.titleRefutedAt ?? 'no date'}]  ${p.titleRefutedWhy ?? '(no evidence)'}`,
+    );
+  }
   expect(
     !JSON.stringify(replays).includes('provenance'),
     'provenance never reaches replays.json (substrate/contract boundary holds)',
@@ -811,6 +858,15 @@ async function main(): Promise<void> {
   // 8 badges at real density — the surface this game exists to prove
   const eight = replays.find((r) => r.sides.every((s) => s.characters.length === 4));
   if (eight) {
+    // Browse renders one infinite-scroll page (36 cards) and loads the next as
+    // the sentinel nears the viewport. The newest full 4v4 record need not be
+    // on the first page (on 2026-10-14 it was the 42nd), so scroll until its
+    // card exists rather than measuring a card that was never rendered.
+    const card = `[data-replay-id="${eight.id}"]`;
+    for (let i = 0; i < 40 && !(await page.locator(card).count()); i++) {
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.waitForTimeout(250);
+    }
     const density = await page.evaluate((id: string) => {
       const c = document.querySelector(`[data-replay-id="${id}"]`);
       if (!c) return null;

@@ -1,21 +1,28 @@
 /**
  * Dev-only: write one hand-read side into data/overrides.json.
  *
- * Body: { i, a: [3 ids], b: [3 ids], force? }  — the three assists read from each
- * of the item's two frames.
+ * Body: { video, side, sideIndex?, a: [3 ids], b: [3 ids], useFrameA?, union?,
+ *         keepTitled?, titleWrong?: { why, wholeSlot? } }
+ * — the three assists read from each of the item's two frames, plus at most one
+ * answer to a refusal. `force` is the pre-2026-10-14 name of `useFrameA` and is
+ * read as exactly that (see SaveIntents in server/utils/portraitWork.ts).
  *
  * THE TWO FRAMES ARE COMPARED AS SETS, NOT CELL BY CELL. The icons permute between
  * cells as the point fighter changes, so "cell A disagrees with cell A" would fire
  * constantly on frames that agree perfectly about who is on the team. What must
  * match is {point} + {three assists} from each frame. A mismatch is refused rather
  * than silently merged, because a side that reads two different benches is exactly
- * the case a person should look at again — `force` exists for when one frame is
- * genuinely occluded and the labeller has decided which to trust.
+ * the case a person should look at again — `useFrameA` exists for when one frame
+ * is genuinely occluded and the labeller has decided which to trust.
  *
  * A HUMAN READ REPLACES THE SIDE. It does not merge with the description: 4 of 189
  * hand-read slots named a fighter absent from BOTH described benches, and when the
  * pixels and the prose disagree the pixels win. Existing tiers stay recorded in
  * `tiers` and in `fromDescription`, so nothing is lost — only superseded.
+ *
+ * Every decision is made by decideBenchSave (server/utils/portraitWork.ts), which
+ * touches no file; this handler resolves the side, reads the inputs and writes
+ * the answer. That split is what lets verify-gates control the decisions.
  */
 
 import { writeFileSync } from 'node:fs';
@@ -23,6 +30,7 @@ import { join } from 'node:path';
 // The pipeline's own constant, not a second 4. stats.ts owns it and emit's
 // oversize accounting keys off the same value.
 import { CHARACTERS_PER_SIDE } from '../../../scripts/stats';
+import { titleClaim } from '../../../scripts/title-refutation';
 
 interface Body {
   /** identity of the side, as handed out by the GET — NOT a list position */
@@ -33,16 +41,43 @@ interface Body {
   i?: unknown;
   a?: unknown;
   b?: unknown;
+  /** the frames disagree and frame B was misread — trust frame A */
+  useFrameA?: unknown;
+  /** legacy: read as `useFrameA` only; it no longer gets past the title check */
   force?: unknown;
   /** the two frames disagree because the TEAM CHANGED — keep both readings */
   union?: unknown;
   /** the title names a fighter the footage never showed — keep BOTH */
   keepTitled?: unknown;
+  /** the title is WRONG for this side: { why, wholeSlot? } */
+  titleWrong?: unknown;
 }
 interface SideRec {
   characters: string[];
-  provenance: Record<string, unknown> & { tiers?: string[] };
+  provenance: Record<string, unknown> & {
+    tiers?: string[];
+    fromTitle?: string[];
+    titleRefuted?: string[];
+  };
 }
+
+/**
+ * What a save DECIDES, as opposed to what it inherits. Each save writes these
+ * afresh, so none may be carried over from the side's previous provenance: a
+ * re-read that agrees with its title must not inherit an old refutation, and a
+ * plain save must not inherit an old `teamChange` or `forced`. (Before
+ * 2026-10-14 the keep-both path left a previous save's `forced: true` in place.)
+ * `fromTitle` is decided too, but every decision writes it, so it is overwritten
+ * where it stands rather than dropped and re-appended.
+ */
+const DECIDED = [
+  'titleRefuted',
+  'titleRefutedWhy',
+  'titleRefutedAt',
+  'teamChange',
+  'forced',
+  'humanPicks',
+] as const;
 
 export default defineEventHandler(async (event) => {
   if (!import.meta.dev) throw createError({ statusCode: 404 });
@@ -96,81 +131,46 @@ export default defineEventHandler(async (event) => {
   const a = picks(body.a, 'frame A', w.points[0] ? 3 : 4);
   const b = picks(body.b, 'frame B', w.points[1] ? 3 : 4);
 
-  const membersOf = (point: string | null, rest: string[]) => [
-    ...new Set([...(point ? [point] : []), ...rest]),
-  ];
-  const setOf = (point: string | null, rest: string[]) => membersOf(point, rest).sort().join(',');
-  const setA = setOf(w.points[0], a);
-  const setB = setOf(w.points[1], b);
-
-  // A MID-SET TEAM CHANGE IS NOT A CONFLICT TO BE RESOLVED — it is two true
-  // readings of a side that really did field more than four fighters. Forcing one
-  // frame would discard an observation as good as the one it keeps, and the
-  // contract already counts sides of more than four: legal, counted in usage,
-  // excluded from pairing so C(n,2) cannot fabricate pairs never played.
-  if (setA !== setB && body.union === true) {
-    const characters = [...new Set([...membersOf(w.points[0], a), ...membersOf(w.points[1], b)])];
-    return writeSide(w, sideIndex, characters, { teamChange: true });
-  }
-
-  if (setA !== setB && body.force !== true) {
-    return {
-      ok: false,
-      disagree: true,
-      a: setA.split(','),
-      b: setB.split(','),
-      message: 'the two frames read different benches — resolve, or resend with force',
-    };
-  }
-
-  // point first when known: they held the plate at the moment the frame was taken
-  const characters = [...new Set([...(w.points[0] ? [w.points[0]] : []), ...a])];
-
   // THE FREE POSITIVE CONTROL, CHECKED AT THE POINT OF ENTRY.
   //
   // The title names a fighter that side demonstrably played, so a read omitting it
-  // is a misread or a mis-attribution. That check already exists at the emit gate,
-  // where it correctly refused to publish — but it fired at BUILD time, hours after
-  // the reading, on a side that had by then dropped out of the worklist. Catching
-  // it here costs nothing and tells the reviewer while the frames are still on
-  // screen. `force` remains available, because a genuine mid-set change can drop a
-  // fighter the title named.
-  const vids = readJson<{ id: string; sides: { provenance: { fromTitle: string[] } }[] }[]>(
-    'data/videos.json',
-    [],
-  );
-  const titled = vids.find((x) => x.id === w.video)?.sides[sideIndex]?.provenance.fromTitle ?? [];
-  const missingTitled = titled.filter((t) => !characters.includes(t));
-
-  // KEEPING BOTH IS USUALLY RIGHT, AND FORCING USUALLY IS NOT.
+  // is a misread, a mis-attribution, a mid-set team change — or a wrong title.
+  // The emit gate used to catch it at BUILD time, hours after the reading, on a
+  // side that had dropped out of the worklist; here it costs nothing and tells the
+  // reviewer while the frames are still on screen.
   //
-  // The uploader's title is evidence the player used that fighter; the frames are
-  // evidence of who was on the bench when they were sampled. When those disagree
-  // the ordinary cause is a mid-set team change, and BOTH observations are true —
-  // so the side had more than four over the set, which the contract already counts
-  // and excludes from pairing. Forcing would drop a fighter the title witnesses,
-  // which discards a true observation to make a check pass.
-  if (missingTitled.length && body.keepTitled === true) {
-    return writeSide(w, sideIndex, [...characters, ...missingTitled], {
-      teamChange: true,
-      humanPicks: { a, b, forced: false },
-    });
-  }
+  // JUDGED AGAINST THE TITLE'S WHOLE CLAIM, `fromTitle ∪ titleRefuted`, read from
+  // the file the verdict writes (overrides.json) before the published copy. So a
+  // re-read is measured against the title, never against an earlier verdict: a
+  // side someone ruled wrong has to be ruled wrong again, with its evidence, by
+  // whoever re-saves it.
+  const base = sideBase(w.video)[sideIndex];
+  if (!base) throw createError({ statusCode: 404, statusMessage: 'video not in videos.json' });
 
-  if (missingTitled.length && body.force !== true) {
-    return {
-      ok: false,
-      titleMissing: missingTitled,
-      message:
-        `the title names ${missingTitled.join(', ')} on this side, and the reading does not ` +
-        'include them — check the attribution first; if it is right, keep both',
-    };
-  }
-  return writeSide(w, sideIndex, characters, {
-    forced: setA !== setB ? true : undefined,
-    humanPicks: { a, b, forced: setA !== setB },
+  const d = decideBenchSave({
+    points: w.points,
+    a,
+    b,
+    titled: titleClaim(base.provenance),
+    intents: readSaveIntents(body as Record<string, unknown>),
+    today: new Date().toISOString().slice(0, 10),
   });
+  if (!d.ok) {
+    if ('refused' in d) throw createError({ statusCode: 400, statusMessage: d.refused });
+    return d;
+  }
+  return writeSide(w, sideIndex, d.characters, d.provenance);
 });
+
+/** The sides a save builds on: the override's when one exists (the file every
+ *  verdict writes, and fresher than the published copy until the next parse),
+ *  else the published record's. */
+function sideBase(video: string): SideRec[] {
+  const overrides = readJson<Record<string, { sides?: SideRec[] }>>('data/overrides.json', {});
+  if (overrides[video]?.sides) return overrides[video].sides;
+  const videos = readJson<{ id: string; sides: SideRec[] }[]>('data/videos.json', []);
+  return videos.find((x) => x.id === video)?.sides ?? [];
+}
 
 function writeSide(
   w: import('../../utils/portraitWork').BenchItem,
@@ -227,34 +227,49 @@ function writeSide(
       };
     }
   }
-  const sides = baseSides.map((s, k) =>
-    k !== sideIndex
-      ? s
-      : {
-          ...s,
-          characters,
-          provenance: {
-            ...s.provenance,
-            tier: 'human',
-            tiers: [...(s.provenance.tiers ?? []), 'human'],
-            fromHuman: characters,
-            /** WHICH SCREEN SIDE THIS READ CAME FROM.
-             *
-             *  The plate cannot always say which record side a screen side is, and
-             *  when a person supplies that instead, nothing else records the link.
-             *  Without it the page cannot tell a saved side from an unsaved one —
-             *  every tick stayed grey while the writes landed perfectly, which is
-             *  worse than not writing: it invites the same work to be done twice. */
-            humanScreenSide: w.side,
-            complete: characters.length >= 4,
-            ...extra,
-          },
-        },
-  );
+  const sides = baseSides.map((s, k) => {
+    if (k !== sideIndex) return s;
+    const inherited = Object.fromEntries(
+      Object.entries(s.provenance).filter(([key]) => !(DECIDED as readonly string[]).includes(key)),
+    );
+    return {
+      ...s,
+      characters,
+      provenance: {
+        ...inherited,
+        tier: 'human',
+        tiers: [...(s.provenance.tiers ?? []), 'human'],
+        fromHuman: characters,
+        /** WHICH SCREEN SIDE THIS READ CAME FROM.
+         *
+         *  The plate cannot always say which record side a screen side is, and
+         *  when a person supplies that instead, nothing else records the link.
+         *  Without it the page cannot tell a saved side from an unsaved one —
+         *  every tick stayed grey while the writes landed perfectly, which is
+         *  worse than not writing: it invites the same work to be done twice. */
+        humanScreenSide: w.side,
+        complete: characters.length >= 4,
+        ...extra,
+      },
+    };
+  });
 
+  // The '//' note is rewritten by every save, so it can only POINT at a
+  // refutation; the evidence itself lives on the side, where the next save to
+  // the other side of this record cannot erase it.
+  const stamp = new Date().toISOString().slice(0, 10);
+  const refutedNotes = sides.flatMap((s, k) => {
+    const ids = (s.provenance as { titleRefuted?: string[] }).titleRefuted;
+    return ids?.length ? [`side ${k} (${ids.join(', ')})`] : [];
+  });
   overrides[w.video] = {
     ...existing,
-    '//': `bench-completion: read by a person from the HUD portrait cluster [${new Date().toISOString().slice(0, 10)}]`,
+    '//':
+      `bench-completion: read by a person from the HUD portrait cluster [${stamp}]` +
+      (refutedNotes.length
+        ? `. The title was ruled wrong on ${refutedNotes.join(' and ')}: the evidence is that ` +
+          "side's provenance.titleRefutedWhy."
+        : ''),
     sides,
     resolvedBy: 'human',
   };

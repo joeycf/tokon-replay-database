@@ -311,8 +311,31 @@ export interface CharProvenance {
   /** Ids the TITLE stated. The seed of every TITLE-PARSED record, and so
    *  always present on one. An index intake parses no title — its title is
    *  synthesized FROM the catalogue's own character fields, so citing it as a
-   *  source would be circular — and those sides carry `[]` here. */
+   *  source would be circular — and those sides carry `[]` here.
+   *
+   *  ON A SIDE A PERSON READ (`tier: 'human'`) it holds only the title ids the
+   *  reading CONFIRMS. An id the person ruled wrong moves to `titleRefuted`
+   *  rather than being deleted, so `fromTitle ∪ titleRefuted` is still the
+   *  title's whole claim and `fromTitle ⊆ characters` stays a check that means
+   *  something (2026-10-14; the shape 165de8d chose by hand for Rt6A0-Kq79Q). */
   fromTitle: string[];
+  /** Title ids a PERSON ruled wrong for this side — the uploader's title, not the
+   *  reading, is in error. Written only by /dev/bench-review's "the title is
+   *  wrong" (or by hand with the same three fields).
+   *
+   *  Always on a `human` side and never also in `fromTitle`. It MAY coincide with
+   *  `characters`: a title slot copied wholesale from another upload can name a
+   *  fighter this player really fielded (BhAlz4yHmcM side 1, where Blade is on
+   *  both teams), and the slot still states nothing true about this side.
+   *  Enforced in e2e and verify-gates, reported by parse — the rules live in
+   *  scripts/title-refutation.ts. */
+  titleRefuted?: string[];
+  /** The evidence for `titleRefuted`: what a stranger would check (HUD handles,
+   *  plate reads, the video's own description, an independent index entry).
+   *  Required whenever `titleRefuted` is present. */
+  titleRefutedWhy?: string;
+  /** When the refutation was recorded, YYYY-MM-DD (UTC). Required with it. */
+  titleRefutedAt?: string;
   /** Ids the DESCRIPTION bench stated for this side, once aligned. */
   fromDescription?: string[];
   /** Ids a third-party INDEX stated for this side, as discrete fields. No
@@ -327,6 +350,20 @@ export interface CharProvenance {
    *  benches, and the pixels win. So a human read REPLACES a side's list rather
    *  than merging into it. */
   fromHuman?: string[];
+  /** Which SCREEN side ('L' | 'R') the human read came from. The plate cannot
+   *  always say which record side a screen side is, so this is the only link
+   *  /dev/bench-review has from a saved side back to the item it was read on. */
+  humanScreenSide?: 'L' | 'R';
+  /** The exact picks from each of the two frames, so reopening a saved side
+   *  shows what was read. `forced`: frame A was used over a disagreeing frame B
+   *  ("use frame A anyway"). Saves older than this field derive the picks. */
+  humanPicks?: { a: string[]; b: string[]; forced: boolean };
+  /** The side fielded more than four over the set — both frames' readings kept,
+   *  or a title fighter kept alongside them ("also keep … — team changed"). */
+  teamChange?: boolean;
+  /** Saved with frame A over a disagreeing frame B. Never set on a team change:
+   *  there both frames are true, so neither was overruled. */
+  forced?: boolean;
   /** How the description was aligned to THIS side. */
   descAlign?: DescAlign;
   /** Which slot order this side's title segment used. */

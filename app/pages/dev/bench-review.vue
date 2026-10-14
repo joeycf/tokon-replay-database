@@ -36,7 +36,7 @@
           v-for="(it, k) in items"
           :key="it.i"
           class="tick"
-          :class="{ on: it.done, cur: k === cursor }"
+          :class="{ on: it.done && !it.recheck, re: it.done && it.recheck, cur: k === cursor }"
           @click="cursor = k"
         />
       </nav>
@@ -143,6 +143,30 @@
         </div>
 
         <div class="actions">
+          <!-- The title, shown. Every refusal below is a judgement about it, and
+               until 2026-10-14 the page never displayed it: dE1pzpogWsU's title
+               hands NITRO's Black Panther to K7, which is plain the moment the
+               title and the HUD are on one screen. -->
+          <div class="titlebox">
+            <p class="ttl">{{ cur.title }}</p>
+            <p
+              v-for="(ts, k) in cur.titleSides"
+              :key="k"
+              class="dim"
+            >
+              <span :class="{ here: (cur.sideIndex ?? sideIndex) === k }"
+                >side {{ k + 1 }} · {{ ts.handle }}</span
+              >
+              — the title names
+              {{ ts.claim.length ? ts.claim.map((c) => c.name).join(', ') : 'no fighter' }}
+              <span
+                v-if="ts.refuted.length"
+                class="warn"
+              >
+                · ruled wrong: {{ ts.refuted.map((c) => c.name).join(', ') }}</span
+              >
+            </p>
+          </div>
           <!-- The plate could not say which player this screen side is, so the
                handle under the health bar is the evidence and the reviewer reads
                it. Never inferred from title order: one uploader reverses its
@@ -203,36 +227,82 @@
             this one was saved with <em>use frame A anyway</em>
           </p>
           <p
+            v-if="cur.savedRefuted"
+            class="warn"
+          >
+            saved with the title ruled wrong:
+            <strong>{{ cur.savedRefuted.ids.map((c) => c.name).join(', ') }}</strong>
+            [{{ cur.savedRefuted.at }}]<br />
+            <span class="dim">{{ cur.savedRefuted.why }}</span>
+          </p>
+          <p
             v-if="cur.recheck"
             class="warn"
           >
             This side is complete but FAILS its own control — the title names a fighter the saved
-            reading does not include. Re-read it.
+            reading does not include, and nobody recorded that the title is wrong. Re-read it.
           </p>
-          <p
+          <div
             v-if="titleMissing"
             class="warn"
           >
-            The title names <strong>{{ titleMissing.join(', ') }}</strong> on this side and your
-            reading does not include them.<br />
-            <span class="dim">
-              If the attribution is right, this is a mid-set team change: the title witnesses that
-              fighter, the frames witness the rest, and both are true. Keeping both records the side
-              as it actually was. </span
-            ><br />
+            <p>
+              The title names <strong>{{ namesOf(titleMissing) }}</strong> on this side and your
+              reading does not include them.
+            </p>
+            <p
+              v-if="missingOpposite.length"
+              class="dim"
+            >
+              The plate read <strong>{{ namesOf(missingOpposite) }}</strong> on the OTHER player's
+              side. Check the attribution first; if it is right, the title put that fighter on the
+              wrong player.
+            </p>
+            <p class="dim">
+              If the attribution is right, there are two honest answers. A mid-set team change: the
+              title witnesses that fighter, the frames witness the rest, and both are true — keep
+              both. Or the title is simply wrong — say what shows it, and it is recorded on the side
+              rather than silently dropped.
+            </p>
             <button
               class="act union"
               @click="saveKeepingTitled()"
             >
-              also keep {{ titleMissing.join(', ') }} — team changed
+              also keep {{ namesOf(titleMissing) }} — team changed
             </button>
-            <button
-              class="force"
-              @click="save(true)"
-            >
-              drop them and save
-            </button>
-          </p>
+            <!-- "drop them and save" stood here and recorded nothing, so the side
+                 failed e2e forever and nobody could tell a verdict from a misread.
+                 The verdict needs its evidence; the server refuses it without. -->
+            <div class="refute">
+              <label
+                class="dim"
+                for="refute-why"
+                >the title is wrong — what shows it?</label
+              >
+              <textarea
+                id="refute-why"
+                v-model="refuteWhy"
+                class="why"
+                rows="3"
+                placeholder="the HUD handle, the plate, the description, another upload of the same match…"
+              />
+              <label class="dim check">
+                <input
+                  v-model="refuteWholeSlot"
+                  type="checkbox"
+                />
+                the whole slot was copied from another video — refute every fighter it names, even
+                one this player really fielded
+              </label>
+              <button
+                class="force"
+                :disabled="!refuteWhy.trim() || busy"
+                @click="saveTitleWrong()"
+              >
+                the title is wrong — record it
+              </button>
+            </div>
+          </div>
           <p
             v-if="disagree"
             class="warn"
@@ -242,17 +312,17 @@
             B: {{ disagree.b.join(', ') }}<br />
             <span class="dim">
               If the team CHANGED between games, both readings are true and the side really did
-              field more than four — keep both. Force frame A only when one frame was misread. </span
+              field more than four — keep both. Use frame A only when frame B was misread. </span
             ><br />
             <button
               class="act union"
-              @click="save(false, true)"
+              @click="save({ union: true })"
             >
               both — the team changed mid-set
             </button>
             <button
               class="force"
-              @click="save(true)"
+              @click="save({ useFrameA: true })"
             >
               use frame A anyway
             </button>
@@ -273,7 +343,7 @@
           <button
             class="save"
             :disabled="!ready || busy"
-            @click="save(false)"
+            @click="save()"
           >
             {{ busy ? 'saving…' : cur.done ? 're-save side' : 'save side' }}
           </button>
@@ -335,6 +405,10 @@ if (!import.meta.dev) {
 
 const LETTERS = ['A', 'B', 'C'] as const;
 
+interface Named {
+  id: string;
+  name: string;
+}
 interface Item {
   i: number;
   video: string;
@@ -342,14 +416,27 @@ interface Item {
   secs: number[];
   allSecs: number[];
   side: 'L' | 'R';
-  points: ({ id: string; name: string } | null)[];
+  points: (Named | null)[];
   handles: [string, string];
   needs: { side: boolean; point: boolean };
   sideIndex: number | null;
-  known: { id: string; name: string }[];
+  known: Named[];
+  title: string;
+  titleSides: { handle: string; claim: Named[]; refuted: Named[] }[];
+  opposite: Named[];
   saved: string[] | null;
   savedPicks: { a: string[]; b: string[]; forced?: boolean } | null;
+  savedRefuted: { ids: Named[]; why: string; at: string } | null;
   done: boolean;
+}
+
+/** One answer to a refusal, at most (server/utils/portraitWork.ts SaveIntents).
+ *  The old single `force` meant two things and recorded neither. */
+interface SaveMode {
+  useFrameA?: boolean;
+  union?: boolean;
+  keepTitled?: boolean;
+  titleWrong?: { why: string; wholeSlot: boolean };
 }
 
 const cursor = ref(0);
@@ -360,6 +447,13 @@ const titleMissing = ref<string[] | null>(null);
 /** A refusal the server explained — shown verbatim, because the alternative is a
  *  button that looks broken. */
 const refused = ref<string | null>(null);
+/** "the title is wrong": the evidence, and whether the whole slot was copied */
+const refuteWhy = ref('');
+const refuteWholeSlot = ref(false);
+/** The frames half of the request the title refusal answered. Its answer is
+ *  resent WITH it: a title refusal that follows "use frame A anyway" or "both —
+ *  the team changed" must not quietly drop that choice. */
+const frameMode = ref<Pick<SaveMode, 'useFrameA' | 'union'>>({});
 
 /** Three diamonds when the plate named the point fighter; the bust as a fourth
  *  when it did not. `◆` is the bust so the row cannot be mistaken for a diamond. */
@@ -406,6 +500,14 @@ const done = computed(() => data.value?.done ?? 0);
 const awaiting = computed(() => data.value?.awaitingFootage ?? []);
 const roster = computed(() => data.value?.roster ?? []);
 const cur = computed(() => items.value[cursor.value]);
+const nameOf = computed(() => new Map(roster.value.map((r) => [r.id, r.name])));
+function namesOf(ids: string[]): string {
+  return ids.map((id) => nameOf.value.get(id) ?? id).join(', ');
+}
+/** title fighters this reading lacks that the plate saw on the other player */
+const missingOpposite = computed(() =>
+  (titleMissing.value ?? []).filter((id) => cur.value?.opposite.some((o) => o.id === id)),
+);
 const ready = computed(() => {
   const it = cur.value;
   if (!it) return false;
@@ -435,6 +537,10 @@ function loadPicks(): void {
   disagree.value = null;
   titleMissing.value = null;
   refused.value = null;
+  frameMode.value = {};
+  // a re-read of a side already ruled wrong starts from the recorded evidence
+  refuteWhy.value = it?.savedRefuted?.why ?? '';
+  refuteWholeSlot.value = false;
   const blank = (): string[][] => [
     new Array<string>(slotsFor(0).length).fill(''),
     new Array<string>(slotsFor(1).length).fill(''),
@@ -475,10 +581,18 @@ watch(cursor, loadPicks);
 watch(items, loadPicks, { immediate: true });
 
 async function saveKeepingTitled(): Promise<void> {
-  await save(false, false, true);
+  await save({ ...frameMode.value, keepTitled: true });
 }
 
-async function save(force: boolean, union = false, keepTitled = false): Promise<void> {
+async function saveTitleWrong(): Promise<void> {
+  if (!refuteWhy.value.trim()) return;
+  await save({
+    ...frameMode.value,
+    titleWrong: { why: refuteWhy.value.trim(), wholeSlot: refuteWholeSlot.value },
+  });
+}
+
+async function save(mode: SaveMode = {}): Promise<void> {
   if (!ready.value || busy.value) return;
   busy.value = true;
   refused.value = null;
@@ -499,13 +613,14 @@ async function save(force: boolean, union = false, keepTitled = false): Promise<
         sideIndex: sideIndex.value,
         a: picks.value[0]!.slice(0, slotsFor(0).length),
         b: picks.value[1]!.slice(0, slotsFor(1).length),
-        force,
-        union,
-        keepTitled,
+        ...mode,
       },
     });
     if (r.titleMissing) {
+      // One refusal at a time: the frames question was answered to get here.
+      disagree.value = null;
       titleMissing.value = r.titleMissing;
+      frameMode.value = { useFrameA: mode.useFrameA, union: mode.union };
       return;
     }
     if (r.ok) {
@@ -521,6 +636,7 @@ async function save(force: boolean, union = false, keepTitled = false): Promise<
       const at = items.value.findIndex((x) => x.video === saved.video && x.side === saved.side);
       if (at >= 0) cursor.value = Math.min(at + 1, items.value.length - 1);
     } else if (r.disagree) {
+      titleMissing.value = null;
       disagree.value = { a: r.a ?? [], b: r.b ?? [] };
     } else {
       // EVERY OTHER REFUSAL LANDS HERE, AND IT MUST SAY SOMETHING. The union-slip
@@ -541,11 +657,19 @@ async function save(force: boolean, union = false, keepTitled = false): Promise<
 }
 
 function onKey(e: KeyboardEvent): void {
-  if (e.target instanceof HTMLSelectElement) return;
+  // Typing the evidence for "the title is wrong" must not save the side plainly
+  // on Enter, nor move the cursor on an arrow key.
+  if (
+    e.target instanceof HTMLSelectElement ||
+    e.target instanceof HTMLTextAreaElement ||
+    e.target instanceof HTMLInputElement
+  ) {
+    return;
+  }
   if (e.key === 'ArrowLeft') cursor.value = Math.max(0, cursor.value - 1);
   else if (e.key === 'ArrowRight')
     cursor.value = Math.min(items.value.length - 1, cursor.value + 1);
-  else if (e.key === 'Enter') void save(false);
+  else if (e.key === 'Enter') void save();
 }
 onMounted(() => window.addEventListener('keydown', onKey));
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
@@ -580,6 +704,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 }
 .tick.on {
   background: var(--color-success);
+}
+/* saved, but failing its title control — not drained */
+.tick.re {
+  background: var(--color-warning);
 }
 .tick.cur {
   outline: 2px solid var(--color-primary);
@@ -733,6 +861,50 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 .note {
   margin-top: 1rem;
   max-width: 26rem;
+}
+.titlebox {
+  margin-bottom: 0.75rem;
+  max-width: 34rem;
+}
+.titlebox p {
+  margin: 0 0 0.2rem;
+}
+.ttl {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+.here {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.refute {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  max-width: 30rem;
+}
+.why {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  resize: vertical;
+}
+.check {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+.refute .force {
+  align-self: flex-start;
+}
+.force:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 .restored {
   color: var(--color-success);

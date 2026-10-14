@@ -379,6 +379,52 @@ of `data/overrides.json` with no locking, so whichever finishes second wins and
 the other's verdicts are gone. `npm run data:catchup -- --dry` exists for exactly
 this — see the note under the maintenance ritual above.
 
+### When the title is wrong (`/dev/bench-review`)
+
+The title is checked at the point of entry: a reading that omits a fighter the
+title names for that side is refused, and the page shows the title and each
+side's title fighters so the reviewer can judge it. There are exactly two honest
+answers, and each records itself:
+
+| refusal                         | answer                                        | what is written                                                     |
+| ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------- |
+| the two frames read differently | **both — the team changed mid-set**           | both readings, `teamChange: true`, never `forced`                   |
+|                                 | **use frame A anyway**                        | frame A, `forced: true`                                             |
+| the title names a fighter       | **also keep … — team changed**                | the title fighter appended, `teamChange: true`                      |
+| the reading lacks               | **the title is wrong** (a reason is required) | `fromTitle` keeps what the read confirms; the rest → `titleRefuted` |
+
+"The title is wrong" writes three fields on the side's provenance:
+`titleRefuted` (the ids), `titleRefutedWhy` (the evidence — HUD handles, plate
+reads, the description, another upload of the same match) and `titleRefutedAt`
+(the UTC day). Tick **the whole slot was copied from another video** when the
+title was templated from a different upload: every fighter it names is refuted,
+even one this player really fielded (BhAlz4yHmcM side 1, where Blade is on both
+teams). The rules live in `scripts/title-refutation.ts`.
+
+This exists because the old page had one `force` button for both refusals, and
+"drop them and save" recorded nothing: five correct reads of wrong titles left
+e2e's `fromTitle ⊆ characters` red from 2026-09-24 to 2026-10-14. A request
+still sending `force: true` now means "use frame A" and nothing else. Never fix
+a contradiction by trimming `fromTitle` by hand — that hides the title's claim
+instead of answering it. To record a verdict by hand, write the same three
+fields.
+
+Where it is held:
+
+- **`npm run test:e2e`** names every side failing `fromTitle ⊆ characters`, asserts
+  every refutation sits on a human-read side, stays out of `fromTitle` and has its
+  evidence and day, and prints the full list of refutations on every run.
+- **`npm run verify:gates`** controls both halves ([1e], [4g]) and fails on a bad
+  committed refutation.
+- **`data/report.md`** lists, under ⚠ ACTION REQUIRED, a published side failing
+  the check (with the exact `overrides.json` edit), a refutation that breaks the
+  rules, and a human side whose title _as parsed today_ names a fighter its verdict
+  neither confirms nor refutes — a hand-trimmed `fromTitle`, or a title the
+  uploader edited after the verdict. The parse never exits on these: the cron has
+  no e2e step, and a held day costs more than the report.
+- **`/dev/disagreements`** shows each refutation as an acknowledged row with its
+  evidence, so a ruled-wrong title never simply disappears from review.
+
 ## Vercel
 
 Static (`npm run generate`), `app.baseURL` defaults to `/tokon/` — an env

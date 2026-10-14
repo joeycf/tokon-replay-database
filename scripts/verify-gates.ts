@@ -25,7 +25,15 @@ import { execFileSync } from 'node:child_process';
 
 import { buildAliasMatcher, idKey, loadCharacters, playerId, stripLeaderboard } from './roster';
 import { alignBench, readBench } from './bench';
-import { buildBenchList } from '../server/utils/portraitWork';
+import {
+  benchPartition,
+  buildBenchList,
+  decideBenchSave,
+  failsControl,
+  readSaveIntents,
+  savedSideFor,
+} from '../server/utils/portraitWork';
+import { refutationProblems, unmetTitle, type TitleSide } from './title-refutation';
 import { NOT_A_MATCH_RE } from './parse';
 import { emitGeneric } from './emit';
 import { dueExpiries } from './expiries';
@@ -506,6 +514,357 @@ try {
       process.chdir(cwd);
       await rm(tmp, { recursive: true, force: true });
     }
+  }
+
+  // ── 1e. the title verdict ───────────────────────────────────────────────────
+  //
+  // e2e's `fromTitle ⊆ characters` was red from 2026-09-24 to 2026-10-14 over five
+  // CORRECT reads of WRONG titles. One `force` flag let /dev/bench-review skip the
+  // title check and record nothing; c650959's partition then filed the failing
+  // sides as drained; and the cron has no e2e step. These controls pin each half
+  // of the fix with the dE1pzpogWsU shape: K7's title claims Doctor Doom AND Black
+  // Panther, the reading has Doom, and the Panther is NITRO's, on the other side.
+  console.log('\n[1e] title verdict — a dropped title fighter is open work, a refuted one is not');
+  {
+    const k7 = ['magneto', 'blade', 'green-goblin', 'doctor-doom'];
+    type Prov = TitleSide['provenance'] & { humanScreenSide?: string };
+    const human = (prov: Prov): TitleSide & { provenance: Prov } => ({
+      characters: k7,
+      provenance: { tier: 'human', fromHuman: k7, humanScreenSide: 'R', ...prov },
+    });
+    const dropped = human({ fromTitle: ['doctor-doom', 'black-panther'] });
+    const refuted = human({
+      fromTitle: ['doctor-doom'],
+      titleRefuted: ['black-panther'],
+      titleRefutedWhy: 'HUD: NITRO on the left on Black Panther; K7 SHOWOFF on the right on Doom',
+      titleRefutedAt: '2026-10-14',
+    });
+
+    // (a) the unrecorded drop is flagged — by the control, the partition and e2e
+    check(
+      'a dropped title fighter with no refutation FAILS the control',
+      failsControl(dropped),
+      `unmet ${unmetTitle(dropped).join(',')}`,
+    );
+    check(
+      'and the e2e predicate names it',
+      unmetTitle(dropped).join(',') === 'black-panther',
+      unmetTitle(dropped).join(',') || '(nothing)',
+    );
+    // (b) the recorded refutation passes all three
+    check(
+      'the same side with the refutation RECORDED passes the control',
+      !failsControl(refuted),
+      undefined,
+    );
+    check(
+      'and the e2e predicate and its companion rules',
+      unmetTitle(refuted).length === 0 && refutationProblems(refuted).length === 0,
+      refutationProblems(refuted).join('; ') || 'clean',
+    );
+
+    // THE PARTITION, through the GET's own matching. The real five were saved on
+    // screen sides the plate could not attribute (sideIndex null), where the
+    // worklist's own recheck is false by construction — so only the saved side,
+    // read from overrides.json, can say the save failed its control.
+    const nitro = {
+      characters: ['magik', 'blade', 'black-panther', 'magneto'],
+      provenance: { tier: 'human', fromTitle: ['magik', 'magneto'], humanScreenSide: 'L' },
+    };
+    const partition = (ovSides: (TitleSide & { provenance: Prov })[]) => {
+      const sv = savedSideFor({ side: 'R', sideIndex: null }, ovSides);
+      return benchPartition({
+        done: !!sv?.provenance.fromHuman?.length,
+        recheck: sv ? failsControl(sv) : false,
+      });
+    };
+    check(
+      'the partition keeps an unrecorded drop OPEN (c650959 filed it as drained)',
+      partition([nitro, dropped]) === 'pending',
+      partition([nitro, dropped]),
+    );
+    check(
+      'and resolves a recorded refutation from the override alone, before any parse',
+      partition([nitro, refuted]) === 'resolved',
+      partition([nitro, refuted]),
+    );
+
+    // The companion's rules can each FAIL — every one is a way to silence e2e.
+    const bad: [string, TitleSide][] = [
+      ['with no evidence', human({ ...refuted.provenance, titleRefutedWhy: '  ' })],
+      ['with no day', human({ ...refuted.provenance, titleRefutedAt: undefined })],
+      ['with a malformed day', human({ ...refuted.provenance, titleRefutedAt: '2026-13-40' })],
+      [
+        'on a footage-tier side',
+        {
+          ...refuted,
+          provenance: { ...refuted.provenance, tier: 'footage', fromHuman: undefined },
+        },
+      ],
+      [
+        'that also stays in fromTitle',
+        human({ ...refuted.provenance, fromTitle: ['doctor-doom', 'black-panther'] }),
+      ],
+      ['that is empty', human({ ...refuted.provenance, titleRefuted: [] })],
+      [
+        'as a why/day with no titleRefuted',
+        human({ fromTitle: ['doctor-doom'], titleRefutedWhy: 'x', titleRefutedAt: '2026-10-14' }),
+      ],
+    ];
+    for (const [label, side] of bad) {
+      check(
+        `a refutation ${label} is not a recorded verdict`,
+        refutationProblems(side).length > 0,
+        refutationProblems(side).join('; ') || 'ACCEPTED',
+      );
+    }
+    // a refuted id MAY coincide with the bench: BhAlz4yHmcM side 1, whose whole
+    // title slot was copied from another match, refutes a Blade it really fielded
+    const wholeSlot = human({
+      fromTitle: [],
+      titleRefuted: ['doctor-doom', 'black-panther'],
+      titleRefutedWhy: 'the slot was copied from another upload',
+      titleRefutedAt: '2026-10-14',
+    });
+    check(
+      'a whole-slot refutation may name a fighter the side really has',
+      refutationProblems(wholeSlot).length === 0,
+      refutationProblems(wholeSlot).join('; ') || 'clean',
+    );
+
+    // THE WRITER'S DECISIONS, exactly as bench-review.post.ts calls them.
+    const save = (
+      body: Record<string, unknown>,
+      b: string[] = ['blade', 'green-goblin', 'magneto'],
+    ) =>
+      decideBenchSave({
+        points: ['doctor-doom', 'doctor-doom'],
+        a: ['blade', 'green-goblin', 'magneto'],
+        b,
+        titled: ['doctor-doom', 'black-panther'],
+        intents: readSaveIntents(body),
+        today: '2026-10-14',
+      });
+    const got = (d: ReturnType<typeof save>) =>
+      d.ok
+        ? `ok ${d.characters.join('/')} ${JSON.stringify(d.provenance)}`
+        : 'titleMissing' in d
+          ? `titleMissing ${d.titleMissing.join(',')}`
+          : 'disagree' in d
+            ? 'disagree'
+            : `refused: ${d.refused.slice(0, 50)}`;
+    const plain = save({});
+    check(
+      'a plain save omitting a title fighter is refused, naming it',
+      !plain.ok && 'titleMissing' in plain && plain.titleMissing.join() === 'black-panther',
+      got(plain),
+    );
+    // (d) THE CONFLATION CONTROL. force:true from a page loaded before the split
+    // used to get past BOTH refusals and write the shape the five carried.
+    const legacy = save({ force: true });
+    check(
+      'a legacy force:true NO LONGER bypasses the title check',
+      !legacy.ok && 'titleMissing' in legacy,
+      got(legacy),
+    );
+    const frameA = save({ useFrameA: true });
+    check(
+      'nor does useFrameA — it answers the frames only',
+      !frameA.ok && 'titleMissing' in frameA,
+      got(frameA),
+    );
+    const keep = save({ keepTitled: true });
+    check(
+      '"also keep" appends the title fighter as a team change',
+      keep.ok && keep.characters.length === 5 && keep.provenance.teamChange === true,
+      got(keep),
+    );
+    const wrong = save({ titleWrong: { why: 'HUD: Black Panther is on NITRO' } });
+    const wrongSide = wrong.ok
+      ? {
+          characters: wrong.characters,
+          provenance: { tier: 'human', fromHuman: wrong.characters, ...wrong.provenance },
+        }
+      : null;
+    check(
+      '"the title is wrong" keeps what the read confirms and refutes the rest, with why and day',
+      wrong.ok &&
+        JSON.stringify(wrong.provenance.fromTitle) === '["doctor-doom"]' &&
+        JSON.stringify(wrong.provenance.titleRefuted) === '["black-panther"]' &&
+        wrong.provenance.titleRefutedAt === '2026-10-14' &&
+        wrong.characters.length === 4,
+      got(wrong),
+    );
+    check(
+      'and what it writes passes the control, the e2e predicate and the companion',
+      !!wrongSide &&
+        !failsControl(wrongSide) &&
+        unmetTitle(wrongSide).length === 0 &&
+        refutationProblems(wrongSide).length === 0,
+      wrongSide ? refutationProblems(wrongSide).join('; ') || 'clean' : 'no side',
+    );
+    const whole = save({ titleWrong: { why: 'copied slot', wholeSlot: true } });
+    check(
+      'with wholeSlot it refutes every title fighter, even one the read contains',
+      whole.ok &&
+        JSON.stringify(whole.provenance.fromTitle) === '[]' &&
+        JSON.stringify(whole.provenance.titleRefuted) === '["doctor-doom","black-panther"]',
+      got(whole),
+    );
+    const noWhy = save({ titleWrong: { why: '   ' } });
+    check(
+      '"the title is wrong" with no evidence is refused',
+      !noWhy.ok && 'refused' in noWhy,
+      got(noWhy),
+    );
+    const both = save({ keepTitled: true, titleWrong: { why: 'x' } });
+    check(
+      '"also keep" with "the title is wrong" is refused',
+      !both.ok && 'refused' in both,
+      got(both),
+    );
+
+    // (c) THE UNION PATH. Frame B read Black Panther where frame A read Magneto:
+    // the team changed between games, and the union happens to meet the title.
+    const swapB = ['blade', 'green-goblin', 'black-panther'];
+    const split = save({}, swapB);
+    check(
+      'disagreeing frames are still refused by default',
+      !split.ok && 'disagree' in split,
+      got(split),
+    );
+    const union = save({ union: true }, swapB);
+    check(
+      'a union save skips the frames refusal and keeps teamChange',
+      union.ok && union.characters.length === 5 && union.provenance.teamChange === true,
+      got(union),
+    );
+    check(
+      'and is NOT marked forced — both frames are true, neither was overruled',
+      union.ok &&
+        union.provenance.forced === undefined &&
+        (union.provenance.humanPicks as { forced: boolean }).forced === false,
+      got(union),
+    );
+    // A union no longer returns before the title check.
+    const unionShort = save({ union: true }, ['blade', 'green-goblin', 'hulk']);
+    check(
+      'a union that still omits a title fighter meets the title check',
+      !unionShort.ok && 'titleMissing' in unionShort,
+      got(unionShort),
+    );
+    const forcedWrong = save(
+      { useFrameA: true, titleWrong: { why: 'frame B misread; title wrong' } },
+      ['blade', 'green-goblin', 'hulk'],
+    );
+    check(
+      'use frame A over a disagreeing frame B IS marked forced',
+      forcedWrong.ok && forcedWrong.provenance.forced === true,
+      got(forcedWrong),
+    );
+
+    // THE WORKLIST, on disk: the refutation also stops the wrong title from
+    // anchoring placement. Side 0 is left short so the record stays queued.
+    const tmp = await mkdtemp(join(tmpdir(), 'tokon-refute-'));
+    const cwd = process.cwd();
+    const write = async (rel: string, data: unknown) => {
+      await mkdir(dirname(join(tmp, rel)), { recursive: true });
+      await writeFile(join(tmp, rel), JSON.stringify(data));
+    };
+    const row = (sec: number, id: string) => ({ sec, id, dist: 0 });
+    const record = (id: string, k7prov: Prov) => ({
+      id,
+      title: 'MARVEL TOKON ▰ NITRO (Magik/Magneto) vs K7 (#2 Doctor Doom/Black Panther) ▰ …',
+      sides: [
+        {
+          characters: ['magik', 'magneto'],
+          handle: 'NITRO',
+          provenance: { fromTitle: ['magik', 'magneto'] },
+        },
+        { characters: k7, handle: 'K7', provenance: { tier: 'human', fromHuman: k7, ...k7prov } },
+      ],
+    });
+    try {
+      await write('data/bench-queue.json', [{ id: 'dropped' }, { id: 'refuted' }]);
+      await write('data/videos.json', [
+        record('dropped', { fromTitle: ['doctor-doom', 'black-panther'] }),
+        record('refuted', { fromTitle: ['doctor-doom'], titleRefuted: ['black-panther'] }),
+      ]);
+      const plates = {
+        geom: {},
+        left: [row(10, 'magik'), row(100, 'black-panther')],
+        right: [row(20, 'doctor-doom'), row(200, 'magneto')],
+      };
+      await write('cache/tokon/extracted.json', { dropped: plates, refuted: plates });
+      for (const id of ['dropped', 'refuted']) {
+        for (const sec of [10, 100, 20, 200]) {
+          await mkdir(join(tmp, 'cache/tokon/frames', id), { recursive: true });
+          await writeFile(
+            join(tmp, 'cache/tokon/frames', id, `${String(sec).padStart(6, '0')}.png`),
+            '',
+          );
+        }
+      }
+      process.chdir(tmp);
+      const list = buildBenchList();
+      const d = list.filter((w) => w.video === 'dropped');
+      const r = list.filter((w) => w.video === 'refuted');
+      check(
+        'with the wrong title fighter in fromTitle, both plates hit both titles and nothing is placed',
+        d.length === 2 && d.every((w) => w.sideIndex === null),
+        d.map((w) => `${w.side}:${w.sideIndex}`).join(' ') || 'no items',
+      );
+      check(
+        'refuted, the plate places both sides: L is offered as NITRO without asking, R is settled',
+        r.length === 1 && r[0]!.side === 'L' && r[0]!.sideIndex === 0 && !r[0]!.needs.side,
+        r.map((w) => `${w.side}:${w.sideIndex} needs.side=${w.needs.side}`).join(' ') || 'no items',
+      );
+      check(
+        'the worklist shows the reviewer the title and what the plate read on the other side',
+        !!d[0] &&
+          d[0].title.startsWith('MARVEL TOKON') &&
+          d.find((w) => w.side === 'R')!.opposite.includes('black-panther'),
+        d.find((w) => w.side === 'R')?.opposite.join(',') ?? 'no item',
+      );
+    } finally {
+      process.chdir(cwd);
+      await rm(tmp, { recursive: true, force: true });
+    }
+  }
+
+  // ── the committed corpus, held to the same rules ───────────────────────────
+  // Like [4d]'s union-slip sweep: a bad refutation or an unmet title in what is
+  // about to be committed fails HERE, rather than waiting for someone to read
+  // report.md. (data/ is the fresh parse run at this script's import.)
+  {
+    const vids = JSON.parse(
+      await readFile(join(ROOT, 'data', 'videos.json'), 'utf8'),
+    ) as MatchVideo[];
+    const unmet = vids.flatMap((v) =>
+      v.sides.flatMap((sd, k) => (unmetTitle(sd).length ? [`${v.id}#${k}`] : [])),
+    );
+    const badRef = vids.flatMap((v) =>
+      v.sides.flatMap((sd, k) => (refutationProblems(sd).length ? [`${v.id}#${k}`] : [])),
+    );
+    check(
+      'no committed side fails its title with no verdict',
+      unmet.length === 0,
+      unmet.join(', ') || 'clean',
+    );
+    check(
+      'every committed title refutation is a recorded verdict',
+      badRef.length === 0,
+      badRef.join(', ') || 'clean',
+    );
+    const report = await readFile(join(ROOT, 'data', 'report.md'), 'utf8');
+    const head = report.slice(0, report.indexOf('_Generated'));
+    check(
+      "report.md's ACTION REQUIRED carries no title finding (drift included)",
+      !/fail their own title check|not a recorded verdict|today's title and the recorded verdict/.test(
+        head,
+      ),
+      'clean',
+    );
   }
 
   // ── 2. the emit contract ────────────────────────────────────────────────────
@@ -1335,6 +1694,228 @@ try {
     } finally {
       // restored by the global finally
     }
+  }
+
+  // ── 4g. the title check, through a real parse: reported, never fatal ───────
+  //
+  // parse.ts REPORTS title contradictions under ACTION REQUIRED and never exits
+  // on them (its soft-gate policy: a hard exit stops the daily refresh). So the
+  // control is two-sided: every way to get a contradiction past e2e must surface
+  // in report.md, the honest refutation must NOT, and the run must exit 0 with
+  // every record still published. Placed BEFORE [4f], which crashes on an empty
+  // local raw/replayTheater.json (a crash that predates this section).
+  console.log('\n[4g] title check — every contradiction reported, none fatal, the verdict clean');
+  {
+    const rawPath = join(ROOT, 'raw', 'proReplays.json');
+    const ovPath = join(ROOT, 'data', 'overrides.json');
+    const original = JSON.parse(await readFile(rawPath, 'utf8')) as {
+      publishedAt: string;
+    }[];
+    const baseOv = JSON.parse(await readFile(ovPath, 'utf8')) as Record<string, unknown>;
+    // DATED AT THE DUMP'S OWN NEWEST UPLOAD, never after it. A bait newer than
+    // anything in raw/ stays in videos.json after the dump is restored, and the
+    // stale-raw guard then (correctly) refuses every later parse — which is how
+    // a first draft of this section took [4f] down with it.
+    const newest = original.reduce((a, r) => (r.publishedAt > a ? r.publishedAt : a), '');
+    // and the corpus comes back as it was, so [4f] starts where it would have
+    const dataSnap = await mkdtemp(join(tmpdir(), 'tokon-4g-'));
+    await cp(join(ROOT, 'data'), dataSnap, { recursive: true });
+    const bait = (id: string, handle: string, chars: string) => ({
+      id,
+      channel: 'proReplays',
+      // affix-fenced like 5d's, so the handles come out clean
+      title: `Marvel Tokon ▰ ${handle} (${chars}) vs CTLRFOPP (Storm) ▰ Pro level replays`,
+      description: 'MARVEL TOKON high level replay',
+      publishedAt: newest,
+      durationSec: 600,
+      viewCount: 10,
+      liveBroadcastContent: 'none',
+    });
+    const read = ['blade', 'hulk', 'loki', 'danger'];
+    const why = 'control: the HUD shows this player on Blade, never Magik';
+    const verdict = (handle: string, characters: string[], prov: Record<string, unknown>) => ({
+      '//': 'verify-gates [4g] control',
+      resolvedBy: 'human',
+      sides: [
+        {
+          player: handle.toLowerCase(),
+          handle,
+          characters,
+          provenance: {
+            tier: 'human',
+            tiers: ['title', 'human'],
+            fromHuman: characters,
+            slotOrder: 'handle-first',
+            complete: true,
+            ...prov,
+          },
+        },
+        {
+          player: 'ctlrfopp',
+          handle: 'CTLRFOPP',
+          characters: ['storm'],
+          provenance: {
+            tier: 'title',
+            tiers: ['title'],
+            fromTitle: ['storm'],
+            slotOrder: 'handle-first',
+            complete: false,
+          },
+        },
+      ],
+    });
+    // id → [title fighters, override, what report.md must say about it (null: nothing)]
+    const cases: [string, string, string, ReturnType<typeof verdict>, RegExp | null][] = [
+      // the five, as saved: the title fighter dropped and nothing recorded
+      [
+        'CTLRFDROP1',
+        'CTLRFDROP',
+        'Magik',
+        verdict('CTLRFDROP', read, { fromTitle: ['magik'] }),
+        /`CTLRFDROP1` side 0: the title names \*\*magik\*\*/,
+      ],
+      // 165de8d's shape: fromTitle trimmed by hand — green in e2e, so only parse can see it
+      [
+        'CTLRFTRIM1',
+        'CTLRFTRIM',
+        'Magik',
+        verdict('CTLRFTRIM', read, { fromTitle: [] }),
+        /`CTLRFTRIM1` side 0: today's title names \*\*magik\*\*/,
+      ],
+      // the uploader edits the title after the verdict: (Magik) became (Magik/Hulk)…
+      // and the reading has no Hulk either, so this side's verdict is out of date
+      [
+        'CTLRFEDIT1',
+        'CTLRFEDIT',
+        'Magik/Hulk',
+        verdict('CTLRFEDIT', ['magik', 'blade', 'loki', 'danger'], { fromTitle: ['magik'] }),
+        /`CTLRFEDIT1` side 0: today's title names \*\*hulk\*\*/,
+      ],
+      // a refutation with no evidence or day
+      [
+        'CTLRFNOWHY1',
+        'CTLRFNOWHY',
+        'Magik',
+        verdict('CTLRFNOWHY', read, { fromTitle: [], titleRefuted: ['magik'] }),
+        /`CTLRFNOWHY1` side 0: .*no titleRefutedWhy/,
+      ],
+      // a refutation on a side no person read
+      [
+        'CTLRFFOOT1',
+        'CTLRFFOOT',
+        'Magik',
+        {
+          ...verdict('CTLRFFOOT', read, {
+            fromTitle: [],
+            titleRefuted: ['magik'],
+            titleRefutedWhy: why,
+            titleRefutedAt: '2026-10-14',
+          }),
+          resolvedBy: 'extractor',
+        },
+        /`CTLRFFOOT1` side 0: on a footage side/,
+      ],
+      // confirmed and refuted at once
+      [
+        'CTLRFBOTH1',
+        'CTLRFBOTH',
+        'Magik',
+        verdict('CTLRFBOTH', ['magik', 'blade', 'hulk', 'loki'], {
+          fromTitle: ['magik'],
+          titleRefuted: ['magik'],
+          titleRefutedWhy: why,
+          titleRefutedAt: '2026-10-14',
+        }),
+        /`CTLRFBOTH1` side 0: .*both confirmed \(fromTitle\) and refuted/,
+      ],
+      // THE HONEST VERDICT: reported nowhere
+      [
+        'CTLRFOK1',
+        'CTLRFOK',
+        'Magik',
+        verdict('CTLRFOK', read, {
+          fromTitle: [],
+          titleRefuted: ['magik'],
+          titleRefutedWhy: why,
+          titleRefutedAt: '2026-10-14',
+        }),
+        null,
+      ],
+    ];
+    // the footage case is a machine side: retag it so it is not human at all
+    const foot = cases.find((c) => c[0] === 'CTLRFFOOT1')![3].sides[0]!.provenance as Record<
+      string,
+      unknown
+    >;
+    foot.tier = 'footage';
+    foot.tiers = ['title', 'footage'];
+    delete foot.fromHuman;
+    foot.fromFootage = read;
+
+    await writeFile(
+      rawPath,
+      JSON.stringify([...original, ...cases.map(([id, h, chars]) => bait(id, h, chars))], null, 1),
+    );
+    await writeFile(
+      ovPath,
+      JSON.stringify(
+        { ...baseOv, ...Object.fromEntries(cases.map(([id, , , ov]) => [id, ov])) },
+        null,
+        2,
+      ),
+    );
+    let code = 0;
+    let out = '';
+    try {
+      out = execFileSync('npx', ['tsx', 'scripts/parse.ts'], {
+        cwd: ROOT,
+        stdio: 'pipe',
+        encoding: 'utf8',
+      });
+    } catch (e) {
+      const err = e as { status?: number; stdout?: string; stderr?: string };
+      code = err.status ?? 1;
+      out = `${err.stdout ?? ''}${err.stderr ?? ''}`;
+    }
+    check(
+      'the parse exits 0 — a title contradiction never holds the cron',
+      code === 0,
+      `exit ${code}`,
+    );
+    check(
+      'and says so on its console',
+      /ACTION REQUIRED: \d+ side\(s\) fail their title check/.test(out),
+      out.split('\n').filter((l) => /title/.test(l) && /ACTION/.test(l)).length + ' line(s)',
+    );
+    const report = await readFile(join(ROOT, 'data', 'report.md'), 'utf8');
+    const head = report.slice(0, report.indexOf('_Generated'));
+    for (const [id, , , , want] of cases) {
+      if (want) {
+        check(
+          `report.md ACTION REQUIRED names ${id}`,
+          want.test(head),
+          want.test(head) ? 'named' : 'ABSENT',
+        );
+      } else {
+        check(
+          `the recorded refutation (${id}) is NOT reported`,
+          !head.includes(id),
+          head.includes(id) ? 'REPORTED' : 'absent',
+        );
+      }
+    }
+    const vids = JSON.parse(
+      await readFile(join(ROOT, 'data', 'videos.json'), 'utf8'),
+    ) as MatchVideo[];
+    check(
+      'every control record is still published — reported, never withheld',
+      cases.every(([id]) => vids.some((v) => v.id === id)),
+      `${cases.filter(([id]) => vids.some((v) => v.id === id)).length}/${cases.length}`,
+    );
+    await writeFile(rawPath, JSON.stringify(original, null, 1));
+    await rm(join(ROOT, 'data'), { recursive: true, force: true });
+    await cp(dataSnap, join(ROOT, 'data'), { recursive: true });
+    await rm(dataSnap, { recursive: true, force: true });
   }
 
   // ── 4f. the index intake: add-only, only-grows, cursor on the PULL ──────────

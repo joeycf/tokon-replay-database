@@ -46438,7 +46438,7 @@
     "resolvedBy": "human"
   },
   "Rt6A0-Kq79Q": {
-    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-15]. THE TITLE MIS-ATTRIBUTES CARNAGE. It reads \"KINGAFRICA (#2 Ranked Captain America) vs ODYSSEUS (Carnage)\", but the handle strips at 62s put KINGAFRICA on the RIGHT and ODYSSEUS on the LEFT, and carnage witnesses on the RIGHT plate (145-385s) beside captain-america (62-940s) — i.e. on Kingafrica's team. Odysseus never fields it. buildBenchList placed the sides by matching carnage to the title, so it inverted them and offered the reviewer Odysseus's bench as Kingafrica's. Odysseus keeps fromTitle [] because the title states nothing true about that side; leaving [\"carnage\"] would fail its own control forever.",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-15]. THE TITLE MIS-ATTRIBUTES CARNAGE. It reads \"KINGAFRICA (#2 Ranked Captain America) vs ODYSSEUS (Carnage)\", but the handle strips at 62s put KINGAFRICA on the RIGHT and ODYSSEUS on the LEFT, and carnage witnesses on the RIGHT plate (145-385s) beside captain-america (62-940s) — i.e. on Kingafrica's team. Odysseus never fields it. buildBenchList placed the sides by matching carnage to the title, so it inverted them and offered the reviewer Odysseus's bench as Kingafrica's. Odysseus keeps fromTitle [] because the title states nothing true about that side; leaving [\"carnage\"] would fail its own control forever. [2026-10-14] Recorded as side 1's provenance.titleRefuted [\"carnage\"] rather than by the trimmed fromTitle alone.",
     "sides": [
       {
         "player": "kingafrica",
@@ -46486,6 +46486,11 @@
             "human"
           ],
           "fromTitle": [],
+          "titleRefuted": [
+            "carnage"
+          ],
+          "titleRefutedWhy": "The title mis-attributes Carnage (the maintainer's verdict in 165de8d, 2026-09-15, until now recorded only by trimming fromTitle). It reads \"KINGAFRICA (#2 Ranked Captain America) vs ODYSSEUS (Carnage)\", but the handle strips at 62s put KINGAFRICA on the RIGHT and ODYSSEUS on the LEFT, and carnage witnesses on the RIGHT plate (145-385s) beside captain-america, on Kingafrica's team. Odysseus never fields it.",
+          "titleRefutedAt": "2026-10-14",
           "descAlign": "handle",
           "slotOrder": "handle-first",
           "complete": true,
@@ -48144,7 +48149,7 @@
     "resolvedBy": "human"
   },
   "eTTKoXTTyMM": {
-    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-23]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-23]. The title was ruled wrong on side 0 (captain-america) [2026-10-14]: the evidence is that side's provenance.titleRefutedWhy.",
     "sides": [
       {
         "player": "nypotato",
@@ -48161,9 +48166,12 @@
             "title",
             "human"
           ],
-          "fromTitle": [
+          "fromTitle": [],
+          "titleRefuted": [
             "captain-america"
           ],
+          "titleRefutedWhy": "NYPOTATO fielded Iron Man, Magik, Black Panther and Ghost Rider, not Captain America; the title is probably stale. HUD at 137s: NYPOTATO on the left on Iron Man, SNAKE EYEZ on the right on Champion. Left plates: ghost-rider 10, magik 6, iron-man 2, black-panther 1 (+23 near); captain-america is never read. The same pairing with identical teams: gb4M0B_cb6w (\"ChrisG (Iron-Man, Black Panther, Ghost Rider and Magik) versus Snake Eyez ...\") and Replay Theater entries 487429 and 487432.",
+          "titleRefutedAt": "2026-10-14",
           "slotOrder": "handle-first",
           "complete": true,
           "fromHuman": [
@@ -49514,7 +49522,7 @@
     "resolvedBy": "human"
   },
   "lX85HVFdsnk": {
-    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-25]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-25]. The title was ruled wrong on side 1 (peni-parker) [2026-10-14]: the evidence is that side's provenance.titleRefutedWhy.",
     "sides": [
       {
         "player": "snake-eyez",
@@ -49573,9 +49581,12 @@
             "title",
             "human"
           ],
-          "fromTitle": [
+          "fromTitle": [],
+          "titleRefuted": [
             "peni-parker"
           ],
+          "titleRefutedWhy": "SYN CYPOLE played Ms. Marvel, not Peni Parker. HUD at 64s: SNAKE EYEZ on the left on Hulk, SYN CYPOLE on the right on Ms. Marvel. Plates: ms-marvel 12 exact + 32 near on the right; peni-parker is never read on either side. Independent: CqwZ8HFRXkg (\"SNAKE EYEZ (Champion/Hulk) vs SYN CYPOLE (Ms. Marvel)\", replaysHub) has the identical team, and Replay Theater record MTRxkH6QO5Y@99 lists Cypole as Ms. Marvel/Spider-Man/Black Panther/Blade.",
+          "titleRefutedAt": "2026-10-14",
           "slotOrder": "chars-first",
           "complete": true,
           "fromHuman": [
@@ -58614,7 +58625,7 @@
     "resolvedBy": "human"
   },
   "BhAlz4yHmcM": {
-    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-26]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-09-26]. The title was ruled wrong on side 0 (captain-america, carnage) and side 1 (loki, blade — the whole slot) [2026-10-14], and side 1's player corrected from Un0Koa to HookGangGod: the evidence is each side's provenance.titleRefutedWhy.",
     "sides": [
       {
         "player": "huebert",
@@ -58631,10 +58642,13 @@
             "title",
             "human"
           ],
-          "fromTitle": [
+          "fromTitle": [],
+          "titleRefuted": [
             "captain-america",
             "carnage"
           ],
+          "titleRefutedWhy": "The title was copied from a sibling upload: apart from the first handle it is NS9oPgoAxMM's \"Kingafrica (Captain America/Carnage) vs Un0Koa (Loki/Blade)\", posted on the same channel two hours later. This video's own description reads \"HUEBERT (Loki, Spider-Man, Magneto and Blade) versus HookGangGod (Blade, Spider-Man, Doctor Doom and Iron-Man)\", and its tags name the same eight fighters. Plates: loki 32 exact on the left; captain-america and carnage are never read on either side. HUEBERT's 35 other sides all field Loki and never Captain America or Carnage (corpus 2026-10-14).",
+          "titleRefutedAt": "2026-10-14",
           "descAlign": "ambiguous",
           "slotOrder": "handle-first",
           "complete": true,
@@ -58661,8 +58675,8 @@
         }
       },
       {
-        "player": "un0koa",
-        "handle": "Un0Koa",
+        "player": "hookganggod",
+        "handle": "HookGangGod",
         "characters": [
           "doctor-doom",
           "iron-man",
@@ -58675,10 +58689,13 @@
             "title",
             "human"
           ],
-          "fromTitle": [
+          "fromTitle": [],
+          "titleRefuted": [
             "loki",
             "blade"
           ],
+          "titleRefutedWhy": "The whole slot was copied from NS9oPgoAxMM (Un0Koa on Loki/Blade), a different match, so it states nothing true about this side even where Blade coincides. The player is HookGangGod, not Un0Koa: the video's description (\"... versus HookGangGod (Blade, Spider-Man, Doctor Doom and Iron-Man)\"), its 'hookganggod' tag, and Replay Theater entries 486616, 486620, 486897, 488269 and 488421 (HookGangGod on Blade/Spider-Man/Doctor Doom/Iron Man). Right plates: spider-man 11, doctor-doom 6, blade 5, iron-man 2, exactly that bench; loki is never read on the right. Un0Koa's 14 other sides all field Star-Lord, never read here.",
+          "titleRefutedAt": "2026-10-14",
           "descAlign": "ambiguous",
           "slotOrder": "handle-first",
           "complete": true,
@@ -69859,7 +69876,7 @@
     "resolvedBy": "human"
   },
   "dE1pzpogWsU": {
-    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-05]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-10-05]. The title was ruled wrong on side 1 (black-panther) [2026-10-14]: the evidence is that side's provenance.titleRefutedWhy.",
     "sides": [
       {
         "player": "nitro",
@@ -69921,9 +69938,13 @@
             "human"
           ],
           "fromTitle": [
-            "doctor-doom",
+            "doctor-doom"
+          ],
+          "titleRefuted": [
             "black-panther"
           ],
+          "titleRefutedWhy": "The title hands NITRO's Black Panther to K7. HUD at 151s: NITRO on the left with Black Panther on point, K7 SHOWOFF on the right with Doctor Doom on point. Plates: black-panther 24 exact + 38 near on the LEFT and none on the right; doctor-doom 41 exact on the right. NITRO's 9 other sides all field Black Panther; K7's 41 other sides never do (corpus 2026-10-14). K7 fielded magneto, blade, green-goblin, doctor-doom.",
+          "titleRefutedAt": "2026-10-14",
           "descAlign": "handle",
           "slotOrder": "handle-first",
           "complete": true,

@@ -4,11 +4,20 @@
  * Two populations, and it matters that they are different:
  *
  * CROSS-TIER, over the sides drained at /dev/bench-review. A `human` side whose
- * `fromTitle`, `fromDescription` or `fromFootage` names a fighter the reader did
- * NOT see. Currently zero across 227 sides — which is a result, not an empty page.
- * It is partly structural: the bench queue only ever held INCOMPLETE sides, so
- * none of them carried a four-name description to contradict in the first place.
- * It stays watched because every side drained from here on can break it.
+ * `fromTitle`, `fromDescription`, `fromIndex` or `fromFootage` names a fighter the
+ * reader did NOT see. It read zero across 227 sides when this page was built
+ * (2026-08-19), partly by structure: the bench queue only ever held INCOMPLETE
+ * sides, so none carried a four-name description to contradict. It did not stay
+ * zero. By 2026-10-05 it held six rows over 1,383 human-read sides — five title
+ * rows, every one a correct read of a WRONG title, and one footage row
+ * (8toULZpVItQ side 1) — which is how the e2e title check had been red for weeks.
+ *
+ * A title a person has RULED WRONG is not an open disagreement any more, but it
+ * is not hidden either: `titleRefuted` takes the ids out of `fromTitle`, so the
+ * open check stops seeing them, and each refutation comes back here as an
+ * ACKNOWLEDGED row carrying its evidence and date. A verdict nobody can see from
+ * the one page that reviews human-vs-tier disagreements would be a quiet way to
+ * make a disagreement disappear.
  *
  * OFF-BENCH, over the template-labelling pass in data/portrait-labels.json. Those
  * sides had a full described bench, and four labels named a fighter absent from
@@ -18,6 +27,8 @@
  * a rule.
  */
 
+import { titleClaim } from '../../scripts/title-refutation';
+
 export interface CrossTier {
   video: string;
   sideIndex: number;
@@ -25,6 +36,10 @@ export interface CrossTier {
   claimed: string[];
   human: string[];
   missing: string[];
+  /** set on an ACKNOWLEDGED row: a person ruled the title wrong for these ids */
+  refuted?: string[];
+  why?: string;
+  at?: string;
 }
 
 export interface OffBench {
@@ -51,6 +66,9 @@ interface SideRec {
     fromIndex?: string[];
     fromFootage?: string[];
     fromHuman?: string[];
+    titleRefuted?: string[];
+    titleRefutedWhy?: string;
+    titleRefutedAt?: string;
   };
 }
 interface FrameRead {
@@ -59,9 +77,14 @@ interface FrameRead {
   dist: number;
 }
 
-export function crossTier(): { rows: CrossTier[]; scanned: number } {
+export function crossTier(): {
+  rows: CrossTier[];
+  acknowledged: CrossTier[];
+  scanned: number;
+} {
   const videos = readJson<{ id: string; sides: SideRec[] }[]>('data/videos.json', []);
   const rows: CrossTier[] = [];
+  const acknowledged: CrossTier[] = [];
   let scanned = 0;
   for (const v of videos) {
     v.sides.forEach((s, k) => {
@@ -89,9 +112,22 @@ export function crossTier(): { rows: CrossTier[]; scanned: number } {
           });
         }
       }
+      if (p.titleRefuted?.length) {
+        acknowledged.push({
+          video: v.id,
+          sideIndex: k,
+          tier: 'title',
+          claimed: titleClaim(p),
+          human: p.fromHuman!,
+          missing: p.titleRefuted.filter((c) => !seen.has(c)),
+          refuted: p.titleRefuted,
+          why: p.titleRefutedWhy ?? '',
+          at: p.titleRefutedAt ?? '',
+        });
+      }
     });
   }
-  return { rows, scanned };
+  return { rows, acknowledged, scanned };
 }
 
 export function offBench(): OffBench[] {

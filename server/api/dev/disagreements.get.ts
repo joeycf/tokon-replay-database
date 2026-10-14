@@ -3,8 +3,13 @@
  *
  * A check that finds nothing must be distinguishable from a check that did not
  * run, so the cross-tier section reports how many sides it SCANNED even when it
- * has no rows. Zero across 227 is the current answer and it is worth stating.
+ * has no rows. (It was zero across 227 when written; by 2026-10-05 it was six
+ * across 1,383, five of them wrong titles — see server/utils/disagree.ts.) Title
+ * refutations ride along as `acknowledged`: settled, and shown with their
+ * evidence rather than dropped.
  */
+
+import type { CrossTier } from '../../utils/disagree';
 
 export default defineEventHandler(() => {
   if (!import.meta.dev) throw createError({ statusCode: 404 });
@@ -16,16 +21,20 @@ export default defineEventHandler(() => {
   const ct = crossTier();
   const ob = offBench();
 
+  const withNames = (r: CrossTier) => ({
+    ...r,
+    claimedNames: r.claimed.map(nm),
+    humanNames: r.human.map(nm),
+    missingNames: r.missing.map(nm),
+    refutedNames: (r.refuted ?? []).map(nm),
+  });
+
   return {
     roster: [...roster].sort((a, b) => a.name.localeCompare(b.name)),
     crossTier: {
       scanned: ct.scanned,
-      rows: ct.rows.map((r) => ({
-        ...r,
-        claimedNames: r.claimed.map(nm),
-        humanNames: r.human.map(nm),
-        missingNames: r.missing.map(nm),
-      })),
+      rows: ct.rows.map(withNames),
+      acknowledged: ct.acknowledged.map(withNames),
     },
     // OPEN disagreements only. `applied` has been computed here since the row
     // existed and never used to filter, so a disagreement the reviewer had

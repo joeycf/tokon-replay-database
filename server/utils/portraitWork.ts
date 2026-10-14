@@ -23,6 +23,10 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+// The title-refutation rules are shared with parse, e2e and verify-gates, none of
+// which can import each other — see the module's header.
+import { unmetTitle, type TitleSide } from '../../scripts/title-refutation';
+
 export interface WorkItem {
   video: string;
   sec: number;
@@ -156,6 +160,251 @@ export interface BenchItem {
   /** complete, yet missing the fighter its own title names — the free positive
    *  control failing, so the side is WRONG rather than done */
   recheck: boolean;
+  /** the record's title as it stands, shown to the reviewer: the page used to
+   *  judge a title it never displayed */
+  title: string;
+  /** fighters the plate read on the OTHER screen side. A title fighter the
+   *  reading lacks that turns up here is the signature of a title that put a
+   *  fighter on the wrong player (dE1pzpogWsU's Black Panther), not of a misread. */
+  opposite: string[];
+}
+
+/**
+ * THE FREE POSITIVE CONTROL, AS ONE PREDICATE: a side with a full bench that
+ * still omits a fighter its title names. Such a side is WRONG rather than done.
+ *
+ * Extracted 2026-10-14 so the worklist below, the bench-review GET and
+ * verify-gates all ask the same question. It is the e2e predicate
+ * (`fromTitle ⊆ characters`, scripts/title-refutation.ts unmetTitle) restricted
+ * to complete sides, because an incomplete side is unfinished for a simpler
+ * reason and is already in the queue.
+ *
+ * A side whose title a person RULED WRONG passes, because the refuted ids are in
+ * `titleRefuted`, not `fromTitle`. One that merely dropped them does not.
+ */
+export function failsControl(s: TitleSide): boolean {
+  return s.characters.length >= 4 && unmetTitle(s).length > 0;
+}
+
+/**
+ * THE BENCH-REVIEW PARTITION. A saved side is resolved only if it also passes its
+ * control.
+ *
+ * c650959 (2026-09-11) partitioned on `done` alone — any human read at all — and
+ * that silently undid 58836f3's "a failing control now means unfinished": a
+ * complete side failing its title went to the drained list, visible only under
+ * "show drained", and five of them sat there for three weeks while e2e was red.
+ */
+export const benchPartition = (it: { done: boolean; recheck: boolean }): 'pending' | 'resolved' =>
+  it.done && !it.recheck ? 'resolved' : 'pending';
+
+/**
+ * Which overrides.json side a worklist item was saved to: matched by the SCREEN
+ * side it was read from, else by the record side when the plate attributed it.
+ * The GET reads both its "saved" tick and its recheck from this one side, so the
+ * two can never describe different sides.
+ */
+export function savedSideFor<S extends { provenance?: { humanScreenSide?: string } }>(
+  w: Pick<BenchItem, 'side' | 'sideIndex'>,
+  ovSides: S[],
+): S | undefined {
+  const byScreen = ovSides.find((s) => s.provenance?.humanScreenSide === w.side);
+  if (byScreen) return byScreen;
+  return w.sideIndex !== null ? ovSides[w.sideIndex] : undefined;
+}
+
+/**
+ * WHAT A SAVE ASKS FOR — read from the POST body.
+ *
+ * There used to be ONE flag, `force`, and it bypassed two unrelated refusals: the
+ * two frames disagreeing, and the reading omitting a fighter the title names. The
+ * second bypass wrote nothing down. A leftover "use frame A anyway" click after
+ * fixing the picks skipped the title check as silently as "drop them and save"
+ * did, and both left a side that failed e2e forever (2026-10-05 diagnosis: five
+ * sides, every one a correct read of a wrong title).
+ *
+ * So each intent is its own field now, and the old flag keeps only its first
+ * meaning: `force: true` from a page loaded before this change is `useFrameA`,
+ * and it no longer gets past the title check.
+ */
+export interface SaveIntents {
+  /** the frames disagree because frame B was misread — trust frame A */
+  useFrameA: boolean;
+  /** the frames disagree because the TEAM CHANGED — keep both readings */
+  union: boolean;
+  /** the title names a fighter the frames never showed — keep it as well */
+  keepTitled: boolean;
+  /** the title is WRONG for this side. `wholeSlot`: the slot was copied from
+   *  another video, so even a title fighter the reading contains is refuted */
+  titleWrong: { why: string; wholeSlot: boolean } | null;
+}
+
+export function readSaveIntents(body: Record<string, unknown>): SaveIntents {
+  const tw = body.titleWrong;
+  const twObj =
+    tw && typeof tw === 'object' ? (tw as { why?: unknown; wholeSlot?: unknown }) : null;
+  return {
+    useFrameA: body.useFrameA === true || body.force === true,
+    union: body.union === true,
+    keepTitled: body.keepTitled === true,
+    titleWrong:
+      tw === true || twObj
+        ? { why: String(twObj?.why ?? ''), wholeSlot: twObj?.wholeSlot === true }
+        : null,
+  };
+}
+
+export type TitleDecision =
+  | {
+      ok: true;
+      characters: string[];
+      fromTitle: string[];
+      titleRefuted?: string[];
+      teamChange?: true;
+    }
+  | { ok: false; titleMissing: string[] }
+  | { ok: false; refused: string };
+
+/**
+ * THE TITLE HALF OF A SAVE. `titled` is the title's whole claim for this side
+ * (`fromTitle ∪ titleRefuted`, so a re-save is judged against the title, never
+ * against an earlier verdict), `characters` what the frames read.
+ *
+ *   nothing missing      → saved; fromTitle is the whole claim
+ *   keepTitled           → the missing fighters are appended, as a team change
+ *   titleWrong           → fromTitle keeps what the reading confirms; the rest
+ *                          moves to titleRefuted. wholeSlot refutes all of it
+ *   neither              → refused, naming what is missing
+ *
+ * "the title is wrong" without its evidence is refused outright: a refutation is
+ * the one record that makes the title check pass without the title being met.
+ */
+export function decideTitle(
+  titled: string[],
+  characters: string[],
+  intents: Pick<SaveIntents, 'keepTitled' | 'titleWrong'>,
+): TitleDecision {
+  if (intents.keepTitled && intents.titleWrong) {
+    return {
+      ok: false,
+      refused: '"also keep" and "the title is wrong" contradict each other: send one',
+    };
+  }
+  if (intents.titleWrong && !intents.titleWrong.why.trim()) {
+    return {
+      ok: false,
+      refused:
+        '"the title is wrong" needs its evidence: say what shows it (the HUD handles, the ' +
+        'plate, the description, another upload of the same match)',
+    };
+  }
+  const missing = titled.filter((t) => !characters.includes(t));
+  if (intents.titleWrong) {
+    const refuted = intents.titleWrong.wholeSlot ? titled : missing;
+    if (!refuted.length) return { ok: true, characters, fromTitle: titled };
+    return {
+      ok: true,
+      characters,
+      fromTitle: titled.filter((t) => !refuted.includes(t)),
+      titleRefuted: refuted,
+    };
+  }
+  if (!missing.length) return { ok: true, characters, fromTitle: titled };
+  if (intents.keepTitled) {
+    return {
+      ok: true,
+      characters: [...characters, ...missing],
+      fromTitle: titled,
+      teamChange: true,
+    };
+  }
+  return { ok: false, titleMissing: missing };
+}
+
+export type SaveDecision =
+  | { ok: false; disagree: true; a: string[]; b: string[]; message: string }
+  | { ok: false; titleMissing: string[]; message: string }
+  | { ok: false; refused: string }
+  | { ok: true; characters: string[]; provenance: Record<string, unknown> };
+
+/**
+ * A WHOLE BENCH-REVIEW SAVE, decided without touching a file: the frames
+ * comparison, then the title. bench-review.post.ts only reads the inputs and
+ * writes what this returns, which is what lets verify-gates control it.
+ *
+ * The two frames are compared as SETS ({point} + three assists): the icons
+ * permute between cells as the point fighter changes.
+ *
+ * THREE DEFECTS OF THE OLD UNION PATH, fixed here (2026-10-14). It returned
+ * before the title check, so "both — the team changed" skipped it entirely; a
+ * plan to route it through the shared tail would instead have hit the frames
+ * refusal (a union request sends no force), marked every union forced (its
+ * frames differ by definition) and lost `teamChange`. So: a union skips ONLY the
+ * frames refusal, is never `forced`, and always records `teamChange`.
+ */
+export function decideBenchSave(input: {
+  points: [string | null, string | null];
+  a: string[];
+  b: string[];
+  titled: string[];
+  intents: SaveIntents;
+  /** YYYY-MM-DD, UTC — stamped on a refutation */
+  today: string;
+}): SaveDecision {
+  const { points, a, b, intents } = input;
+  const membersOf = (point: string | null, rest: string[]) => [
+    ...new Set([...(point ? [point] : []), ...rest]),
+  ];
+  const setA = membersOf(points[0], a).sort().join(',');
+  const setB = membersOf(points[1], b).sort().join(',');
+  const disagree = setA !== setB;
+  const union = disagree && intents.union;
+
+  if (disagree && !union && !intents.useFrameA) {
+    return {
+      ok: false,
+      disagree: true,
+      a: setA.split(','),
+      b: setB.split(','),
+      message: 'the two frames read different benches — resolve, or resend with useFrameA',
+    };
+  }
+
+  // point first when known: they held the plate at the moment the frame was taken
+  const read = union
+    ? [...new Set([...membersOf(points[0], a), ...membersOf(points[1], b)])]
+    : membersOf(points[0], a);
+
+  const t = decideTitle(input.titled, read, intents);
+  if (!t.ok) {
+    if ('refused' in t) return t;
+    return {
+      ok: false,
+      titleMissing: t.titleMissing,
+      message:
+        `the title names ${t.titleMissing.join(', ')} on this side, and the reading does not ` +
+        'include them — check the attribution first; if it is right, either the team changed ' +
+        '(keep both) or the title is wrong (say why)',
+    };
+  }
+  const forced = disagree && !union;
+  return {
+    ok: true,
+    characters: t.characters,
+    provenance: {
+      fromTitle: t.fromTitle,
+      ...(t.titleRefuted
+        ? {
+            titleRefuted: t.titleRefuted,
+            titleRefutedWhy: intents.titleWrong!.why.trim(),
+            titleRefutedAt: input.today,
+          }
+        : {}),
+      ...(union || t.teamChange ? { teamChange: true } : {}),
+      ...(forced ? { forced: true } : {}),
+      humanPicks: { a, b, forced },
+    },
+  };
 }
 
 /**
@@ -199,6 +448,7 @@ export function buildBench(): { items: BenchItem[]; awaitingFootage: string[] } 
   const videos = readJson<
     {
       id: string;
+      title: string;
       sides: { characters: string[]; handle: string; provenance: { fromTitle: string[] } }[];
     }[]
   >('data/videos.json', []);
@@ -211,11 +461,7 @@ export function buildBench(): { items: BenchItem[]; awaitingFootage: string[] } 
   // correct it.
   for (const v of videos) {
     if (v.sides.length !== 2) continue;
-    const broken = v.sides.some(
-      (s) =>
-        s.characters.length >= 4 && !s.provenance.fromTitle.every((t) => s.characters.includes(t)),
-    );
-    if (broken) queued.add(v.id);
+    if (v.sides.some(failsControl)) queued.add(v.id);
   }
 
   const out: BenchItem[] = [];
@@ -325,14 +571,10 @@ export function buildBench(): { items: BenchItem[]; awaitingFootage: string[] } 
       // uploader reverses its second title slot on 27 of 34 videos, so assuming
       // order would compound one error with another.
       const sideIndex = placed[side];
-      const settled = (s: { characters: string[]; provenance: { fromTitle: string[] } }) =>
-        s.characters.length >= 4 && s.provenance.fromTitle.every((t) => s.characters.includes(t));
+      const settled = (s: TitleSide) => s.characters.length >= 4 && !failsControl(s);
       if (sideIndex !== null && settled(v.sides[sideIndex]!)) continue;
       if (sideIndex === null && v.sides.every(settled)) continue;
-      const recheck =
-        sideIndex !== null &&
-        v.sides[sideIndex]!.characters.length >= 4 &&
-        !settled(v.sides[sideIndex]!);
+      const recheck = sideIndex !== null && failsControl(v.sides[sideIndex]!);
 
       // two frames as far apart as available, so they are different bursts. Fall
       // back to any HUD frame when the plate resolved nothing: a person can read a
@@ -368,6 +610,12 @@ export function buildBench(): { items: BenchItem[]; awaitingFootage: string[] } 
         recheck,
         handles,
         needs: { side: sideIndex === null, point: points[0] === null || points[1] === null },
+        title: v.title,
+        opposite: [
+          ...new Set(
+            (side === 'L' ? e.right : e.left).filter((r) => r.id && r.dist === 0).map((r) => r.id!),
+          ),
+        ],
       });
     }
   }

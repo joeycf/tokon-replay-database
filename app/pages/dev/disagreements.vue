@@ -31,8 +31,10 @@
             v-if="!crossRows.length"
             class="ok"
           >
-            No disagreements across {{ scanned }} human-read sides — no title, description or
-            footage tier named a fighter the reader did not see.
+            No open disagreements across {{ scanned }} human-read sides — no title, description,
+            index or footage tier named a fighter the reader did not see<span v-if="ackRows.length"
+              >, apart from the {{ ackRows.length }} title(s) a person ruled wrong below</span
+            >.
           </p>
           <table
             v-else
@@ -59,6 +61,52 @@
                 <td>{{ r.claimedNames.join(', ') }}</td>
                 <td>{{ r.humanNames.join(', ') }}</td>
                 <td class="warn">{{ r.missingNames.join(', ') }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- ACKNOWLEDGED, NOT HIDDEN. A refutation takes the ids out of fromTitle,
+             so the open table above stops seeing them; without this section a
+             verdict that a title is wrong would make the disagreement vanish from
+             the one page that reviews them. -->
+        <section
+          v-if="ackRows.length"
+          class="block"
+        >
+          <h2>
+            title ruled wrong — acknowledged <span class="dim">({{ ackRows.length }})</span>
+          </h2>
+          <p class="dim note">
+            A person read these sides and recorded that the uploader's title is wrong for them
+            (<code>provenance.titleRefuted</code>). Settled, but listed with the evidence so the
+            verdict can be checked. A refuted fighter can still be on the side when the whole title
+            slot was copied from another video.
+          </p>
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>record</th>
+                <th>side</th>
+                <th>title claimed</th>
+                <th>human read</th>
+                <th>ruled wrong</th>
+                <th>evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(r, i) in ackRows"
+                :key="i"
+              >
+                <td class="mono">{{ r.video }}</td>
+                <td>{{ r.sideIndex + 1 }}</td>
+                <td>{{ r.claimedNames.join(', ') }}</td>
+                <td>{{ r.humanNames.join(', ') }}</td>
+                <td class="warn">{{ r.refutedNames.join(', ') }}</td>
+                <td class="dim">
+                  <span class="mono">{{ r.at }}</span> · {{ r.why }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -163,10 +211,11 @@
 /**
  * Dev-only review of human-vs-machine disagreements.
  *
- * The cross-tier table is empty today and says so with its denominator. That is
+ * The cross-tier table says when it is empty, with its denominator. That is
  * deliberate: a check reporting nothing and a check that never ran look identical
  * on a blank page, and this one is the standing guard over every side drained from
- * here on.
+ * here on. (It was empty when written, across 227 sides; it did not stay so, and
+ * the five wrong titles it listed by 2026-10-05 are now acknowledged refutations.)
  */
 
 // Declares this tool on the /dev index (engine app/pages/dev/index.vue). Every
@@ -193,6 +242,9 @@ interface Cross {
   claimedNames: string[];
   humanNames: string[];
   missingNames: string[];
+  refutedNames: string[];
+  why?: string;
+  at?: string;
 }
 interface Off {
   key: string;
@@ -209,7 +261,7 @@ interface Off {
 
 const busy = ref(false);
 const { data, pending, error, refresh } = await useFetch<{
-  crossTier: { scanned: number; rows: Cross[] };
+  crossTier: { scanned: number; rows: Cross[]; acknowledged: Cross[] };
   offBench: Off[];
   /** already applied — carried for reference, not as work */
   offBenchResolved: Off[];
@@ -218,6 +270,7 @@ const { data, pending, error, refresh } = await useFetch<{
 }>('/api/dev/disagreements');
 
 const crossRows = computed(() => data.value?.crossTier.rows ?? []);
+const ackRows = computed(() => data.value?.crossTier.acknowledged ?? []);
 const scanned = computed(() => data.value?.crossTier.scanned ?? 0);
 const off = computed(() => data.value?.offBench ?? []);
 const roster = computed(() => data.value?.roster ?? []);
