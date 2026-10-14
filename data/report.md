@@ -7,7 +7,7 @@
 - **patch-table** (stale-patch-table, due 2026-09-26)
   The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-09-26, 18 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-10-14T13:06:22.424Z_
+_Generated 2026-10-14T15:23:42.673Z_
 
 ## Coverage
 
@@ -59,6 +59,7 @@ How every one of the 2408 sides got its characters.
 - bench alignment: character-subset 33 · handle 674 · ambiguous 7
 - title slot order: handle-first 1799 · chars-first 165 · parallel-lists 244
 - tier conflicts (queued for review): 1
+- title refutations (a person ruled the title wrong): **6** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
 
 ### Side-size distribution
