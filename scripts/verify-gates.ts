@@ -45,6 +45,7 @@ import {
   validateQuietThrough,
   validateSeasons,
 } from './patches';
+import { retargetLedger } from './ledger';
 import { resolvePlayers } from './players';
 import { LIQUIPEDIA_GAME, SOURCE_PAGE, validate as validateTournaments } from './tournaments';
 import type { MatchVideo, PlayerRecord, SeasonBoundary } from '../types/index';
@@ -1058,6 +1059,26 @@ try {
       const r = base();
       await emitGeneric([r], characters, [...players, players[0]!], sources);
     });
+  }
+
+  // ── 2b′. the redirect ledger's chain rule ──────────────────────────────────
+  // The write used to keep a row only while its destination was live, so x → y
+  // vanished the day y was merged into z, and the drift gate held the cron for
+  // it (Tekken, 2026-10-12). Synthetic ids, so these survive any real merge.
+  console.log("\n[2b′] redirect ledger — a row follows its destination's merge");
+  {
+    const same = (a: Record<string, string>, b: Record<string, string>) =>
+      JSON.stringify(a) === JSON.stringify(b);
+    const r1 = retargetLedger({ a: 'b', b: 'c' }, new Set(['c']));
+    check('carries x → y on to z once y is merged into z', same(r1, { a: 'c', b: 'c' }), JSON.stringify(r1));
+    const r2 = retargetLedger({ x: 'y', y: 'x' }, new Set(['x']));
+    check('a flip drops the row that would now point a live id at itself', same(r2, { y: 'x' }), JSON.stringify(r2));
+    const r3 = retargetLedger({ a: 'gone' }, new Set(['c']));
+    check('drops a row whose trail ends in nobody', same(r3, {}), JSON.stringify(r3));
+    const r4 = retargetLedger({ a: 'b', b: 'a', c: 'a' }, new Set(['z']));
+    check('drops rows that loop', same(r4, {}), JSON.stringify(r4));
+    const r5 = retargetLedger({ live: 'c' }, new Set(['live', 'c']));
+    check('keeps a live-source row for the drift gate to refuse', same(r5, { live: 'c' }), JSON.stringify(r5));
   }
 
   // ── 2c. tournament placements ───────────────────────────────────────────────

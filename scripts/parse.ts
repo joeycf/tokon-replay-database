@@ -19,6 +19,7 @@ import {
   type WitnessArtifact,
   type WitnessFile,
 } from './crosscheck';
+import { retargetLedger } from './ledger';
 import { CHARACTERS_PER_SIDE } from './stats';
 import { resolveKey, resolvePlayers, undeclaredCollisions } from './players';
 import { dueExpiries, expiryBlock } from './expiries';
@@ -1434,13 +1435,13 @@ async function main() {
   for (const [canonical, absorbed] of mergeReport.merged) {
     for (const old of absorbed) proposed[old] = canonical;
   }
-  // Two rows are dropped rather than carried: one pointing at itself (a spelling
-  // that later won the id back — Vercel serves a self-redirect as a loop), and
-  // one whose target no longer exists (the whole player left the corpus, so the
-  // redirect would land on a 404 of its own).
-  const redirects = Object.fromEntries(
-    Object.entries(proposed).filter(([from, to]) => from !== to && playerMap.has(to)),
-  );
+  // A row whose target was itself merged away since (x → y, then y → z) is
+  // carried on to z, not dropped — dropping it took x's redirect with it, which
+  // is what held Tekken's cron on 2026-10-12. Dropped: a row pointing at itself
+  // (a spelling that later won the id back — Vercel serves a self-redirect as a
+  // loop), and one whose trail ends in nobody (the whole player left the
+  // corpus, so the redirect would land on a 404 of its own). scripts/ledger.ts.
+  const redirects = retargetLedger(proposed, new Set(playerMap.keys()));
 
   // ── tournament placements → featured + extra.titles ───────────────────────
   // data/tournaments.json is Liquipedia's Tier 1–2 winners and runners-up,
