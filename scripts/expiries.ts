@@ -47,19 +47,15 @@ import type { Expiry } from '../types/index';
 export const UNRELEASED: { id: string; releases: string; accent?: string; note?: string }[] = [
   {
     id: 'phoenix-cyclops',
-    releases: '2026-10-16',
+    releases: '2026-11-02',
     // Already derived — the design handoff's own worked DLC example carries it
     // at 7.4:1, so release day is a one-line change rather than a design task.
     accent: '#FF9D57',
     note:
-      'Year-1 character #1. Announced "this Fall" with a published Oct–Dec 2026 window and no ' +
-      'hard date. Fired at WINDOW OPEN on 2026-10-01 and was NOT playable on 2026-10-02: ' +
-      'Sony\'s product page still reads "Phoenix Cyclops arrives in Fall 2026. Stay tuned", ' +
-      'and no date has been announced. Re-dated two weeks out, not to the window close, ' +
-      "because the only other watch, data:roster-check (Sony's Hero Select block, which " +
-      'already lists the 21 shipped fighters), is manual and never runs in the cron. ' +
-      'Re-date to the release day once one is announced; if the window slips, re-date the ' +
-      'row — do not delete it.',
+      'Year-1 character #1. DATED: the vendor\'s Steam announcement of 2026-10-08, ' +
+      '"Phoenix Cyclops joins MARVEL Tōkon: Fighting Souls on November 2". Fired at window ' +
+      'open on 2026-10-01 (not playable on 10-02), then was re-dated two weeks out while no ' +
+      'date existed. This is the release day. If it slips, re-date the row — do not delete it.',
   },
   // ── THE REMAINING YEAR-1 SLOTS, ONE ROW PER WINDOW ─────────────────────────
   // These three replace a single 'year1-remainder' row dated 2027-12-31. That
