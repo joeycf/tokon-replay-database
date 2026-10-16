@@ -155,7 +155,7 @@ instead.
 | `npm run data:expiries`     | the self-expiring gates (`--check`)                                                                                           |
 | `npm run data:catchup`      | **the maintenance ritual** — fetch → parse → read new footage → what's left                                                   |
 | `npm run data:replay-dupes` | cross-channel duplicate audit — report-only, never drops                                                                      |
-| `npm run verify:gates`      | positive-control every gate                                                                                                   |
+| `npm run verify:gates`      | positive-control every gate — `[4f]` needs a seeded full dump (`npm run data:theater -- --full`); an empty dump is a named ✗  |
 | `npm run test:e2e`          | the audit suite (needs `npm run generate` first)                                                                              |
 | `npm run verify:deployed`   | post-deploy smoke check against production                                                                                    |
 

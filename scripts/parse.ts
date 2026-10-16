@@ -64,6 +64,15 @@ const allowCollapse = new Set(
     .filter(Boolean),
 );
 
+/** The collapse guard's two arms. Applied in exactly one place — "the collapse
+ *  guard" in main(), which also says why both are required and why the guard
+ *  is asleep below 20 records. Module-scope and EXPORTED (2026-10-15) so that
+ *  verify-gates can pick its [4f]-1 fixture by the guard's own predicate rather
+ *  than by a copy of these numbers that could drift from it. verify-deployed.ts
+ *  keeps its own pair on purpose: importing this module runs a parse. */
+export const COLLAPSE_PCT = 0.1;
+export const COLLAPSE_ABS = 20;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // THE GAME-MARKER GATE — runs FIRST, before anything structural.
 //
@@ -1120,8 +1129,9 @@ async function main() {
       // nothing in the failure named.
       //
       // A pull returning no TAGGED entries is the ORDINARY case here — 44
-      // tournament records against a 248-entry catalogue — so this branch runs
-      // on most quiet mornings, not only on broken ones.
+      // tournament records against a 248-entry catalogue when measured
+      // (2026-08-31; 85 against 199 on 2026-10-15) — so this branch runs on
+      // most quiet mornings, not only on broken ones.
       records.push(...mine);
       // WRITE THE COUNT BACK, do not `continue` past the guard. The reference
       // skips the collapse guard for a carried source and says so in its
@@ -1145,8 +1155,9 @@ async function main() {
     //    submissions rather than the catalogue. Replacing on that would delete
     //    the committed intake every morning.
     //  · A VOD GOING PRIVATE DELETES EVERY SEGMENT CUT FROM IT. These records
-    //    are segments: the 44 committed here sit on just 5 source VODs, and the
-    //    largest holds 18 of them — 40.9% of the intake. THE COLLAPSE GUARD IS
+    //    are segments: the 85 committed here (2026-10-15; 44 when this was
+    //    written, 2026-08-31) sit on 10 source VODs, and the largest holds 18 of
+    //    them — 21.2% of the intake. THE COLLAPSE GUARD IS
     //    BLIND TO THAT: the loss clears its >10% arm and FAILS its >20 arm, so
     //    the guard waves it through in silence and the pin would then be
     //    rewritten downward to match.
@@ -1244,9 +1255,8 @@ async function main() {
   // 20 records or fewer, and four of these five are under 40 today. The guard
   // is therefore asleep at this corpus size and verify:deployed plus the freeze
   // pin are the live protection until it wakes. That is a property of the
-  // thresholds, not a reason to weaken them.
-  const COLLAPSE_PCT = 0.1;
-  const COLLAPSE_ABS = 20;
+  // thresholds, not a reason to weaken them. The two numbers are COLLAPSE_ABS
+  // and COLLAPSE_PCT at module scope, exported for verify-gates.
   const collapses: string[] = [];
   for (const ch of CHANNELS) {
     const before = committed.filter((r) => r.intake === ch.id).length;
@@ -1495,8 +1505,9 @@ async function main() {
   //
   // The only remaining check would have been the collapse guard, and this repo's
   // collapse guard cannot see the loss that actually happens here: the largest
-  // source VOD holds 18 of the 44 records, so losing it is 40.9% — over the >10%
-  // arm and nowhere near the >20 absolute one, which is the same blind spot this
+  // source VOD holds 18 of the 85 records (2026-10-15; 18 of 44 when written),
+  // so losing it is 21.2% — over the >10% arm and short of the >20 absolute
+  // one, which is the same blind spot this
   // file already documents for every intake under 20 records.
   //
   // A pin that can only rise turns "records left quietly" into a refusal. When
@@ -1519,7 +1530,7 @@ async function main() {
             `  catalogue still lists it, so the published count cannot fall on its own.`,
             `  ${was - got} record(s) were dropped by something inside this run, and the`,
             `  collapse guard is not sensitive enough to have caught it — the largest`,
-            `  single source VOD here is 18 records (40.9%) and the guard needs >20.`,
+            `  single source VOD here is 18 records (21.2% of 85, 2026-10-15) and the guard needs >20.`,
             ``,
             `  Nothing has been written. If the drop is genuine and deliberate:`,
             `    npm run data:parse -- --allow-shrink`,
@@ -1568,8 +1579,9 @@ async function main() {
   // KEYED ON THE PULL HAVING HAPPENED, NOT ON RECORDS HAVING BEEN REBUILT, and
   // that distinction is the whole reason this block reads `theaterStats` rather
   // than `rebuiltThisRun`. A cursor pass that returns no TAGGED entries is the
-  // ordinary case here — 44 tournament records against a 248-entry catalogue —
-  // and it writes an empty dump, which the carry above correctly treats as a
+  // ordinary case here (44 tournament records against a 248-entry catalogue when
+  // measured, 2026-08-31; 85 against 199 on 2026-10-15) and it writes an empty
+  // dump, which the carry above correctly treats as a
   // carry. `rebuiltThisRun` is then empty. Driving the cursor off that list means
   // the most common successful pull on the calendar advances the cursor in
   // memory and never persists it, so every following morning re-reads the same

@@ -34,7 +34,7 @@ import {
   savedSideFor,
 } from '../server/utils/portraitWork';
 import { refutationProblems, unmetTitle, type TitleSide } from './title-refutation';
-import { NOT_A_MATCH_RE } from './parse';
+import { COLLAPSE_ABS, COLLAPSE_PCT, NOT_A_MATCH_RE } from './parse';
 import { emitGeneric } from './emit';
 import { dueExpiries } from './expiries';
 import {
@@ -1723,8 +1723,10 @@ try {
   // on them (its soft-gate policy: a hard exit stops the daily refresh). So the
   // control is two-sided: every way to get a contradiction past e2e must surface
   // in report.md, the honest refutation must NOT, and the run must exit 0 with
-  // every record still published. Placed BEFORE [4f], which crashes on an empty
-  // local raw/replayTheater.json (a crash that predates this section).
+  // every record still published. Placed BEFORE [4f], which until 2026-10-15
+  // crashed on an empty local raw/replayTheater.json — the ordinary cron state —
+  // and took [4d], [5] and the tally down with it; it now records a named
+  // failure and skips the two cases that need the dump.
   console.log('\n[4g] title check — every contradiction reported, none fatal, the verdict clean');
   {
     const rawPath = join(ROOT, 'raw', 'proReplays.json');
@@ -1945,16 +1947,17 @@ try {
   // on a healthy day — which is the condition this file exists to make
   // impossible.
   //
-  //  · ADD-ONLY. These records are SEGMENTS: the 44 committed here sit on 5
-  //    source VODs and the largest holds 18 of them. One VOD going private drops
-  //    40.9% of the intake in a morning, and the collapse guard cannot see it —
-  //    18 is under its >20 arm. Nothing else would have noticed.
+  //  · ADD-ONLY. These records are SEGMENTS: the 85 committed here (2026-10-15)
+  //    sit on 10 source VODs and the largest holds 18 of them. One VOD going
+  //    private drops 21.2% of the intake in a morning, and the collapse guard
+  //    cannot see it — 18 is under its >20 arm. Nothing else would have noticed.
   //  · ONLY-GROWS. Until this change every cron run carried and asserted the pin
   //    at exact equality. Most runs rebuild now and a rebuild overwrites the pin,
   //    so the refusal below is the replacement for that assert, not a belt on it.
   //  · THE CURSOR IS KEYED ON THE PULL, NOT THE REBUILD. A pull that returns no
-  //    TAGGED entries is the ordinary case at 44 records against a 248-entry
-  //    catalogue, and it writes an empty dump, which is a carry. Keying the
+  //    TAGGED entries is the ordinary case (44 records against a 248-entry
+  //    catalogue when measured, 2026-08-31; 85 against 199 on 2026-10-15), and
+  //    it writes an empty dump, which is a carry. Keying the
   //    cursor on "records were rebuilt" means the most common successful run on
   //    the calendar never persists it and every morning re-reads the same pages.
   //    That was live in the reference before it was found.
@@ -1979,10 +1982,11 @@ try {
     const cursorPath = join(ROOT, 'data', 'theater-cursor.json');
     const rtOriginal = JSON.parse(await readFile(rtPath, 'utf8')) as { videoId: string }[];
     const pinOriginal = await readFile(pinPath, 'utf8');
-    const theaterCount = async () =>
+    const theaterRecords = async () =>
       (
         JSON.parse(await readFile(join(ROOT, 'data', 'videos.json'), 'utf8')) as MatchVideo[]
-      ).filter((v) => v.intake === 'replayTheater').length;
+      ).filter((v) => v.intake === 'replayTheater');
+    const theaterCount = async () => (await theaterRecords()).length;
     const pinNow = async () =>
       (JSON.parse(await readFile(pinPath, 'utf8')) as Record<string, number>).replayTheater;
     const cursorNow = async () =>
@@ -1999,51 +2003,116 @@ try {
     const pinBefore = await pinNow();
     const cursorBefore = await cursorNow();
 
-    // 4f-1 — the vanished VOD. Cut every entry cut from the largest source VOD
-    // out of the dump, exactly as a private/deleted upload would, and sweep.
-    const byVod = new Map<string, number>();
-    for (const r of rtOriginal) byVod.set(r.videoId, (byVod.get(r.videoId) ?? 0) + 1);
-    const [biggest, biggestN] = [...byVod.entries()].sort((a, b) => b[1] - a[1])[0]!;
-    await writeFile(
-      rtPath,
-      JSON.stringify(
-        rtOriginal.filter((r) => r.videoId !== biggest),
-        null,
-        1,
-      ),
-    );
-    await writeStats('full', cursorBefore);
-    const vanished = parse();
+    // THE FIXTURE IS A FULL DUMP, AND THE ORDINARY STATE OF raw/ IS AN EMPTY ONE.
+    // raw/ is gitignored, a quiet cursor pull writes `[]`, and the cron never
+    // sweeps — so on most checkouts rtOriginal is empty. Until 2026-10-15 the
+    // fixture pick below destructured `undefined` out of an empty map, and the
+    // TypeError skipped [4d], [5] and the tally. Named instead: one ✗ that sets
+    // exit 1 and says how to seed, with 4f-1 and 4f-3 skipped so that 4f-2 —
+    // which writes its own `[]` — and every section after it still run. (The
+    // `import … from './parse'` at the top of this file still runs a full parse
+    // before the snapshot; that is a separate, larger fix.)
+    // "A FULL SWEEP" IS WHAT THE LABEL SAYS, so the predicate reads the pull's
+    // own self-report when there is one: a NON-EMPTY cursor delta — a local
+    // `npm run data:theater` on a day with new tagged entries — is not a sweep
+    // either, and 4f-1 would cut a VOD out of a slice that never held it whole.
+    const statsBefore = existsSync(statsPath)
+      ? (JSON.parse(await readFile(statsPath, 'utf8')) as { mode?: string })
+      : null;
+    const noSweep =
+      rtOriginal.length === 0 || (statsBefore !== null && statsBefore.mode !== 'full');
     check(
-      'a full sweep missing its largest VOD publishes the committed count, not the dump',
-      vanished.code === 0 && (await theaterCount()) === before,
-      `exit ${vanished.code}, ${await theaterCount()} records (dump held ${before - biggestN})`,
+      '[4f] fixture: raw/replayTheater.json holds a full sweep (seed with `npm run data:theater -- --full`)',
+      !noSweep,
+      noSweep
+        ? `${rtOriginal.length === 0 ? 'empty dump' : `a ${statsBefore?.mode ?? 'unreported'} pull, not a full sweep`} — 4f-1 and 4f-3 skipped; 4f-2 still runs`
+        : `${rtOriginal.length} entries${statsBefore ? `, mode ${statsBefore.mode}` : ''}`,
     );
-    // NAMED HONESTLY. The collapse guard is blind to this loss — that much is
-    // asserted here. It is NOT the only thing that would catch it: a real full
-    // sweep never reaches parse, because the floor in scripts/fetch-theater.ts
-    // refuses at 90% of the pin (44 → 39.6) and this dump would be 26. What
-    // this case reproduces is the dump placed by HAND, and the cursor path
-    // where the floor is deliberately skipped, and on those two the add-only
-    // merge is the last line.
-    check(
-      'the loss is inside the collapse guard, which is blind to it',
-      biggestN <= 20,
-      `${biggestN} records, ${((biggestN / before) * 100).toFixed(1)}% — the guard needs >20`,
-    );
-    check(
-      'and the full-sweep floor would have refused this dump before parse ever saw it',
-      before - biggestN < pinBefore * 0.9,
-      `${before - biggestN} records against a floor of ${(pinBefore * 0.9).toFixed(1)} (90% of pin ${pinBefore})`,
-    );
-    check(
-      'and report.md STATES the survivors rather than absorbing them',
-      (await readFile(join(ROOT, 'data', 'report.md'), 'utf8')).includes(
-        `| ${before - biggestN} | ${biggestN} |`,
-      ),
-      `"not in this pull: ${biggestN}"`,
-    );
-    check('the pin did not move', (await pinNow()) === pinBefore, `${await pinNow()}`);
+
+    if (!noSweep) {
+      // 4f-1 — the vanished VOD. Cut every entry cut from one source VOD out of
+      // the dump, exactly as a private/deleted upload would, and sweep.
+      //
+      // THE FIXTURE IS CHOSEN BY THE GUARD'S OWN PREDICATE, ON COMMITTED COUNTS.
+      // "The largest VOD" was the fixture until 2026-10-15, and it stopped
+      // proving anything the day the largest cleared both arms: 23 dump entries
+      // at 11.6% is a loss the guard CAN see, so check 2 below went red on HEAD
+      // while the merge it controls was fine. And the guard compares committed
+      // against parsed (parse.ts, "the collapse guard"), so the loss it must be
+      // blind to is the COMMITTED records on the VOD, not the dump entries — an
+      // entry already known elsewhere or dropped to residue is in the dump and
+      // not in the corpus, and the survivors count asserted below is committed
+      // records too. So: the largest VOD in the dump whose committed count the
+      // guard is blind to, by the guard's own constants, or a named failure.
+      const guardSees = (n: number) => n > COLLAPSE_ABS && n / before > COLLAPSE_PCT;
+      const inDump = new Set(rtOriginal.map((r) => r.videoId));
+      const committedByVod = new Map<string, number>();
+      for (const v of await theaterRecords()) {
+        if (v.videoId && inDump.has(v.videoId)) {
+          committedByVod.set(v.videoId, (committedByVod.get(v.videoId) ?? 0) + 1);
+        }
+      }
+      const blind = [...committedByVod.entries()]
+        .filter(([, n]) => !guardSees(n))
+        .sort((a, b) => b[1] - a[1]);
+      check(
+        '[4f]-1 fixture: a source VOD whose committed records the collapse guard is blind to',
+        blind.length > 0,
+        blind.length
+          ? `${blind[0]![0]} — ${blind[0]![1]} of ${before}`
+          : `${committedByVod.size} VOD(s) shared by dump and corpus, every one over ` +
+              `>${COLLAPSE_ABS} AND >${COLLAPSE_PCT * 100}% of ${before} — 4f-1 skipped`,
+      );
+      if (blind.length > 0) {
+        const [biggest, biggestN] = blind[0]!;
+        await writeFile(
+          rtPath,
+          JSON.stringify(
+            rtOriginal.filter((r) => r.videoId !== biggest),
+            null,
+            1,
+          ),
+        );
+        await writeStats('full', cursorBefore);
+        const vanished = parse();
+        check(
+          'a full sweep missing its largest blind VOD publishes the committed count, not the dump',
+          vanished.code === 0 && (await theaterCount()) === before,
+          `exit ${vanished.code}, ${await theaterCount()} records ` +
+            `(the cut dump builds ${before - biggestN})`,
+        );
+        // NAMED HONESTLY. The collapse guard is blind to this loss — that much is
+        // asserted here, naming both arms, because both chose the fixture. It is
+        // NOT the only thing that would catch it: on a real full sweep the floor
+        // in scripts/fetch-theater.ts refuses below 90% of the pin, so a loss
+        // over 10% never reaches parse at all. That floor is PRINTED, not
+        // asserted: a blind loss is at most 20 records, and once the pin passes
+        // 200 that is under 10%, so "blind" and "the floor would have refused
+        // it" cannot both hold — the line says which side of that today's corpus
+        // is on. What this case reproduces is the dump placed by HAND, and the
+        // cursor path where the floor is deliberately skipped, and on those two
+        // the add-only merge is the last line.
+        check(
+          'the loss is inside the collapse guard, which is blind to it',
+          !guardSees(biggestN),
+          `${biggestN} records, ${((biggestN / before) * 100).toFixed(1)}% — the guard needs ` +
+            `>${COLLAPSE_ABS} AND >${COLLAPSE_PCT * 100}%`,
+        );
+        console.log(
+          `  … the full-sweep floor (90% of pin ${pinBefore} = ${(pinBefore * 0.9).toFixed(1)}) ` +
+            `would ${before - biggestN < pinBefore * 0.9 ? 'have refused' : 'NOT have refused'} ` +
+            `this ${before - biggestN}-record sweep; a cursor delta or a hand-placed dump skips it`,
+        );
+        check(
+          'and report.md STATES the survivors rather than absorbing them',
+          (await readFile(join(ROOT, 'data', 'report.md'), 'utf8')).includes(
+            `| ${before - biggestN} | ${biggestN} |`,
+          ),
+          `"not in this pull: ${biggestN}"`,
+        );
+        check('the pin did not move', (await pinNow()) === pinBefore, `${await pinNow()}`);
+      }
+    }
 
     // 4f-2 — the ordinary quiet morning: the pull ran, found no TAGGED entries,
     // and wrote an empty dump. That is a CARRY, and the cursor must still move.
@@ -2073,21 +2142,27 @@ try {
 
     // 4f-3 — only-grows. A pin above the published count is the shape a silent
     // drop leaves behind, and the rebuild must refuse rather than re-pin down.
-    await writeFile(rtPath, JSON.stringify(rtOriginal, null, 1));
-    await writeStats('full', cursorBefore);
-    await writeFile(pinPath, JSON.stringify({ replayTheater: before + 16 }, null, 2) + '\n');
-    const shrink = parse();
-    check(
-      'a rebuild refuses to re-pin DOWNWARD and names the shortfall',
-      shrink.code !== 0 && shrink.out.includes(`${before + 16} → ${before}`),
-      `exit ${shrink.code}`,
-    );
-    const allowed = parse(['--allow-shrink']);
-    check(
-      'and --allow-shrink is the deliberate way through',
-      allowed.code === 0 && (await pinNow()) === before,
-      `exit ${allowed.code}, pin ${await pinNow()}`,
-    );
+    // SKIPPED on an empty dump, not re-fixtured: with `[]` and 'full' stats the
+    // parse takes the carry branch and the re-pin block skips a carried channel
+    // (parse.ts, "re-pin every index intake rebuilt from a dump"), so neither
+    // expectation below can hold there.
+    if (!noSweep) {
+      await writeFile(rtPath, JSON.stringify(rtOriginal, null, 1));
+      await writeStats('full', cursorBefore);
+      await writeFile(pinPath, JSON.stringify({ replayTheater: before + 16 }, null, 2) + '\n');
+      const shrink = parse();
+      check(
+        'a rebuild refuses to re-pin DOWNWARD and names the shortfall',
+        shrink.code !== 0 && shrink.out.includes(`${before + 16} → ${before}`),
+        `exit ${shrink.code}`,
+      );
+      const allowed = parse(['--allow-shrink']);
+      check(
+        'and --allow-shrink is the deliberate way through',
+        allowed.code === 0 && (await pinNow()) === before,
+        `exit ${allowed.code}, pin ${await pinNow()}`,
+      );
+    }
     await writeFile(pinPath, pinOriginal);
     await writeFile(rtPath, JSON.stringify(rtOriginal, null, 1));
     await rm(statsPath, { force: true });
