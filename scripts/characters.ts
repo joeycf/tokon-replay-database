@@ -28,7 +28,7 @@ import { readFile, writeFile, access } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { dueExpiries } from './expiries';
+import { UNRELEASED, dueExpiries } from './expiries';
 import type { CharacterRecord } from '../types/index';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -321,9 +321,14 @@ async function main() {
   }
 
   // Tokens with no roster entry are the same defect seen from the other side:
-  // a renamed id leaves an orphan that silently styles nothing.
+  // a renamed id leaves an orphan that silently styles nothing. A token for a
+  // fighter still gated in scripts/expiries.ts is NOT an orphan — it is an
+  // accent derived ahead of release (phoenix-cyclops's #FF9D57 sits in the
+  // handoff spec at 7.4:1 and is pasted into tokens.css on release day; no such
+  // token exists yet) — so the exemption reads UNRELEASED instead of naming an
+  // id here, and the next pre-derived token needs no edit to this file.
   const orphans = Object.keys(accents).filter(
-    (k) => !ROSTER.some((r) => r.id === k) && k !== 'phoenix-cyclops',
+    (k) => !ROSTER.some((r) => r.id === k) && !UNRELEASED.some((u) => u.id === k),
   );
   if (orphans.length) {
     console.error(

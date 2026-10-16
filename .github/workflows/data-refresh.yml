@@ -175,9 +175,9 @@ jobs:
         # Deliberately failing (scripts/expiries.ts). The data has already been
         # committed and pushed by the step above, so a red run never costs a
         # refresh — it only makes the pending work impossible to miss. Two things
-        # can trip it: a Year-1 character's announced window opening
-        # (phoenix-cyclops 2026-10-01, then the three unnamed Year-1 slots at
-        # 2027-01-01, 2027-04-01 and 2027-07-01), and the patch table going more
+        # can trip it: a Year-1 character's release day or window opening
+        # (phoenix-cyclops 2026-11-02, then thor-jane-foster 2027-01-01, venom
+        # 2027-04-01 and jubilee 2027-07-01), and the patch table going more
         # than STALE_PATCH_DAYS (10) stale on a vendor that shipped twice in its
         # first five days.
         # Clear it by doing the work, NOT by deleting this step. For the patch

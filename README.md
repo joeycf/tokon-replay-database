@@ -128,12 +128,14 @@ strictly worse than the misfiling it warns about. **The red workflow and the
 `exit 1` are the design, not a bug** — clear them by doing the work, never by
 deleting the check.
 
-Two things can trip them: a Year-1 character's announced window opening
-(`phoenix-cyclops`, 2026-10-01) and the patch table going 10 days stale on a
-vendor that shipped twice in its first five days. When the vendor has simply
-shipped nothing, `npm run data:patch-check -- --confirm-quiet` records a clean
-feed read in `scripts/patches.ts`. Commit it, and the alarm counts its 10 days
-from that date instead.
+Two things can trip them: a Year-1 character's release day or window opening
+(`phoenix-cyclops` 2026-11-02, then `thor-jane-foster` 2027-01-01, `venom`
+2027-04-01 and `jubilee` 2027-07-01 — the vendor's own quarters, fired at window
+open) and the patch table going 10 days stale on a vendor that shipped twice in
+its first five days. When the vendor has simply shipped nothing,
+`npm run data:patch-check -- --confirm-quiet` records a clean feed read in
+`scripts/patches.ts`. Commit it, and the alarm counts its 10 days from that date
+instead.
 
 ## Scripts
 

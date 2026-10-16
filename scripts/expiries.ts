@@ -52,43 +52,107 @@ export const UNRELEASED: { id: string; releases: string; accent?: string; note?:
     // at 7.4:1, so release day is a one-line change rather than a design task.
     accent: '#FF9D57',
     note:
-      'Year-1 character #1. DATED: the vendor\'s Steam announcement of 2026-10-08, ' +
-      '"Phoenix Cyclops joins MARVEL Tōkon: Fighting Souls on November 2". Fired at window ' +
-      'open on 2026-10-01 (not playable on 10-02), then was re-dated two weeks out while no ' +
-      'date existed. This is the release day. If it slips, re-date the row — do not delete it.',
+      'Year-1 character #1. DATED: first announced 2026-10-07 (PlayStation Blog 17:00Z, ' +
+      'YouTube 3y9_kwKo3Fs, Bluesky), Steam copy 2026-10-08: "Phoenix Cyclops joins MARVEL ' +
+      'Tōkon: Fighting Souls on November 2". Fired at window open on 2026-10-01 (not playable ' +
+      'on 10-02), then was re-dated two weeks out while no date existed. This is the release ' +
+      'day, IN PACIFIC TIME: SIE\'s Japanese release writes "11月2日（月）（※太平洋時間）", so ' +
+      "the cron's 2026-11-02 07:47Z run is 11-01 23:47 PST and fires before the release day " +
+      "has begun — expected, and what this file's rule accepts (early costs one dismissed " +
+      'warning); 11-03 07:47Z is the first run on the release day. If it slips, re-date the ' +
+      'row — do not delete it.',
   },
-  // ── THE REMAINING YEAR-1 SLOTS, ONE ROW PER WINDOW ─────────────────────────
-  // These three replace a single 'year1-remainder' row dated 2027-12-31. That
-  // date was the pass's OUTSIDE COMMITMENT ("expected to be made available by
-  // 31 December 2027" on the Year 1 pass listing), not a release date, and using
-  // it as one meant the gate fired ELEVEN MONTHS after character 2's window
-  // opened and three months after character 4's window closed. All three could
-  // have shipped and been filed nowhere before it ever went off — the exact
-  // failure this file exists to prevent.
+  // ── THE YEAR-1 SLOTS, NAMED 2026-10-11 ─────────────────────────────────────
+  // These three replace 'year1-character-2', 'year1-character-3-and-stage' and
+  // 'year1-character-4' — the unnamed one-row-per-window placeholders, which in
+  // turn replaced a single 'year1-remainder' row dated 2027-12-31. That date
+  // was the pass's OUTSIDE COMMITMENT ("expected to be made available by 31
+  // December 2027" on the Year 1 pass listing), not a release date, and it
+  // would have fired ELEVEN MONTHS after character 2's window opened — the
+  // exact failure this file exists to prevent. The placeholders fixed the
+  // dates; these rows put names on them, the same way the October row was split
+  // in the CotW repo (ae5c9f8, Mikey/Draken).
   //
-  // The published windows come from the Year-1 pass roadmap. None of the three
-  // is named, so there is no id and no accent yet: split a row into a real one
-  // on reveal, the same way the October row was handled in the CotW repo.
-  // Window-open dates, per this file's rule for quarter-granularity windows.
+  // THE VENDOR NAMED ALL THREE ON 2026-10-11, during EVO France — YouTube at
+  // 11:58Z, X at 13:00Z, Bluesky at 13:50Z — and never on Steam news or Sony's
+  // Hero Select page, so the two surfaces the checkers read said nothing.
+  // Verbatim:
+  //   · Bluesky, bsky.app/profile/marveltokon.bsky.social/post/3mxm5ioefd22t:
+  //     "Thor (Jane Foster) - Winter 2027 / Venom - Spring 2027 / Jubilee -
+  //     Summer 2027"
+  //   · X, x.com/MARVELTokon/status/2109267863047401839 — quoted for the three
+  //     NAMES only: the same post misdates Cyclops ("October 12th").
+  //   · YouTube, youtube.com/watch?v=sNf7HHYxTAM: "Thor (Jane Foster), the
+  //     second DLC character in the Year 1 Character & Stage Pass … Coming this
+  //     Winter!"
+  //   · the roster image on the posts: "SPRING 2027 / VENOM & KLYNTAR STAGE".
+  //
+  // THE QUARTERS ARE VENDOR-SOURCED TOO, SO THE WINDOW-OPEN DATES STAND. The
+  // season-pass block on store.steampowered.com/app/4848500/ lists milestones
+  // 91639 "Year 1 character 2 (Jan-Mar 2027)", 49216 "Year 1 character 3
+  // (Apr-Jun 2027)", 49651 "Year 1 Stage (Apr-Jun 2027)" and 51085 "Year 1
+  // character 4 (Jul-Sep 2027)". Each season word lands in exactly one of those
+  // quarters: Thor = #2 is EXPLICIT (the YouTube line says "second"); Venom +
+  // Klyntar Stage = #3 and Jubilee = #4 are WINDOW MATCHES — strong, and marked
+  // as inference in their notes rather than stated as fact.
+  //
+  // Sony's Hero Select still lists 21 and none of the four (2026-10-15), so
+  // every id below is the kebab of the vendor's own spelling, to be confirmed
+  // there. No accent on any of them: never invented here — the action text says
+  // where one comes from, and phoenix-cyclops carries his only because the
+  // design handoff already had it.
   {
-    id: 'year1-character-2',
+    id: 'thor-jane-foster',
     releases: '2027-01-01',
-    note: 'Year-1 character #2, window January–March 2027. Announced, unnamed.',
+    note:
+      'Year-1 character #2. "Thor (Jane Foster) - Winter 2027" (Bluesky 3mxm5ioefd22t, ' +
+      '2026-10-11); the ordinal is EXPLICIT — YouTube sNf7HHYxTAM: "Thor (Jane Foster), the ' +
+      'second DLC character in the Year 1 Character & Stage Pass … Coming this Winter!" — and ' +
+      'Steam milestone 91639 "Year 1 character 2 (Jan-Mar 2027)" is the quarter, so this fires ' +
+      "at window open. The id is the kebab of the vendor's spelling; CONFIRM it against Sony's " +
+      'Hero Select when she is listed (not yet, 2026-10-15). Before she joins ROSTER: a bare ' +
+      '"Thor" is in 24 titles in raw/ today, all fightingStationX AI-exhibition uploads with no ' +
+      'Tōkon marker, so the game-marker gate drops them first: 22 MvC:I "(Hardest AI)" that ' +
+      'NOT_A_MATCH_RE would drop as well, plus an MvC:I "(Hardest) AI" and a UMvC3 "(Hardest IA)" ' +
+      'that only the gate catches — clean today, so recount on the day.',
   },
   {
-    id: 'year1-character-3-and-stage',
+    id: 'venom',
     releases: '2027-04-01',
     note:
-      'Year-1 character #3 AND the Year-1 stage, both window April–June 2027. Announced, ' +
-      'unnamed. The stage is not a roster row — it is here so the one announcement that ' +
-      'covers both is not half-tracked.',
+      'Year-1 character #3, AND the Year-1 stage rides this row. "Venom - Spring 2027" (Bluesky ' +
+      '3mxm5ioefd22t); the roster image reads "SPRING 2027 / VENOM & KLYNTAR STAGE". The ' +
+      'ordinal is INFERRED by window match, not stated: Steam milestones 49216 "Year 1 ' +
+      'character 3 (Apr-Jun 2027)" and 49651 "Year 1 Stage (Apr-Jun 2027)" are the only slots ' +
+      "in that quarter. Fires at window open. CONFIRM the id against Sony's Hero Select when " +
+      'he is listed (not yet, 2026-10-15). The stage is not a roster row — it is here so the one ' +
+      'announcement that covers both is not half-tracked — and its name is attested only as ' +
+      '"KLYNTAR STAGE", in caps on the image; do not title-case it without a second source. ' +
+      'HAZARDS BEFORE HE JOINS ROSTER (raw/ measured 2026-10-15): "venom" is in 53 titles and ' +
+      'none is him. 25 carry the player handle "LORD VENOM" / "Lorde Venom" (replaysHub, ' +
+      'highLevelReplays, fgcReplaysHub; two player pages exist, lord-venom and lorde-venom), ' +
+      '10 are Tōkon "Venom vs … ▰ Mod Showcase" uploads that NOT_A_MATCH_RE drops (MOD SHOWCASE), ' +
+      '13 are MvC:I AI-exhibition uploads with no Tōkon marker that the game-marker gate drops ' +
+      'first (11 "(Hardest AI)", which NOT_A_MATCH_RE would also drop, plus a "(Hardest) AI" and a ' +
+      '"(Hardest IA)" that only the gate catches), and 5 are ' +
+      "Guilty Gear's " +
+      'Venom (other-game). So before the alias goes live, check the matcher against the HANDLE ' +
+      'position — parallelLists() classifies a segment by whether its sides resolve, ' +
+      '/dev/review-queue refuses a handle that resolves a fighter, and e2e asserts no handle is ' +
+      'a fighter name; all three meet LORD VENOM on release day — and against a modded Venom: ' +
+      'the mod titles are dropped by their "Mod Showcase" marker, not by the roster, and one ' +
+      'without the marker would resolve on both sides.',
   },
   {
-    id: 'year1-character-4',
+    id: 'jubilee',
     releases: '2027-07-01',
     note:
-      'Year-1 character #4, window July–September 2027. Announced, unnamed. This is the last ' +
-      'of the pass; when it is named and shipped, the Year-1 gate is done.',
+      'Year-1 character #4, the last of the pass. "Jubilee - Summer 2027" (Bluesky ' +
+      '3mxm5ioefd22t). The ordinal is INFERRED by window match, not stated: Steam milestone ' +
+      '51085 "Year 1 character 4 (Jul-Sep 2027)" is the only slot in that quarter. Fires at ' +
+      "window open. CONFIRM the id against Sony's Hero Select when she is listed (not yet, " +
+      '2026-10-15). Zero hits for "jubilee" in raw/ today. When she is named and shipped, the ' +
+      'Year-1 gate is done.',
   },
 ];
 
