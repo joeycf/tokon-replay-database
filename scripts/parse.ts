@@ -99,9 +99,15 @@ const OTHER_GAME_RE =
 
 /** Content that is not a competitive human-vs-human match. Deliberately does
  *  NOT test /Top \d+/ — that reads "Top 8" out of real tournament matches and
- *  is the filter that cost SF6 real records. */
+ *  is the filter that cost SF6 real records.
+ *
+ *  `\bMODS\b` is fightingStationX's second label for the same mod showcases —
+ *  "Iron Man vs Magik ▰ MODS ▰ Marvel Tokon Fighting Souls", daily from
+ *  2026-10-01. With no handles in the title, those reached /dev/review-queue as
+ *  records whose handles were fighter names, which the page can only reject.
+ *  Plural only: a singular MOD is plausible inside a real handle. */
 export const NOT_A_MATCH_RE =
-  /\bCPU\b|HARDEST\s*AI|MAX\s*DIFFICULTY|#shorts|COMBO\s*(?:EXHIBITION|VIDEO|GUIDE)|\bTRAILER\b|TIER\s*LIST|STORY\s*MODE|WALKTHROUGH|ALL\s*(?:SUPERS|CHARACTERS|WIN)|COMPILATION|\bINTRO\b|BETA\s*TEST|\bREVIEW\b|GAMEPLAY\s*OVERVIEW|CHARACTER\s*GUIDE|\bRANKING\b|\bTUTORIAL\b|MOD\s*SHOWCASE/iu;
+  /\bCPU\b|HARDEST\s*AI|MAX\s*DIFFICULTY|#shorts|COMBO\s*(?:EXHIBITION|VIDEO|GUIDE)|\bTRAILER\b|TIER\s*LIST|STORY\s*MODE|WALKTHROUGH|ALL\s*(?:SUPERS|CHARACTERS|WIN)|COMPILATION|\bINTRO\b|BETA\s*TEST|\bREVIEW\b|GAMEPLAY\s*OVERVIEW|CHARACTER\s*GUIDE|\bRANKING\b|\bTUTORIAL\b|MOD\s*SHOWCASE|\bMODS\b/iu;
 
 /**
  * The event-brand gate for `eventsOnly` channels (marvelTokonYT).

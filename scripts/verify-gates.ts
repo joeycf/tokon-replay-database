@@ -205,6 +205,7 @@ try {
       'Dark Magik vs Lady Deadpool ▰ Mod Showcase ▰ Marvel Tokon',
       'Deadpool (Lady Deadpool) vs Spider-Man (Black Gold Suit) ▰ Mod Showcase ▰ Marvel Tokon',
       'MARVEL TOKON ▰ A (Magik) vs B (Storm) ▰ MODSHOWCASE',
+      'Iron Man vs Magik ▰ MODS ▰ Marvel Tokon Fighting Souls',
     ]) {
       check(`rejects: "${title.slice(0, 52)}…"`, NOT_A_MATCH_RE.test(title), undefined);
     }
@@ -224,6 +225,7 @@ try {
       'TOKON ▰ NAIRE (Spider-Man) vs (Green Goblin) HADO 👊【MARVEL TŌKON: Fighting Souls】',
       'Marvel Tokon ▰ SENSHII (#1 Black Panther) vs SOAP EATER (Blade) ▰ High Level Gameplay',
       'MARVEL TOKON ▰ MODESTO (Magik) vs SHOWCASER (Storm) ▰ High Level Gameplay',
+      'MARVEL TOKON ▰ MOD (Magik) vs MODESTO (Storm) ▰ High Level Gameplay',
     ]) {
       check(`still a match: "${title.slice(0, 46)}…"`, !NOT_A_MATCH_RE.test(title), undefined);
     }
