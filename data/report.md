@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-16T12:45:24.514Z_
+_Generated 2026-10-17T11:46:19.815Z_
 
 ## Coverage
 
@@ -8,13 +8,13 @@ _Generated 2026-10-16T12:45:24.514Z_
 | --- | ---: | ---: | ---: |
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 868 | 170 | 19.6% |
-| replaysHub | 411 | 402 | 97.8% |
-| fightingStationX | 3147 | 224 | 7.1% |
-| fgcReplaysHub | 2775 | 41 | 1.5% |
+| hadoukenReplays | 869 | 171 | 19.7% |
+| replaysHub | 415 | 406 | 97.8% |
+| fightingStationX | 3156 | 224 | 7.1% |
+| fgcReplaysHub | 2779 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1214** | |
+| **total** | | **1219** | |
 
 ## Index intakes
 
@@ -29,28 +29,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor did not move: the catalogue has taken no new Tōkon entry since_
-_the last pull — quieter still, and equally ordinary._
+_The cursor still advanced — a quiet day is the ordinary case here, not a_
+_failed one._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 2428 sides got its characters.
+How every one of the 2438 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 132 | 5.4% |
-| description | 624 | 25.7% |
+| title | 142 | 5.8% |
+| description | 624 | 25.6% |
 | index | 170 | 7.0% |
 | footage | 119 | 4.9% |
-| human | 1356 | 55.8% |
+| human | 1356 | 55.6% |
 | review | 27 | 1.1% |
 
-- complete (4/4): **2296/2428** (94.6%)
+- complete (4/4): **2296/2438** (94.2%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 682 · ambiguous 7
-- title slot order: handle-first 1817 · chars-first 167 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 686 · ambiguous 7
+- title slot order: handle-first 1826 · chars-first 168 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **6** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,27 +59,27 @@ How every one of the 2428 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 118 | 4.9% |
-| 2 | 14 | 0.6% |
-| 4 | 2286 | 94.2% |
+| 1 | 126 | 5.2% |
+| 2 | 16 | 0.7% |
+| 4 | 2286 | 93.8% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **132 side(s) awaiting a drain** across 66 record(s) — oldest published **11 day(s)** ago
+- **142 side(s) awaiting a drain** across 71 record(s) — oldest published **12 day(s)** ago
 
-> The bench queue is at 66 (nudge threshold 40).
+> The bench queue is at 71 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
-- review queue (never published): **11** — character-completion 11
-- bench queue (published, incomplete): **66**
+- review queue (never published): **12** — character-completion 12
+- bench queue (published, incomplete): **71**
 
 ## Player identity
 
-13 identity(s) resolved from more than one spelling. The
+14 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -87,6 +87,7 @@ after changing scripts/players.ts, or the old URLs 404.
 | --- | --- |
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
+| `caddyluke` | `caddy-luke` |
 | `chrisg` | `chris-g` |
 | `ghost-of-evo` | `ghostofevo` |
 | `hulk-mash` | `hulkmash` |
@@ -137,13 +138,13 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4183 |
-| not-tokon | 1236 |
+| other-game | 4188 |
+| not-tokon | 1243 |
 | pre-launch | 663 |
 | not-a-match | 216 |
 | short-duration | 47 |
 | not-an-event | 35 |
-| char-unresolved | 30 |
+| char-unresolved | 31 |
 | no-vs-title | 8 |
 | bad-handle | 1 |
 
