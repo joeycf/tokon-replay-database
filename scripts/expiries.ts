@@ -9,16 +9,18 @@
  *                                                 banner and writes an
  *                                                 "## ⚠ ACTION REQUIRED" block
  *                                                 at the top of data/report.md
- *   .github/workflows/…    (daily cron)         → a FINAL step, AFTER commit and
- *                                                 push, that exits 1
+ *   .github/workflows/pending-work.yml          → runs after every completed
+ *                                                 data run and exits 1
  *
  * A hard exit in parse.ts would fail `npm run data:build` and stop the daily
  * refresh entirely, which is strictly worse than the misfiling it warns about:
  * a day of stale data costs more than a day of a fighter filed under the wrong
- * accent. So the daily path stays soft, the data gets pushed, and the WORKFLOW
- * goes red afterwards so the pending work is impossible to miss.
+ * accent. So the daily path stays soft, the data gets pushed, and the "Pending
+ * work" run (workflow_run on the data run's completion) goes red afterwards so
+ * the pending work is impossible to miss — and a held data run can no longer
+ * hide a due expiry behind it, which it did on 2026-10-12.
  *
- * THE RED WORKFLOW AND THE exit 1 ARE THE DESIGN, NOT A BUG. Clear them by
+ * THE RED PENDING-WORK RUN AND THE exit 1 ARE THE DESIGN, NOT A BUG. Clear them by
  * doing the work below — never by deleting the check.
  *
  * Second-order property worth preserving: report.md's commit guard drops the
@@ -228,7 +230,8 @@ export function dueExpiries(
   // be NaN or negative, both compare false against the threshold, and the alarm
   // would never fire again.
   const newest = PATCHES.at(-1);
-  const quiet = /^\d{4}-\d{2}-\d{2}$/.test(quietThrough) && quietThrough <= asOf ? quietThrough : '';
+  const quiet =
+    /^\d{4}-\d{2}-\d{2}$/.test(quietThrough) && quietThrough <= asOf ? quietThrough : '';
   const since = newest && quiet > newest.start ? quiet : newest?.start;
   if (newest && since && daysBetween(since, asOf) > STALE_PATCH_DAYS) {
     const age = daysBetween(since, asOf);
@@ -265,9 +268,9 @@ export function expiryBlock(due: Expiry[]): string[] {
 }
 
 // ── standalone `--check` ─────────────────────────────────────────────────────
-// The workflow's LAST step. It runs after the data has been committed and
-// pushed, so a red run never costs a refresh — it only makes the pending work
-// impossible to ignore.
+// The "Pending work" workflow's step. It runs after the data run has completed
+// (pushed, or held), so a red run never costs a refresh — it only makes the
+// pending work impossible to ignore.
 const isMain = !!process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop()!);
 if (isMain && process.argv.includes('--check')) {
   const due = dueExpiries();

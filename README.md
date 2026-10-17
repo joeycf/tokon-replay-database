@@ -117,15 +117,15 @@ table against the live feed.
 
 Three severities, and the difference between them is the design:
 
-| where                     | behaviour                                                                     |
-| ------------------------- | ----------------------------------------------------------------------------- |
-| `scripts/characters.ts`   | **exits 1** — blocks the roster work that is due                              |
-| `scripts/parse.ts`        | **never exits**; writes `## ⚠ ACTION REQUIRED` to the top of `data/report.md` |
-| the workflow's final step | **exits 1**, _after_ the data is committed and pushed                         |
+| where                       | behaviour                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| `scripts/characters.ts`     | **exits 1** — blocks the roster work that is due                              |
+| `scripts/parse.ts`          | **never exits**; writes `## ⚠ ACTION REQUIRED` to the top of `data/report.md` |
+| the "Pending work" workflow | **exits 1**, _after_ the data run completes (pushed or held)                  |
 
 A hard exit in `parse.ts` would stop the daily refresh entirely, which is
-strictly worse than the misfiling it warns about. **The red workflow and the
-`exit 1` are the design, not a bug** — clear them by doing the work, never by
+strictly worse than the misfiling it warns about. **The red Pending work run and
+the `exit 1` are the design, not a bug** — clear them by doing the work, never by
 deleting the check.
 
 Two things can trip them: a Year-1 character's release day or window opening
@@ -202,6 +202,12 @@ A day with no new videos produces **no commit and no deploy**: the guard drops
 `data/report.md` when its only diff is the `_Generated_` timestamp. That means
 the commit trail _undercounts_ green cycles — check the Actions tab, not the
 log.
+
+**A red data run means the archive is stale or wrong — nothing else.** The due
+expiries (characters and the 10-day patch alarm) run in
+`.github/workflows/pending-work.yml` ("Pending work"), triggered by
+`workflow_run` after every completed data run, whatever it concluded, so a held
+data run can no longer hide a due expiry behind it (2026-10-12).
 
 Extraction never runs here. YouTube blocks datacenter IPs, so the footage tier
 is local-only and the cron carries committed overrides forward.
