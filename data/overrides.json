@@ -70246,5 +70246,61 @@
       }
     ],
     "resolvedBy": "human"
+  },
+  "t7yf5zXQWTg": {
+    "//": "review verdict: characters read by a person [2026-10-17]",
+    "sides": [
+      {
+        "player": "puns",
+        "handle": "PUNS",
+        "characters": [
+          "star-lord",
+          "loki",
+          "champion",
+          "deadpool"
+        ],
+        "provenance": {
+          "tier": "review",
+          "tiers": [
+            "review"
+          ],
+          "fromTitle": [],
+          "fromHuman": [
+            "star-lord",
+            "loki",
+            "champion",
+            "deadpool"
+          ],
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      },
+      {
+        "player": "kingafrica",
+        "handle": "KINGAFRICA",
+        "characters": [
+          "captain-america",
+          "storm",
+          "magneto",
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "review",
+          "tiers": [
+            "review"
+          ],
+          "fromTitle": [],
+          "fromHuman": [
+            "captain-america",
+            "storm",
+            "magneto",
+            "spider-man"
+          ],
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      }
+    ],
+    "resolvedBy": "human"
   }
 }
