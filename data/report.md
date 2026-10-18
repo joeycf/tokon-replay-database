@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-17T23:13:41.238Z_
+_Generated 2026-10-18T07:02:36.046Z_
 
 ## Coverage
 
@@ -40,43 +40,36 @@ How every one of the 2442 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 62 | 2.5% |
+| title | 0 | 0.0% |
 | description | 624 | 25.6% |
 | index | 170 | 7.0% |
-| footage | 201 | 8.2% |
-| human | 1356 | 55.5% |
+| footage | 129 | 5.3% |
+| human | 1490 | 61.0% |
 | review | 29 | 1.2% |
 
-- complete (4/4): **2309/2442** (94.6%)
-- oversize (>4, mid-set team change): **11** — counted in usage, excluded from pairing
+- complete (4/4): **2442/2442** (100.0%)
+- oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
 - bench alignment: character-subset 33 · handle 687 · ambiguous 7
 - title slot order: handle-first 1828 · chars-first 168 · parallel-lists 244
 - tier conflicts (queued for review): 1
-- title refutations (a person ruled the title wrong): **6** side(s) — named, with their evidence, by `npm run test:e2e`
+- title refutations (a person ruled the title wrong): **9** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
 
 ### Side-size distribution
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 81 | 3.3% |
-| 2 | 28 | 1.1% |
-| 3 | 24 | 1.0% |
-| 4 | 2298 | 94.1% |
-| 5 _(mid-set change)_ | 8 | 0.3% |
+| 4 | 2432 | 99.6% |
+| 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **133 side(s) awaiting a drain** across 71 record(s) — oldest published **12 day(s)** ago
-
-> The bench queue is at 71 (nudge threshold 40).
-> Run `npm run data:catchup` locally — the cron cannot do this: extraction
-> needs a logged-in YouTube session from a residential address.
+- **0 side(s) awaiting a drain** across 0 record(s)
 
 ## Queues
 
 - review queue (never published): **0** — —
-- bench queue (published, incomplete): **71**
+- bench queue (published, incomplete): **0**
 
 ## Player identity
 
