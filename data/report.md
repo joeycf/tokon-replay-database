@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-19T14:59:57.146Z_
+_Generated 2026-10-19T16:20:47.803Z_
 
 ## Coverage
 
@@ -10,10 +10,10 @@ _Generated 2026-10-19T14:59:57.146Z_
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 869 | 171 | 19.7% |
 | replaysHub | 423 | 415 | 98.1% |
-| fightingStationX | 3178 | 224 | 7.0% |
+| fightingStationX | 3179 | 224 | 7.0% |
 | fgcReplaysHub | 2787 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
-| replayTheater _(index)_ | 7 | 92 | — |
+| replayTheater _(carried)_ | — | 92 | — |
 | **total** | | **1235** | |
 
 ## Index intakes
@@ -25,11 +25,14 @@ the committed records are carried, and the run stays green.
 
 | intake | records | pin | this run | pages | new | not in this pull |
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| `replayTheater` | 92 | 92 | rebuilt from a cursor delta | — | — | — |
+| `replayTheater` | 92 | 92 | carried (pull found no new tournament entries) | — | — | — |
 
-Entries **collapsed as double-submitted**: **0** of 7 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
+_The pull ran and found no new tournament entries, so the committed catalogue_
+_was carried unchanged._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
-_Entries skipped as already-known: **0** of 7 in this pull — none was a video this repo has already fetched, published or ruled on. A statement about this pull's tagged rows, not the catalogue: the cross-check below measures the catalogue-wide overlap._
+_Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
@@ -37,14 +40,14 @@ How every one of the 2470 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 14 | 0.6% |
+| title | 2 | 0.1% |
 | description | 624 | 25.3% |
 | index | 184 | 7.4% |
-| footage | 129 | 5.2% |
+| footage | 141 | 5.7% |
 | human | 1490 | 60.3% |
 | review | 29 | 1.2% |
 
-- complete (4/4): **2456/2470** (99.4%)
+- complete (4/4): **2458/2470** (99.5%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
 - bench alignment: character-subset 33 · handle 694 · ambiguous 7
 - title slot order: handle-first 1842 · chars-first 168 · parallel-lists 244
@@ -56,13 +59,15 @@ How every one of the 2470 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 14 | 0.6% |
-| 4 | 2446 | 99.0% |
+| 1 | 4 | 0.2% |
+| 2 | 4 | 0.2% |
+| 3 | 4 | 0.2% |
+| 4 | 2448 | 99.1% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **14 side(s) awaiting a drain** across 7 record(s) — oldest published **1 day(s)** ago
+- **12 side(s) awaiting a drain** across 7 record(s) — oldest published **1 day(s)** ago
 
 ## Queues
 
@@ -131,7 +136,7 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 | other-game | 4199 |
 | not-tokon | 1256 |
 | pre-launch | 663 |
-| not-a-match | 230 |
+| not-a-match | 231 |
 | short-duration | 49 |
 | not-an-event | 35 |
 | char-unresolved | 20 |
