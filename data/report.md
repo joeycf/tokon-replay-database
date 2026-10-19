@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-18T14:09:14.976Z_
+_Generated 2026-10-19T14:59:57.146Z_
 
 ## Coverage
 
@@ -9,12 +9,12 @@ _Generated 2026-10-18T14:09:14.976Z_
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 869 | 171 | 19.7% |
-| replaysHub | 420 | 412 | 98.1% |
-| fightingStationX | 3167 | 224 | 7.1% |
-| fgcReplaysHub | 2783 | 41 | 1.5% |
+| replaysHub | 423 | 415 | 98.1% |
+| fightingStationX | 3178 | 224 | 7.0% |
+| fgcReplaysHub | 2787 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
-| replayTheater _(carried)_ | — | 85 | — |
-| **total** | | **1225** | |
+| replayTheater _(index)_ | 7 | 92 | — |
+| **total** | | **1235** | |
 
 ## Index intakes
 
@@ -25,32 +25,29 @@ the committed records are carried, and the run stays green.
 
 | intake | records | pin | this run | pages | new | not in this pull |
 | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| `replayTheater` | 85 | 85 | carried (pull found no new tournament entries) | — | — | — |
+| `replayTheater` | 92 | 92 | rebuilt from a cursor delta | — | — | — |
 
-_The pull ran and found no new tournament entries, so the committed catalogue_
-_was carried unchanged._
-_The cursor did not move: the catalogue has taken no new Tōkon entry since_
-_the last pull — quieter still, and equally ordinary._
+Entries **collapsed as double-submitted**: **0** of 7 tagged. The same match submitted twice under two tag spellings; one copy kept, chosen on the tag so the survivor does not depend on submission order.
 
-_Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
+_Entries skipped as already-known: **0** of 7 in this pull — none was a video this repo has already fetched, published or ruled on. A statement about this pull's tagged rows, not the catalogue: the cross-check below measures the catalogue-wide overlap._
 
 ## Character provenance
 
-How every one of the 2450 sides got its characters.
+How every one of the 2470 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 8 | 0.3% |
-| description | 624 | 25.5% |
-| index | 170 | 6.9% |
-| footage | 129 | 5.3% |
-| human | 1490 | 60.8% |
+| title | 14 | 0.6% |
+| description | 624 | 25.3% |
+| index | 184 | 7.4% |
+| footage | 129 | 5.2% |
+| human | 1490 | 60.3% |
 | review | 29 | 1.2% |
 
-- complete (4/4): **2442/2450** (99.7%)
+- complete (4/4): **2456/2470** (99.4%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 691 · ambiguous 7
-- title slot order: handle-first 1836 · chars-first 168 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 694 · ambiguous 7
+- title slot order: handle-first 1842 · chars-first 168 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **9** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,18 +56,18 @@ How every one of the 2450 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 8 | 0.3% |
-| 4 | 2432 | 99.3% |
+| 1 | 14 | 0.6% |
+| 4 | 2446 | 99.0% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **8 side(s) awaiting a drain** across 4 record(s) — oldest published **0 day(s)** ago
+- **14 side(s) awaiting a drain** across 7 record(s) — oldest published **1 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **0** — —
-- bench queue (published, incomplete): **4**
+- bench queue (published, incomplete): **7**
 
 ## Player identity
 
@@ -131,14 +128,14 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4194 |
-| not-tokon | 1248 |
+| other-game | 4199 |
+| not-tokon | 1256 |
 | pre-launch | 663 |
 | not-a-match | 230 |
-| short-duration | 48 |
+| short-duration | 49 |
 | not-an-event | 35 |
 | char-unresolved | 20 |
-| no-vs-title | 8 |
+| no-vs-title | 9 |
 | bad-handle | 1 |
 
 - `marvelTokonYT` events-only gate: **35** upload(s) carried no known event brand.
