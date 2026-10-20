@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-20T20:30:49.542Z_
+_Generated 2026-10-20T20:38:09.413Z_
 
 ## Coverage
 
@@ -40,38 +40,36 @@ How every one of the 2484 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 6 | 0.2% |
+| title | 0 | 0.0% |
 | description | 624 | 25.1% |
 | index | 184 | 7.4% |
-| footage | 139 | 5.6% |
-| human | 1502 | 60.5% |
+| footage | 133 | 5.4% |
+| human | 1514 | 61.0% |
 | review | 29 | 1.2% |
 
-- complete (4/4): **2472/2484** (99.5%)
+- complete (4/4): **2484/2484** (100.0%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
 - bench alignment: character-subset 33 · handle 699 · ambiguous 7
 - title slot order: handle-first 1854 · chars-first 170 · parallel-lists 244
 - tier conflicts (queued for review): 1
-- title refutations (a person ruled the title wrong): **9** side(s) — named, with their evidence, by `npm run test:e2e`
+- title refutations (a person ruled the title wrong): **10** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
 
 ### Side-size distribution
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 11 | 0.4% |
-| 2 | 1 | 0.0% |
-| 4 | 2462 | 99.1% |
+| 4 | 2474 | 99.6% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **12 side(s) awaiting a drain** across 7 record(s) — oldest published **1 day(s)** ago
+- **0 side(s) awaiting a drain** across 0 record(s)
 
 ## Queues
 
 - review queue (never published): **0** — —
-- bench queue (published, incomplete): **7**
+- bench queue (published, incomplete): **0**
 
 ## Player identity
 
