@@ -9,6 +9,11 @@
       "permanent": false
     },
     {
+      "source": "/tokon/players/ajax-fidelity",
+      "destination": "/tokon/players/ajaxfidelity",
+      "permanent": true
+    },
+    {
       "source": "/tokon/players/balder-berg",
       "destination": "/tokon/players/balderberg",
       "permanent": true

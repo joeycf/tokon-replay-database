@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-21T13:15:20.746Z_
+_Generated 2026-10-22T13:12:53.916Z_
 
 ## Coverage
 
@@ -8,13 +8,13 @@ _Generated 2026-10-21T13:15:20.746Z_
 | --- | ---: | ---: | ---: |
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 872 | 174 | 20.0% |
-| replaysHub | 430 | 422 | 98.1% |
-| fightingStationX | 3202 | 224 | 7.0% |
-| fgcReplaysHub | 2795 | 41 | 1.5% |
+| hadoukenReplays | 873 | 175 | 20.0% |
+| replaysHub | 434 | 426 | 98.2% |
+| fightingStationX | 3215 | 224 | 7.0% |
+| fgcReplaysHub | 2799 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1245** | |
+| **total** | | **1250** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2490 sides got its characters.
+How every one of the 2500 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 6 | 0.2% |
-| description | 624 | 25.1% |
+| title | 16 | 0.6% |
+| description | 624 | 25.0% |
 | index | 184 | 7.4% |
 | footage | 133 | 5.3% |
-| human | 1514 | 60.8% |
+| human | 1514 | 60.6% |
 | review | 29 | 1.2% |
 
-- complete (4/4): **2484/2490** (99.8%)
+- complete (4/4): **2484/2500** (99.4%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 701 · ambiguous 7
-- title slot order: handle-first 1859 · chars-first 171 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 705 · ambiguous 7
+- title slot order: handle-first 1868 · chars-first 172 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **10** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,27 +59,29 @@ How every one of the 2490 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 6 | 0.2% |
-| 4 | 2474 | 99.4% |
+| 1 | 12 | 0.5% |
+| 2 | 4 | 0.2% |
+| 4 | 2474 | 99.0% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **6 side(s) awaiting a drain** across 3 record(s) — oldest published **0 day(s)** ago
+- **16 side(s) awaiting a drain** across 8 record(s) — oldest published **1 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **0** — —
-- bench queue (published, incomplete): **3**
+- bench queue (published, incomplete): **8**
 
 ## Player identity
 
-12 identity(s) resolved from more than one spelling. The
+13 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
 | canonical | absorbed |
 | --- | --- |
+| `ajaxfidelity` | `ajax-fidelity` |
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
 | `ghost-of-evo` | `ghostofevo` |
@@ -131,10 +133,10 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4211 |
-| not-tokon | 1270 |
+| other-game | 4219 |
+| not-tokon | 1278 |
 | pre-launch | 663 |
-| not-a-match | 234 |
+| not-a-match | 235 |
 | short-duration | 51 |
 | not-an-event | 35 |
 | char-unresolved | 20 |
@@ -171,6 +173,7 @@ garbled game name gets a human verdict instead of a quiet player page.
 | `TOKON PLAYER` | 6 | 9G-yCsKqlDI |
 | `JOHN TOKON` | 3 | 17zJLO3pto8 |
 | `The Tokon Texan` | 2 | 26SqJz0Xlpo |
+| `MARKTOKON` | 1 | 0rL0Mx_AFI8 |
 | `DR. MARVEL` | 1 | xKOB-OdDuOQ |
 | `Marvel larper` | 1 | Z1uK06owFng |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
