@@ -44,8 +44,12 @@
  * archive matching while the tag does not is a hard failure at the deadline.
  *
  * Run: npm run verify:deployed
- *   SMOKE_HOST     default https://replaydatabase.com — point at the game's own
- *                  *.vercel.app before the shell rewrite exists
+ *   SMOKE_HOST     default https://replaydatabase.com — the apex the shell owns,
+ *                  which edge-rewrites /tokon/* to this project (shell
+ *                  56c1b52, 2026-08-14). The workflow uses the default. Point it
+ *                  at https://tokon-replay-database.vercel.app to read the
+ *                  game's own host directly, which tells a broken rewrite from a
+ *                  broken deployment.
  *   SMOKE_TIMEOUT_SEC (900) · SMOKE_INTERVAL_SEC (20)
  */
 
