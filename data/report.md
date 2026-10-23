@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-22T13:12:53.916Z_
+_Generated 2026-10-23T04:09:30.925Z_
 
 ## Coverage
 
@@ -9,12 +9,12 @@ _Generated 2026-10-22T13:12:53.916Z_
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 873 | 175 | 20.0% |
-| replaysHub | 434 | 426 | 98.2% |
-| fightingStationX | 3215 | 224 | 7.0% |
-| fgcReplaysHub | 2799 | 41 | 1.5% |
+| replaysHub | 437 | 429 | 98.2% |
+| fightingStationX | 3221 | 224 | 7.0% |
+| fgcReplaysHub | 2801 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1250** | |
+| **total** | | **1253** | |
 
 ## Index intakes
 
@@ -36,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2500 sides got its characters.
+How every one of the 2506 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 16 | 0.6% |
-| description | 624 | 25.0% |
-| index | 184 | 7.4% |
-| footage | 133 | 5.3% |
-| human | 1514 | 60.6% |
+| title | 6 | 0.2% |
+| description | 624 | 24.9% |
+| index | 184 | 7.3% |
+| footage | 149 | 5.9% |
+| human | 1514 | 60.4% |
 | review | 29 | 1.2% |
 
-- complete (4/4): **2484/2500** (99.4%)
+- complete (4/4): **2488/2506** (99.3%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 705 · ambiguous 7
-- title slot order: handle-first 1868 · chars-first 172 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 708 · ambiguous 7
+- title slot order: handle-first 1874 · chars-first 172 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **10** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,19 +59,20 @@ How every one of the 2500 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 12 | 0.5% |
-| 2 | 4 | 0.2% |
-| 4 | 2474 | 99.0% |
+| 1 | 10 | 0.4% |
+| 2 | 3 | 0.1% |
+| 3 | 5 | 0.2% |
+| 4 | 2478 | 98.9% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **16 side(s) awaiting a drain** across 8 record(s) — oldest published **1 day(s)** ago
+- **18 side(s) awaiting a drain** across 9 record(s) — oldest published **2 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **0** — —
-- bench queue (published, incomplete): **8**
+- bench queue (published, incomplete): **9**
 
 ## Player identity
 
@@ -133,11 +134,11 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4219 |
-| not-tokon | 1278 |
+| other-game | 4221 |
+| not-tokon | 1283 |
 | pre-launch | 663 |
 | not-a-match | 235 |
-| short-duration | 51 |
+| short-duration | 52 |
 | not-an-event | 35 |
 | char-unresolved | 20 |
 | no-vs-title | 9 |
