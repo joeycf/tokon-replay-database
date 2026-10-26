@@ -80161,5 +80161,68 @@
     "resolvedBy": "extractor",
     "confidence": 0.992,
     "sideVotes": 86
+  },
+  "bEp89Mi76Ks": {
+    "//": "bench-completion: read from footage [data:extract 2026-10-26]",
+    "sides": [
+      {
+        "player": "xylophone",
+        "handle": "Xylophone",
+        "characters": [
+          "wolverine",
+          "hulk",
+          "peni-parker"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "hulk",
+            "wolverine"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": false,
+          "fromFootage": [
+            "wolverine",
+            "hulk",
+            "peni-parker"
+          ],
+          "confidence": 0.992
+        }
+      },
+      {
+        "player": "grima",
+        "handle": "GRIMA",
+        "characters": [
+          "champion",
+          "carnage"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "champion",
+            "carnage"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": false,
+          "fromFootage": [
+            "champion"
+          ],
+          "confidence": 1
+        }
+      }
+    ],
+    "resolvedBy": "extractor",
+    "confidence": 0.992,
+    "sideVotes": 60
   }
 }
