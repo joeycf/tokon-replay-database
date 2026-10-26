@@ -1,6 +1,13 @@
 # Tōkon pipeline report
 
-_Generated 2026-10-25T12:47:14.505Z_
+## ⚠ ACTION REQUIRED
+
+1 self-expiring gate(s) are due:
+
+- **patch-table** (stale-patch-table, due 2026-10-15)
+  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-10-15, 11 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
+
+_Generated 2026-10-26T14:35:00.983Z_
 
 ## Coverage
 
@@ -8,13 +15,13 @@ _Generated 2026-10-25T12:47:14.505Z_
 | --- | ---: | ---: | ---: |
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 874 | 176 | 20.1% |
-| replaysHub | 446 | 437 | 98.0% |
-| fightingStationX | 3251 | 224 | 6.9% |
-| fgcReplaysHub | 2810 | 41 | 1.5% |
+| hadoukenReplays | 875 | 177 | 20.2% |
+| replaysHub | 449 | 440 | 98.0% |
+| fightingStationX | 3263 | 224 | 6.9% |
+| fgcReplaysHub | 2815 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1262** | |
+| **total** | | **1266** | |
 
 ## Index intakes
 
@@ -36,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2524 sides got its characters.
+How every one of the 2532 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 18 | 0.7% |
-| description | 624 | 24.7% |
+| title | 26 | 1.0% |
+| description | 624 | 24.6% |
 | index | 184 | 7.3% |
 | footage | 137 | 5.4% |
-| human | 1532 | 60.7% |
+| human | 1532 | 60.5% |
 | review | 29 | 1.1% |
 
-- complete (4/4): **2506/2524** (99.3%)
+- complete (4/4): **2506/2532** (99.0%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 716 · ambiguous 7
-- title slot order: handle-first 1891 · chars-first 173 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 719 · ambiguous 7
+- title slot order: handle-first 1898 · chars-first 174 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **10** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,18 +66,19 @@ How every one of the 2524 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 18 | 0.7% |
-| 4 | 2496 | 98.9% |
+| 1 | 24 | 0.9% |
+| 2 | 2 | 0.1% |
+| 4 | 2496 | 98.6% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **18 side(s) awaiting a drain** across 9 record(s) — oldest published **2 day(s)** ago
+- **26 side(s) awaiting a drain** across 13 record(s) — oldest published **3 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **9**
+- bench queue (published, incomplete): **13**
 
 ## Player identity
 
@@ -132,14 +140,14 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4237 |
-| not-tokon | 1303 |
+| other-game | 4243 |
+| not-tokon | 1312 |
 | pre-launch | 663 |
 | not-a-match | 236 |
-| short-duration | 54 |
+| short-duration | 55 |
 | not-an-event | 35 |
 | char-unresolved | 21 |
-| no-vs-title | 9 |
+| no-vs-title | 10 |
 | bad-handle | 1 |
 
 - `marvelTokonYT` events-only gate: **35** upload(s) carried no known event brand.
@@ -169,7 +177,7 @@ garbled game name gets a human verdict instead of a quiet player page.
 
 | handle | records | example |
 | --- | ---: | --- |
-| `TOKON` | 7 | B_l-2g79hEI |
+| `TOKON` | 8 | 3kn0YRHRYj8 |
 | `TOKON PLAYER` | 6 | 9G-yCsKqlDI |
 | `JOHN TOKON` | 3 | 17zJLO3pto8 |
 | `The Tokon Texan` | 2 | 26SqJz0Xlpo |
