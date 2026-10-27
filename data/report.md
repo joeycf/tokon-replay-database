@@ -7,7 +7,7 @@
 - **patch-table** (stale-patch-table, due 2026-10-15)
   The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-10-15, 12 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-10-27T13:35:05.926Z_
+_Generated 2026-10-27T14:05:14.107Z_
 
 ## Coverage
 
@@ -18,7 +18,7 @@ _Generated 2026-10-27T13:35:05.926Z_
 | hadoukenReplays | 876 | 178 | 20.3% |
 | replaysHub | 452 | 443 | 98.0% |
 | fightingStationX | 3275 | 224 | 6.8% |
-| fgcReplaysHub | 2820 | 41 | 1.5% |
+| fgcReplaysHub | 2821 | 41 | 1.5% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
 | **total** | | **1270** | |
@@ -47,14 +47,14 @@ How every one of the 2540 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 34 | 1.3% |
+| title | 18 | 0.7% |
 | description | 624 | 24.6% |
 | index | 184 | 7.2% |
-| footage | 137 | 5.4% |
+| footage | 153 | 6.0% |
 | human | 1532 | 60.3% |
 | review | 29 | 1.1% |
 
-- complete (4/4): **2506/2540** (98.7%)
+- complete (4/4): **2508/2540** (98.7%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
 - bench alignment: character-subset 33 · handle 722 · ambiguous 7
 - title slot order: handle-first 1905 · chars-first 175 · parallel-lists 244
@@ -66,14 +66,15 @@ How every one of the 2540 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 30 | 1.2% |
+| 1 | 21 | 0.8% |
 | 2 | 4 | 0.2% |
-| 4 | 2496 | 98.3% |
+| 3 | 7 | 0.3% |
+| 4 | 2498 | 98.3% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **34 side(s) awaiting a drain** across 17 record(s) — oldest published **4 day(s)** ago
+- **32 side(s) awaiting a drain** across 17 record(s) — oldest published **4 day(s)** ago
 
 ## Queues
 
@@ -140,7 +141,7 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4251 |
+| other-game | 4252 |
 | not-tokon | 1318 |
 | pre-launch | 663 |
 | not-a-match | 238 |

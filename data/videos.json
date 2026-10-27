@@ -6,7 +6,7 @@
     "title": "MARVEL TOKON ▰ GROPIS (#1 Ranked Carnage) vs OPAL (#5 Ranked Magik) ▰ High Level Gameplay",
     "publishedAt": "2026-10-27T10:00:24Z",
     "durationSec": 793,
-    "viewCount": 84,
+    "viewCount": 101,
     "season": 1,
     "sides": [
       {
@@ -106,7 +106,7 @@
     "title": "TOKON ▰ FURIOUS (Champion) vs (Champion) GRIMA 👊[MARVEL TŌKON: Fighting Souls]",
     "publishedAt": "2026-10-26T22:12:26Z",
     "durationSec": 444,
-    "viewCount": 117,
+    "viewCount": 120,
     "season": 1,
     "sides": [
       {
@@ -154,7 +154,7 @@
     "title": "MARVEL TOKON ▰ DANGER (Green Goblin Storm) vs PSALM (Peni Parker Loki) ▰ High Level Gameplay",
     "publishedAt": "2026-10-26T19:06:39Z",
     "durationSec": 792,
-    "viewCount": 250,
+    "viewCount": 272,
     "season": 1,
     "sides": [
       {
@@ -215,13 +215,15 @@
         "player": "xylophone",
         "handle": "Xylophone",
         "characters": [
+          "wolverine",
           "hulk",
-          "wolverine"
+          "peni-parker"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "hulk",
@@ -229,7 +231,13 @@
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "wolverine",
+            "hulk",
+            "peni-parker"
+          ],
+          "confidence": 0.992
         }
       },
       {
@@ -240,9 +248,10 @@
           "carnage"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "champion",
@@ -250,7 +259,11 @@
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "champion"
+          ],
+          "confidence": 1
         }
       }
     ]
@@ -312,7 +325,7 @@
     "title": "MARVEL TOKON ▰ LEEK7 (#1 Ranked Doctor Doom) vs ELLIAGAH (Captain America) ▰ High Level Gameplay",
     "publishedAt": "2026-10-25T22:00:16Z",
     "durationSec": 794,
-    "viewCount": 465,
+    "viewCount": 466,
     "season": 1,
     "sides": [
       {
@@ -362,7 +375,7 @@
     "title": "TOKON ▰ GRIMA (Champion) vs (Loki) TOKON 👊[MARVEL TŌKON: Fighting Souls]",
     "publishedAt": "2026-10-25T13:56:58Z",
     "durationSec": 612,
-    "viewCount": 694,
+    "viewCount": 695,
     "season": 1,
     "sides": [
       {
@@ -372,33 +385,47 @@
           "champion"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "champion"
           ],
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "champion"
+          ],
+          "confidence": 1
         }
       },
       {
         "player": "tokon",
         "handle": "TOKON",
         "characters": [
+          "star-lord",
+          "black-panther",
           "loki"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "loki"
           ],
           "slotOrder": "chars-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "star-lord",
+            "black-panther",
+            "loki"
+          ],
+          "confidence": 0.913
         }
       }
     ]
@@ -410,45 +437,61 @@
     "title": "MARVEL TOKON ▰ TENMA (#2 Ranked Peni Parker) vs NAIRE (Spider-Man) ▰ High Level Gameplay",
     "publishedAt": "2026-10-25T10:33:40Z",
     "durationSec": 740,
-    "viewCount": 355,
+    "viewCount": 357,
     "season": 1,
     "sides": [
       {
         "player": "tenma",
         "handle": "Tenma",
         "characters": [
-          "peni-parker"
+          "peni-parker",
+          "deadpool",
+          "black-panther"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "peni-parker"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "peni-parker",
+            "deadpool",
+            "black-panther"
+          ],
+          "confidence": 0.898
         }
       },
       {
         "player": "naire",
         "handle": "Naire",
         "characters": [
-          "spider-man"
+          "spider-man",
+          "peni-parker"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "spider-man"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "spider-man",
+            "peni-parker"
+          ],
+          "confidence": 0.919
         }
       }
     ]
@@ -520,35 +563,49 @@
           "champion"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "champion"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "champion"
+          ],
+          "confidence": 1
         }
       },
       {
         "player": "pingus",
         "handle": "PINGUS",
         "characters": [
-          "wolverine"
+          "deadpool",
+          "wolverine",
+          "black-panther"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "wolverine"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "deadpool",
+            "wolverine",
+            "black-panther"
+          ],
+          "confidence": 0.753
         }
       }
     ]
@@ -610,45 +667,65 @@
     "title": "MARVEL TOKON ▰ ADVANCED (#1 Ranked Iron Man) vs CADDYLUKE (Ghost Rider) ▰ High Level Gameplay",
     "publishedAt": "2026-10-24T10:00:26Z",
     "durationSec": 656,
-    "viewCount": 248,
+    "viewCount": 247,
     "season": 1,
     "sides": [
       {
         "player": "advanced",
         "handle": "Advanced",
         "characters": [
-          "iron-man"
+          "iron-man",
+          "magik",
+          "spider-man"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "iron-man"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "iron-man",
+            "magik",
+            "spider-man"
+          ],
+          "confidence": 0.999
         }
       },
       {
         "player": "caddyluke",
         "handle": "CaddyLuke",
         "characters": [
-          "ghost-rider"
+          "ghost-rider",
+          "green-goblin",
+          "magneto",
+          "doctor-doom"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "ghost-rider"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": true,
+          "fromFootage": [
+            "ghost-rider",
+            "green-goblin",
+            "magneto",
+            "doctor-doom"
+          ],
+          "confidence": 0.949
         }
       }
     ]
@@ -667,38 +744,58 @@
         "player": "tenma",
         "handle": "Tenma",
         "characters": [
-          "peni-parker"
+          "peni-parker",
+          "deadpool",
+          "ms-marvel",
+          "black-panther"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "peni-parker"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": true,
+          "fromFootage": [
+            "peni-parker",
+            "deadpool",
+            "ms-marvel",
+            "black-panther"
+          ],
+          "confidence": 0.982
         }
       },
       {
         "player": "mrchupy",
         "handle": "MrChupy",
         "characters": [
-          "carnage"
+          "carnage",
+          "magik",
+          "doctor-doom"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "carnage"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "carnage",
+            "magik",
+            "doctor-doom"
+          ],
+          "confidence": 0.983
         }
       }
     ]
@@ -720,15 +817,20 @@
           "champion"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "champion"
           ],
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "champion"
+          ],
+          "confidence": 1
         }
       },
       {
@@ -738,15 +840,20 @@
           "wolverine"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "wolverine"
           ],
           "slotOrder": "chars-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "wolverine"
+          ],
+          "confidence": 1
         }
       }
     ]
@@ -758,26 +865,35 @@
     "title": "MARVEL TOKON ▰ TEMNA (#2 Ranked Peni Paker) vs SHIESTY (#1 Ranked Hulk) ▰ High Level Gameplay",
     "publishedAt": "2026-10-23T14:00:33Z",
     "durationSec": 702,
-    "viewCount": 307,
+    "viewCount": 309,
     "season": 1,
     "sides": [
       {
         "player": "temna",
         "handle": "TEMNA",
         "characters": [
-          "peni-parker"
+          "deadpool",
+          "peni-parker",
+          "ms-marvel"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "peni-parker"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "deadpool",
+            "peni-parker",
+            "ms-marvel"
+          ],
+          "confidence": 0.992
         }
       },
       {
@@ -787,16 +903,21 @@
           "hulk"
         ],
         "provenance": {
-          "tier": "title",
+          "tier": "footage",
           "tiers": [
-            "title"
+            "title",
+            "footage"
           ],
           "fromTitle": [
             "hulk"
           ],
           "descAlign": "handle",
           "slotOrder": "handle-first",
-          "complete": false
+          "complete": false,
+          "fromFootage": [
+            "hulk"
+          ],
+          "confidence": 1
         }
       }
     ]
@@ -858,7 +979,7 @@
     "title": "MARVEL TOKON ▰ MrCHUPY (#3 Ranked Carnage) vs SonicXD (Iron Man) ▰ High Level Gameplay",
     "publishedAt": "2026-10-22T22:00:30Z",
     "durationSec": 681,
-    "viewCount": 381,
+    "viewCount": 380,
     "season": 1,
     "sides": [
       {
@@ -970,7 +1091,7 @@
     "title": "MARVEL TOKON ▰ CLOVER (#1 Ranked Captain America) vs NAIRE (Spider-Man) ▰ High Level Gameplay",
     "publishedAt": "2026-10-22T18:00:04Z",
     "durationSec": 717,
-    "viewCount": 363,
+    "viewCount": 364,
     "season": 1,
     "sides": [
       {
@@ -1152,7 +1273,7 @@
     "title": "MARVEL TOKON ▰ TA GIO (Magneto/Blade) vs INFINITY (Hulk/Carnage) ▰ High Level Gameplay",
     "publishedAt": "2026-10-22T10:00:01Z",
     "durationSec": 713,
-    "viewCount": 362,
+    "viewCount": 377,
     "season": 1,
     "sides": [
       {
@@ -1377,7 +1498,7 @@
     "title": "TOKON ▰ FURIOUS (Champion) vs (Champion) GRIMA 👊[MARVEL TŌKON: Fighting Souls]",
     "publishedAt": "2026-10-21T19:30:53Z",
     "durationSec": 771,
-    "viewCount": 405,
+    "viewCount": 406,
     "season": 1,
     "sides": [
       {
@@ -1473,7 +1594,7 @@
     "title": "MARVEL TOKON ▰ TENMA (#2 Ranked Peni Parker) vs AJAXFIDELITY (Spider-Man) ▰ High Level Gameplay",
     "publishedAt": "2026-10-21T18:00:06Z",
     "durationSec": 728,
-    "viewCount": 347,
+    "viewCount": 349,
     "season": 1,
     "sides": [
       {
@@ -1584,7 +1705,7 @@
     "title": "MARVEL TOKON ▰ ADVANCED (#1 Ranked Iron Man) vs MARKTOKON (DeadPool) ▰ High Level Gameplay",
     "publishedAt": "2026-10-21T14:00:29Z",
     "durationSec": 869,
-    "viewCount": 450,
+    "viewCount": 452,
     "season": 1,
     "sides": [
       {
@@ -1682,7 +1803,7 @@
     "title": "MARVEL TOKON ▰ GROPIS (#1 Ranked Carnage) vs PROTO (Carnage) ▰ High Level Gameplay",
     "publishedAt": "2026-10-21T10:00:05Z",
     "durationSec": 823,
-    "viewCount": 292,
+    "viewCount": 293,
     "season": 1,
     "sides": [
       {
@@ -1958,7 +2079,7 @@
     "title": "MARVEL TOKON ▰ SHIESTY (#1 Ranked Hulk) vs GHOSTOFEVO (Storm) ▰ High Level Gameplay",
     "publishedAt": "2026-10-20T18:00:36Z",
     "durationSec": 600,
-    "viewCount": 252,
+    "viewCount": 253,
     "season": 1,
     "sides": [
       {
@@ -2066,7 +2187,7 @@
     "title": "MARVEL TOKON ▰ PUNS (#1 Ranked Star-Lord) vs JONNIE (DeadPool) ▰ High Level Gameplay",
     "publishedAt": "2026-10-20T14:00:20Z",
     "durationSec": 723,
-    "viewCount": 256,
+    "viewCount": 257,
     "season": 1,
     "sides": [
       {
@@ -3070,7 +3191,7 @@
     "title": "MARVEL TOKON ▰ ADVANCED (#1 Ranked Iron Man) vs COLD (#4 Ranked Storm) ▰ High Level Gameplay",
     "publishedAt": "2026-10-18T10:04:43Z",
     "durationSec": 873,
-    "viewCount": 614,
+    "viewCount": 616,
     "season": 1,
     "sides": [
       {
@@ -3695,7 +3816,7 @@
     "title": "TOKON ▰ MAJIN BURNO (Champion) vs (Magneto) CADDY LUKE 👊[MARVEL TŌKON: Fighting Souls]",
     "publishedAt": "2026-10-16T19:58:06Z",
     "durationSec": 794,
-    "viewCount": 1298,
+    "viewCount": 1299,
     "season": 1,
     "sides": [
       {
@@ -3803,7 +3924,7 @@
     "title": "MARVEL TOKON ▰ FCHAMPRYAN (#1 Ranked Black Panther) vs BUSS (#2 Ranked Hulk) ▰ High Level Gameplay",
     "publishedAt": "2026-10-16T18:00:14Z",
     "durationSec": 726,
-    "viewCount": 359,
+    "viewCount": 361,
     "season": 1,
     "sides": [
       {
@@ -4418,7 +4539,7 @@
     "title": "MARVEL TOKON ▰ JOHN TOKON (Magneto) vs LOWRY (Wolverine) ▰ High Level Gameplay",
     "publishedAt": "2026-10-15T14:00:21Z",
     "durationSec": 780,
-    "viewCount": 895,
+    "viewCount": 896,
     "season": 1,
     "sides": [
       {
@@ -4509,7 +4630,7 @@
     "title": "MARVEL TOKON ▰ FCHAMPRYAN (#1 Ranked Black Panther) vs EDDY (Danger) ▰ High Level Gameplay",
     "publishedAt": "2026-10-15T10:00:19Z",
     "durationSec": 794,
-    "viewCount": 338,
+    "viewCount": 337,
     "season": 1,
     "sides": [
       {
@@ -4619,7 +4740,7 @@
     "title": "MARVEL TOKON ▰ GROPIS (#1 Ranked Carnage) vs MATRATON (Hulk) ▰ High Level Gameplay",
     "publishedAt": "2026-10-14T22:00:16Z",
     "durationSec": 738,
-    "viewCount": 376,
+    "viewCount": 377,
     "season": 1,
     "sides": [
       {
@@ -4807,7 +4928,7 @@
     "title": "MARVEL TOKON ▰ ZIDUS (Dead Pool/Hulk) vs NERO (Wolverine/Doctor Doom) ▰ High Level Gameplay",
     "publishedAt": "2026-10-14T18:13:16Z",
     "durationSec": 753,
-    "viewCount": 868,
+    "viewCount": 869,
     "season": 1,
     "sides": [
       {
@@ -5315,7 +5436,7 @@
     "title": "MARVEL TOKON ▰ PHON (#1 Ranked Black Panther) vs SHIESTY (#1 Ranked Hulk) ▰ High Level Gameplay",
     "publishedAt": "2026-10-14T14:57:42Z",
     "durationSec": 689,
-    "viewCount": 384,
+    "viewCount": 385,
     "season": 1,
     "sides": [
       {
@@ -5619,7 +5740,7 @@
     "title": "TOKON ▰ MAJIN BURNO (Champion) vs (Loki) EGOMYLEGO 👊[MARVEL TŌKON: Fighting Souls]",
     "publishedAt": "2026-10-13T18:13:00Z",
     "durationSec": 884,
-    "viewCount": 797,
+    "viewCount": 798,
     "season": 1,
     "sides": [
       {
@@ -6760,7 +6881,7 @@
     "title": "MARVEL TOKON ▰ ADVANCED (#4 Ranked Iron Man) vs SAIKKA (Doctor Doom) ▰ High Level Gameplay",
     "publishedAt": "2026-10-11T14:00:34Z",
     "durationSec": 858,
-    "viewCount": 429,
+    "viewCount": 430,
     "season": 1,
     "sides": [
       {
@@ -7996,7 +8117,7 @@
     "title": "MARVEL TOKON ▰ K7 (#2 Ranked Doctor Doom) vs AURORA (Magik) ▰ High Level Gameplay",
     "publishedAt": "2026-10-09T10:00:38Z",
     "durationSec": 807,
-    "viewCount": 1089,
+    "viewCount": 1088,
     "season": 1,
     "sides": [
       {
@@ -8108,7 +8229,7 @@
     "title": "MARVEL TOKON ▰ FCHAMPRYAN (Black Panther) vs KINGCEE (Captain America) ▰ High Level Gameplay",
     "publishedAt": "2026-10-09T06:00:07Z",
     "durationSec": 509,
-    "viewCount": 316,
+    "viewCount": 315,
     "season": 1,
     "sides": [
       {
@@ -11502,7 +11623,7 @@
     "title": "MARVEL Tokon ▰ F.Champ (B.Panther/G.Goblin) vs G.Paladin (Spider-Man/Carnage) ▰ High Level Gameplay",
     "publishedAt": "2026-10-05T09:46:58Z",
     "durationSec": 833,
-    "viewCount": 310,
+    "viewCount": 311,
     "season": 1,
     "sides": [
       {
@@ -14042,7 +14163,7 @@
     "title": "MARVEL TOKON ▰ SHINKU (#2 Ranked Wolverine) vs IOVRTHK (Ms.  Marvel) ▰ High Level Gameplay",
     "publishedAt": "2026-10-02T18:00:26Z",
     "durationSec": 621,
-    "viewCount": 1203,
+    "viewCount": 1204,
     "season": 1,
     "sides": [
       {
@@ -14204,7 +14325,7 @@
     "title": "MARVEL TOKON ▰ MAJINBURNO (#1 Ranked Champion) vs MOKU (Loki/Storm) ▰ High Level Gameplay",
     "publishedAt": "2026-10-02T14:00:15Z",
     "durationSec": 617,
-    "viewCount": 481,
+    "viewCount": 482,
     "season": 1,
     "sides": [
       {
@@ -16579,7 +16700,7 @@
     "title": "MARVEL TOKON ▰ SLASH (#1 Ranked Dead Pool) vs LORD VENOM (#4 Ranked Loki) ▰ High Level Gameplay",
     "publishedAt": "2026-09-30T06:00:07Z",
     "durationSec": 919,
-    "viewCount": 1142,
+    "viewCount": 1141,
     "season": 1,
     "sides": [
       {
@@ -20357,7 +20478,7 @@
     "title": "MARVEL Tokon ▰ Dragon (Iron-Man/Storm) vs Filipino Champ (Black Panther/Blade) ▰ High Level Gameplay",
     "publishedAt": "2026-09-26T10:07:57Z",
     "durationSec": 861,
-    "viewCount": 472,
+    "viewCount": 473,
     "season": 1,
     "sides": [
       {
@@ -22631,7 +22752,7 @@
     "title": "MARVEL TOKON ▰ SLASH (#1 Ranked Dead Pool) vs SENSHI (#3 Ranked Black Panther) ▰ High Level Gameplay",
     "publishedAt": "2026-09-24T10:00:14Z",
     "durationSec": 991,
-    "viewCount": 442,
+    "viewCount": 439,
     "season": 1,
     "sides": [
       {
@@ -27243,7 +27364,7 @@
     "title": "MARVEL TOKON ▰ K7 (#2 Ranked Doctor Doom) vs LUCKY (Star-Lord) ▰ High Level Gameplay",
     "publishedAt": "2026-09-20T22:00:25Z",
     "durationSec": 710,
-    "viewCount": 2123,
+    "viewCount": 2124,
     "season": 1,
     "sides": [
       {
@@ -34476,7 +34597,7 @@
     "title": "MARVEL TOKON ▰ KINGVLAD (#1 Ranked Ms. Marvel) vs NERO (Wolverine) ▰ High Level Gameplay",
     "publishedAt": "2026-09-16T02:00:04Z",
     "durationSec": 765,
-    "viewCount": 1940,
+    "viewCount": 1942,
     "season": 1,
     "sides": [
       {
@@ -36120,7 +36241,7 @@
     "title": "MARVEL TOKON ▰ LUIGI (#3 Ranked Danger) vs LGR (#4 Ranked Danger) ▰ High Level Gameplay",
     "publishedAt": "2026-09-15T02:00:11Z",
     "durationSec": 761,
-    "viewCount": 632,
+    "viewCount": 635,
     "season": 1,
     "sides": [
       {
@@ -37447,7 +37568,7 @@
     "title": "MARVEL TOKON ▰ SLASH (#1 Ranked Dead Pool) vs CLAW (Captain America) ▰ High Level Gameplay",
     "publishedAt": "2026-09-14T10:12:46Z",
     "durationSec": 774,
-    "viewCount": 1113,
+    "viewCount": 1114,
     "season": 1,
     "sides": [
       {
@@ -53761,7 +53882,7 @@
     "title": "MARVEL TOKON ▰ CLOUD (#2 Ranked Carnage) vs KLEE (Wolverine) ▰ High Level Gameplay",
     "publishedAt": "2026-09-05T06:00:20Z",
     "durationSec": 854,
-    "viewCount": 3277,
+    "viewCount": 3279,
     "season": 1,
     "sides": [
       {
@@ -58911,7 +59032,7 @@
     "title": "MARVEL TOKON ▰ KINOKOMAN (#1 Ranked Green Goblin) vs ROSHIKA (Storm) ▰ High Level Gameplay",
     "publishedAt": "2026-09-02T18:00:22Z",
     "durationSec": 975,
-    "viewCount": 1927,
+    "viewCount": 1932,
     "season": 1,
     "sides": [
       {
@@ -60662,7 +60783,7 @@
     "title": "MARVEL TOKON ▰ GURIHARU (#1 Ranked Dead Pool) vs CLAW (Magneto) ▰ High Level Gameplay",
     "publishedAt": "2026-09-01T22:00:21Z",
     "durationSec": 915,
-    "viewCount": 8124,
+    "viewCount": 8125,
     "season": 1,
     "sides": [
       {
@@ -71503,7 +71624,7 @@
     "title": "TOKON ▰  SNAKE EYEZ (Champion) vs (Ghost Rider) HONEY JACK 👊[MARVEL TŌKON: Fighting Souls]",
     "publishedAt": "2026-08-27T20:09:03Z",
     "durationSec": 635,
-    "viewCount": 10310,
+    "viewCount": 10311,
     "season": 1,
     "sides": [
       {
@@ -82802,7 +82923,7 @@
     "title": "MARVEL TOKON ▰ Diaphone (Loki) vs Web BLAM (Spider-Man) ▰ High Level Gameplay",
     "publishedAt": "2026-08-22T16:15:26Z",
     "durationSec": 239,
-    "viewCount": 622,
+    "viewCount": 623,
     "season": 1,
     "sides": [
       {
@@ -93039,7 +93160,7 @@
     "title": "MARVEL TOKON ▰ FENRITTI (Ghost Rider) vs MOCHI (DeadPool) ▰ High Level Gameplay",
     "publishedAt": "2026-08-15T22:00:35Z",
     "durationSec": 1052,
-    "viewCount": 19347,
+    "viewCount": 19346,
     "season": 1,
     "sides": [
       {
@@ -93395,7 +93516,7 @@
     "title": "MARVEL TOKON ▰ RODA (#1 Ranked Wolverine) vs HADO (Green Goblin) ▰ High Level Gameplay",
     "publishedAt": "2026-08-15T18:00:04Z",
     "durationSec": 699,
-    "viewCount": 9035,
+    "viewCount": 9036,
     "season": 1,
     "sides": [
       {
@@ -94299,7 +94420,7 @@
     "title": "MARVEL TOKON ▰ PUNK (#5 Ranked Carnage) vs GIO (Magneto) ▰ High Level Gameplay",
     "publishedAt": "2026-08-15T10:00:18Z",
     "durationSec": 842,
-    "viewCount": 36587,
+    "viewCount": 36589,
     "season": 1,
     "sides": [
       {
@@ -94942,7 +95063,7 @@
     "title": "MARVEL TOKON ▰ SKIBUSTER (#1 Ranked Ms.Marvel) vs LUCAR (Spider-Man) ▰ High Level Gameplay",
     "publishedAt": "2026-08-14T22:00:18Z",
     "durationSec": 932,
-    "viewCount": 23335,
+    "viewCount": 23334,
     "season": 1,
     "sides": [
       {
@@ -96055,7 +96176,7 @@
     "title": "MARVEL TOKON ▰ KAZUNOKO (Magik) vs MAME SUPA (Carnage) ▰ High Level Gameplay",
     "publishedAt": "2026-08-14T06:00:04Z",
     "durationSec": 887,
-    "viewCount": 62174,
+    "viewCount": 62177,
     "season": 1,
     "sides": [
       {
@@ -96891,7 +97012,7 @@
     "title": "MARVEL TOKON ▰ K7 (Doctor Doom) vs THE DARK KNIGHT (Magik)▰ High Level Gameplay",
     "publishedAt": "2026-08-13T18:11:45Z",
     "durationSec": 995,
-    "viewCount": 34878,
+    "viewCount": 34882,
     "season": 1,
     "sides": [
       {
@@ -98026,7 +98147,7 @@
     "title": "MARVEL TOKON ▰ KAZUNOKO (Loki) vs POTENSU (Ghost Rider) ▰ High Level Gameplay",
     "publishedAt": "2026-08-13T02:00:20Z",
     "durationSec": 1012,
-    "viewCount": 16615,
+    "viewCount": 16616,
     "season": 1,
     "sides": [
       {
@@ -98107,7 +98228,7 @@
     "title": "MARVEL Tōkon ▰ Wawa (Magik/Storm) vs TryKeazer (Danger/Magik) ▰ High Level Gameplay",
     "publishedAt": "2026-08-13T01:45:51Z",
     "durationSec": 797,
-    "viewCount": 18701,
+    "viewCount": 18700,
     "season": 1,
     "sides": [
       {
@@ -98391,7 +98512,7 @@
     "title": "MARVEL TOKON ▰ KEAZER (#2 Ranked Danger) vs TIRAF (Captain America) ▰ High Level Gameplay",
     "publishedAt": "2026-08-12T22:00:00Z",
     "durationSec": 989,
-    "viewCount": 25007,
+    "viewCount": 25011,
     "season": 1,
     "sides": [
       {
@@ -98594,7 +98715,7 @@
     "title": "MARVEL TOKON ▰ SONICFOX (Green Goblin) vs CLOUD (#1 Ranked Star-Lord) ▰ High Level Gameplay",
     "publishedAt": "2026-08-12T18:00:06Z",
     "durationSec": 830,
-    "viewCount": 27221,
+    "viewCount": 27222,
     "season": 1,
     "sides": [
       {
@@ -99281,7 +99402,7 @@
     "title": "MARVEL TOKON ▰ PUNK (#5 Ranked Spider-Man) vs CLIM (Black Panther) ▰ High Level Gameplay",
     "publishedAt": "2026-08-12T10:00:39Z",
     "durationSec": 514,
-    "viewCount": 6537,
+    "viewCount": 6540,
     "season": 1,
     "sides": [
       {
@@ -99433,7 +99554,7 @@
     "title": "MARVEL TOKON ▰ NASHFAN (Star-Lord) vs MOCH (Carnage) ▰ High Level Gameplay",
     "publishedAt": "2026-08-12T06:00:06Z",
     "durationSec": 1004,
-    "viewCount": 28044,
+    "viewCount": 28049,
     "season": 1,
     "sides": [
       {
@@ -99505,7 +99626,7 @@
     "title": "MARVEL TOKON ▰ BLUESKYGUY (Magneto) vs DIAPHONE (Strom) ▰ High Level Gameplay",
     "publishedAt": "2026-08-12T02:00:27Z",
     "durationSec": 893,
-    "viewCount": 13601,
+    "viewCount": 13608,
     "season": 1,
     "sides": [
       {
@@ -100891,7 +101012,7 @@
     "title": "MARVEL TOKON ▰ FENRITTI (Ghost Rider) vs KEI TENDO (Loki) ▰ High Level Gameplay",
     "publishedAt": "2026-08-11T10:00:07Z",
     "durationSec": 881,
-    "viewCount": 35054,
+    "viewCount": 35059,
     "season": 1,
     "sides": [
       {
@@ -101406,7 +101527,7 @@
     "title": "MARVEL TOKON ▰ KEAZER (Danger) vs SONICSTARS (Star-Lord) ▰ High Level Gameplay",
     "publishedAt": "2026-08-11T02:00:04Z",
     "durationSec": 852,
-    "viewCount": 40048,
+    "viewCount": 40051,
     "season": 1,
     "sides": [
       {
@@ -102422,7 +102543,7 @@
     "title": "MARVEL TOKON ▰ LEFFEN (Black Panther) vs SAKUKE (Carnage) ▰ High Level Gameplay",
     "publishedAt": "2026-08-10T14:00:27Z",
     "durationSec": 820,
-    "viewCount": 8835,
+    "viewCount": 8836,
     "season": 1,
     "sides": [
       {
@@ -102733,7 +102854,7 @@
     "title": "MARVEL TOKON ▰ BOYMANGUY (Wolverine) vs LOVEROFPUNS (Hulk) ▰ High Level Gameplay",
     "publishedAt": "2026-08-10T10:00:09Z",
     "durationSec": 886,
-    "viewCount": 21602,
+    "viewCount": 21603,
     "season": 1,
     "sides": [
       {
@@ -103105,7 +103226,7 @@
     "title": "MARVEL TOKON ▰ PUNK (#2 Ranked Carnage) vs NIEVE (Doctor Doom) ▰ High Level Gameplay",
     "publishedAt": "2026-08-10T02:00:20Z",
     "durationSec": 876,
-    "viewCount": 84389,
+    "viewCount": 84390,
     "season": 1,
     "sides": [
       {
@@ -105700,7 +105821,7 @@
     "title": "MARVEL TOKON ▰ PUNK (Carnage) vs LEFTY (Wolverine) ▰ High Level Gameplay",
     "publishedAt": "2026-08-09T02:00:04Z",
     "durationSec": 941,
-    "viewCount": 92746,
+    "viewCount": 92747,
     "season": 1,
     "sides": [
       {
@@ -106516,7 +106637,7 @@
     "title": "MARVEL TOKON ▰ SNAKE EYEZ (Champion) vs GUARDIAN (Dead Pool) ▰ High Level Gameplay",
     "publishedAt": "2026-08-08T18:03:58Z",
     "durationSec": 896,
-    "viewCount": 77183,
+    "viewCount": 77184,
     "season": 1,
     "sides": [
       {
@@ -106875,7 +106996,7 @@
     "title": "MARVEL TOKON ▰ K2 (Doctor Doom) vs THE DARK KNIGHT (Magik) ▰ High Level Gameplay",
     "publishedAt": "2026-08-08T14:01:23Z",
     "durationSec": 975,
-    "viewCount": 20571,
+    "viewCount": 20572,
     "season": 1,
     "sides": [
       {
@@ -108678,7 +108799,7 @@
     "title": "Marvel Tokon ▰ INDIGO (Ghost Rider) vs PUNK (Carnage) ▰ MARVEL TOKON Pro level replays",
     "publishedAt": "2026-08-07T17:06:36Z",
     "durationSec": 775,
-    "viewCount": 11374,
+    "viewCount": 11375,
     "season": 1,
     "sides": [
       {
@@ -109816,7 +109937,7 @@
     "title": "SAIKKA (Star Lord) vs KING JON (Doctor Doom) ▰ MARVEL TOKON: High Level Gameplay",
     "publishedAt": "2026-08-07T04:00:37Z",
     "durationSec": 557,
-    "viewCount": 4899,
+    "viewCount": 4902,
     "season": 1,
     "sides": [
       {
@@ -110513,7 +110634,7 @@
     "title": "MARVEL Tōkon ▰ Zippy ( Spider-Man ) vs Diaphone ( Champion ) ▰ Tokon: Day 1 online matches",
     "publishedAt": "2026-08-06T22:31:58Z",
     "durationSec": 569,
-    "viewCount": 17531,
+    "viewCount": 17532,
     "season": 1,
     "sides": [
       {
@@ -110793,7 +110914,7 @@
     "title": "MARVEL Tōkon ▰ HiAmJoy ( Magik ) vs LeviShoto ( Carnage ) ▰ Tokon: Day 1 online matches",
     "publishedAt": "2026-08-06T19:38:14Z",
     "durationSec": 689,
-    "viewCount": 21213,
+    "viewCount": 21211,
     "season": 1,
     "sides": [
       {
@@ -110863,7 +110984,7 @@
     "title": "Marvel Tokon ▰ KYRMZON (Ghost Rider) vs DIAPHONE (Loki) ▰ MARVEL TOKON Pro level replays",
     "publishedAt": "2026-08-06T19:23:34Z",
     "durationSec": 659,
-    "viewCount": 6844,
+    "viewCount": 6847,
     "season": 1,
     "sides": [
       {
