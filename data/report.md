@@ -7,7 +7,7 @@
 - **patch-table** (stale-patch-table, due 2026-10-15)
   The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-10-15, 12 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-10-27T14:42:19.363Z_
+_Generated 2026-10-27T17:46:39.930Z_
 
 ## Coverage
 
@@ -47,14 +47,14 @@ How every one of the 2540 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 14 | 0.6% |
+| title | 0 | 0.0% |
 | description | 624 | 24.6% |
 | index | 184 | 7.2% |
-| footage | 157 | 6.2% |
-| human | 1532 | 60.3% |
+| footage | 142 | 5.6% |
+| human | 1561 | 61.5% |
 | review | 29 | 1.1% |
 
-- complete (4/4): **2511/2540** (98.9%)
+- complete (4/4): **2540/2540** (100.0%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
 - bench alignment: character-subset 33 · handle 722 · ambiguous 7
 - title slot order: handle-first 1905 · chars-first 175 · parallel-lists 244
@@ -66,20 +66,17 @@ How every one of the 2540 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 17 | 0.7% |
-| 2 | 5 | 0.2% |
-| 3 | 7 | 0.3% |
-| 4 | 2501 | 98.5% |
+| 4 | 2530 | 99.6% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **29 side(s) awaiting a drain** across 16 record(s) — oldest published **4 day(s)** ago
+- **0 side(s) awaiting a drain** across 0 record(s)
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **16**
+- bench queue (published, incomplete): **0**
 
 ## Player identity
 
