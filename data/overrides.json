@@ -80224,5 +80224,137 @@
     "resolvedBy": "extractor",
     "confidence": 0.992,
     "sideVotes": 60
+  },
+  "pYUVcKVXqi0": {
+    "//": "bench-completion: read from footage [data:extract 2026-10-27]",
+    "sides": [
+      {
+        "player": "gropis",
+        "handle": "Gropis",
+        "characters": [
+          "carnage",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "carnage"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": false,
+          "fromFootage": [
+            "carnage",
+            "green-goblin"
+          ],
+          "confidence": 0.949
+        }
+      },
+      {
+        "player": "opal",
+        "handle": "Opal",
+        "characters": [
+          "green-goblin",
+          "magik",
+          "storm",
+          "star-lord"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "magik"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromFootage": [
+            "green-goblin",
+            "magik",
+            "storm",
+            "star-lord"
+          ],
+          "confidence": 0.771
+        }
+      }
+    ],
+    "resolvedBy": "extractor",
+    "confidence": 0.771,
+    "sideVotes": -75
+  },
+  "Os6vMrtXCiQ": {
+    "//": "bench-completion: read from footage [data:extract 2026-10-27]",
+    "sides": [
+      {
+        "player": "k7",
+        "handle": "K7",
+        "characters": [
+          "doctor-doom",
+          "magneto",
+          "blade",
+          "green-goblin"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "doctor-doom"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromFootage": [
+            "doctor-doom",
+            "magneto",
+            "blade",
+            "green-goblin"
+          ],
+          "confidence": 0.937
+        }
+      },
+      {
+        "player": "phon",
+        "handle": "Phon",
+        "characters": [
+          "black-panther",
+          "green-goblin",
+          "storm",
+          "spider-man"
+        ],
+        "provenance": {
+          "tier": "footage",
+          "tiers": [
+            "title",
+            "footage"
+          ],
+          "fromTitle": [
+            "black-panther"
+          ],
+          "descAlign": "handle",
+          "slotOrder": "handle-first",
+          "complete": true,
+          "fromFootage": [
+            "black-panther",
+            "green-goblin",
+            "storm",
+            "spider-man"
+          ],
+          "confidence": 0.901
+        }
+      }
+    ],
+    "resolvedBy": "extractor",
+    "confidence": 0.901,
+    "sideVotes": 142
   }
 }
