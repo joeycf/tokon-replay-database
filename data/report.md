@@ -5,9 +5,9 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-10-15)
-  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-10-15, 13 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
+  The newest patch in scripts/patches.ts is 2026-08-28, and the feed was last confirmed quiet 2026-10-15, 14 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-10-28T14:32:06.683Z_
+_Generated 2026-10-29T14:40:42.760Z_
 
 ## Coverage
 
@@ -15,13 +15,13 @@ _Generated 2026-10-28T14:32:06.683Z_
 | --- | ---: | ---: | ---: |
 | highLevelReplays | 268 | 268 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 876 | 178 | 20.3% |
-| replaysHub | 457 | 448 | 98.0% |
-| fightingStationX | 3287 | 224 | 6.8% |
-| fgcReplaysHub | 2827 | 41 | 1.5% |
+| hadoukenReplays | 877 | 179 | 20.4% |
+| replaysHub | 461 | 452 | 98.0% |
+| fightingStationX | 3299 | 224 | 6.8% |
+| fgcReplaysHub | 2831 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1275** | |
+| **total** | | **1280** | |
 
 ## Index intakes
 
@@ -43,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2550 sides got its characters.
+How every one of the 2560 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 10 | 0.4% |
-| description | 624 | 24.5% |
+| title | 20 | 0.8% |
+| description | 624 | 24.4% |
 | index | 184 | 7.2% |
-| footage | 142 | 5.6% |
-| human | 1561 | 61.2% |
+| footage | 142 | 5.5% |
+| human | 1561 | 61.0% |
 | review | 29 | 1.1% |
 
-- complete (4/4): **2540/2550** (99.6%)
+- complete (4/4): **2540/2560** (99.2%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 727 · ambiguous 7
-- title slot order: handle-first 1915 · chars-first 175 · parallel-lists 244
+- bench alignment: character-subset 33 · handle 731 · ambiguous 7
+- title slot order: handle-first 1924 · chars-first 176 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **10** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -66,19 +66,19 @@ How every one of the 2550 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 9 | 0.4% |
-| 2 | 1 | 0.0% |
-| 4 | 2530 | 99.2% |
+| 1 | 16 | 0.6% |
+| 2 | 4 | 0.2% |
+| 4 | 2530 | 98.8% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **10 side(s) awaiting a drain** across 5 record(s) — oldest published **1 day(s)** ago
+- **20 side(s) awaiting a drain** across 10 record(s) — oldest published **2 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **5**
+- bench queue (published, incomplete): **10**
 
 ## Player identity
 
@@ -140,10 +140,10 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4260 |
-| not-tokon | 1327 |
+| other-game | 4265 |
+| not-tokon | 1336 |
 | pre-launch | 663 |
-| not-a-match | 238 |
+| not-a-match | 240 |
 | short-duration | 57 |
 | not-an-event | 35 |
 | char-unresolved | 21 |
