@@ -81345,5 +81345,61 @@
       }
     ],
     "resolvedBy": "human"
+  },
+  "_ECZnZ3M3VE": {
+    "//": "review verdict: characters read by a person [2026-10-30]",
+    "sides": [
+      {
+        "player": "lucky",
+        "handle": "LUCKY",
+        "characters": [
+          "star-lord",
+          "blade",
+          "magik",
+          "black-panther"
+        ],
+        "provenance": {
+          "tier": "review",
+          "tiers": [
+            "review"
+          ],
+          "fromTitle": [],
+          "fromHuman": [
+            "star-lord",
+            "blade",
+            "magik",
+            "black-panther"
+          ],
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      },
+      {
+        "player": "roda-3-ranked",
+        "handle": "RODA #3 Ranked",
+        "characters": [
+          "wolverine",
+          "blade",
+          "doctor-doom",
+          "magneto"
+        ],
+        "provenance": {
+          "tier": "review",
+          "tiers": [
+            "review"
+          ],
+          "fromTitle": [],
+          "fromHuman": [
+            "wolverine",
+            "blade",
+            "doctor-doom",
+            "magneto"
+          ],
+          "slotOrder": "handle-first",
+          "complete": true
+        }
+      }
+    ],
+    "resolvedBy": "human"
   }
 }
