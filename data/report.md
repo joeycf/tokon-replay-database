@@ -1,20 +1,34 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-01T14:32:07.550Z_
+## ⚠ ACTION REQUIRED
+
+1 self-expiring gate(s) are due:
+
+- **phoenix-cyclops** (unreleased-character, due 2026-11-02)
+  phoenix-cyclops should now be playable. If it is: add --char-phoenix-cyclops to design/handoff/tokens.css (the handoff already derived #FF9D57 — contrast ≥4.5:1 on --color-surface and a hue ≥8–12° off its roster neighbours), add the same hex to accents in app/app.config.ts, add the fighter to ROSTER in scripts/characters.ts, drop this entry from UNRELEASED, then run `npm run data:characters` and `npm run data:art`. If it has NOT shipped, re-date this row to the new window — do not delete it.
+
+2 unmatched character-slot string(s) appear on 3+ records:
+- `P.Cyclops` × 5 (e.g. -sTYhB-DOjU)
+- `PhoenixCyclops` × 3 (e.g. II3CrgXbH0E)
+
+A new fighter has probably shipped. Add it to scripts/characters.ts and
+get an accent token before it silently shortens every side it appears on.
+
+_Generated 2026-11-02T17:27:48.660Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 268 | 268 | 100.0% |
+| highLevelReplays | 273 | 273 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 879 | 180 | 20.5% |
-| replaysHub | 472 | 463 | 98.1% |
-| fightingStationX | 3336 | 224 | 6.7% |
-| fgcReplaysHub | 2843 | 41 | 1.4% |
+| hadoukenReplays | 881 | 180 | 20.4% |
+| replaysHub | 478 | 465 | 97.3% |
+| fightingStationX | 3349 | 224 | 6.7% |
+| fgcReplaysHub | 2847 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1292** | |
+| **total** | | **1299** | |
 
 ## Index intakes
 
@@ -36,21 +50,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2584 sides got its characters.
+How every one of the 2598 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 42 | 1.6% |
-| description | 624 | 24.1% |
+| title | 46 | 1.8% |
+| description | 634 | 24.4% |
 | index | 184 | 7.1% |
 | footage | 142 | 5.5% |
-| human | 1561 | 60.4% |
+| human | 1561 | 60.1% |
 | review | 31 | 1.2% |
 
-- complete (4/4): **2542/2584** (98.4%)
+- complete (4/4): **2544/2598** (97.9%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: character-subset 33 · handle 740 · ambiguous 8
-- title slot order: handle-first 1945 · chars-first 177 · parallel-lists 244
+- bench alignment: handle 747 · character-subset 33 · ambiguous 8
+- title slot order: handle-first 1959 · chars-first 177 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **10** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,19 +73,20 @@ How every one of the 2584 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 33 | 1.3% |
-| 2 | 9 | 0.3% |
-| 4 | 2532 | 98.0% |
+| 1 | 35 | 1.3% |
+| 2 | 11 | 0.4% |
+| 3 | 8 | 0.3% |
+| 4 | 2534 | 97.5% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **42 side(s) awaiting a drain** across 21 record(s) — oldest published **5 day(s)** ago
+- **54 side(s) awaiting a drain** across 28 record(s) — oldest published **6 day(s)** ago
 
 ## Queues
 
-- review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **21**
+- review queue (never published): **12** — character-completion 12
+- bench queue (published, incomplete): **28**
 
 ## Player identity
 
@@ -133,14 +148,14 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4281 |
-| not-tokon | 1361 |
+| other-game | 4286 |
+| not-tokon | 1367 |
 | pre-launch | 663 |
 | not-a-match | 246 |
 | short-duration | 59 |
 | not-an-event | 35 |
-| char-unresolved | 22 |
-| no-vs-title | 11 |
+| char-unresolved | 33 |
+| no-vs-title | 12 |
 | bad-handle | 1 |
 
 - `marvelTokonYT` events-only gate: **35** upload(s) carried no known event brand.
@@ -157,6 +172,9 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
+| `P.Cyclops` | 5 | -sTYhB-DOjU |
+| `PhoenixCyclops` | 3 | II3CrgXbH0E |
+| `D.` | 1 | WeItyxM6nxg |
 | `Paker` | 1 | lvIsJvSRS5o |
 | `SipderMan` | 1 | 7Muj4Ha1FyI |
 | `GreenGoblin` | 1 | gy5Cd9rpbng |
