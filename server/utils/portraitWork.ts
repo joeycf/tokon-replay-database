@@ -13,7 +13,7 @@
  * its bench, the three diamonds hold a known SET of three fighters — what is
  * unknown is which diamond holds which, because the icons move between cells as
  * the point fighter changes. So the labeller picks among three candidates per
- * diamond rather than among twenty-one, which is why ~50 sides is one sitting.
+ * diamond rather than among twenty-two, which is why ~50 sides is one sitting.
  *
  * The list is derived deterministically and sorted by video id, so an index means
  * the same thing to the crop endpoint, the page and the writer without any of them
@@ -552,7 +552,7 @@ export function buildBench(): { items: BenchItem[]; awaitingFootage: string[] } 
      * On L_s3lYOuR3k the right plate read spider-man, which is the LEFT player's
      * title fighter, so both sides placed onto record side 0 and HADO's bench was
      * unreachable behind 72 frames and 68 clean reads. Rare (1 of 312 records with
-     * reads) and not necessarily even an OCR error: on a 21-fighter roster two
+     * reads) and not necessarily even an OCR error: on a 22-fighter roster two
      * players fielding Spider-Man is ordinary, which is exactly why this cannot be
      * resolved by picking one.
      *

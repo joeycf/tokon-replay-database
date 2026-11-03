@@ -161,7 +161,7 @@ const idKey = (s: string) =>
  *      almost everything and is essentially unfalsifiable when it matches.
  *   2. CHARACTER CONTAINMENT. The title's ids for a side must be a subset of
  *      exactly ONE description side's bench. Ambiguous on mirror-ish teams,
- *      which is common on a 21-fighter roster where Magik is everywhere.
+ *      which is common on a 22-fighter roster where Magik is everywhere.
  *   3. Otherwise REFUSE. The bench is discarded for that record and counted.
  *      A refused alignment costs a partially-known side; a wrong one ships a
  *      confidently mislabelled record.

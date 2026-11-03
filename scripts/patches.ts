@@ -151,6 +151,15 @@ export const PATCHES: PatchBoundary[] = [
     announcedOn: 'steam',
     note: 'Patch Update - 28 August 2026',
   },
+  {
+    // Phoenix Cyclops's release patch (Year-1 character #1). The vendor dates
+    // the release in Pacific time; the title's date is the row's date, as for
+    // every steam-announced row.
+    version: '2026-11-02',
+    start: '2026-11-02',
+    announcedOn: 'steam',
+    note: 'Patch Update - 2 November 2026',
+  },
 ];
 
 /**

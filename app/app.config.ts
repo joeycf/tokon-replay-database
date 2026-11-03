@@ -90,7 +90,7 @@ export default defineAppConfig({
     characterRouteSegment: 'fighters',
     // No GameStatsPanels override ships, so the stats page's `beside-timeline`
     // anchor is empty — give the meta-over-time chart the whole row and, with
-    // the room, plot the top 8 of a 21-fighter roster.
+    // the room, plot the top 8 of a 22-fighter roster.
     stats: {
       metaTimelineTopN: 8,
       metaTimelineFullWidth: true,
@@ -111,6 +111,8 @@ export default defineAppConfig({
       magik: '#b650f2',
       wolverine: '#ffd23b',
       danger: '#2ed2c8',
+      // Year-1 DLC #1 (2026-11-02); the hex is the handoff spec's own derivation.
+      'phoenix-cyclops': '#ff9d57',
       // Knights of Doom
       'doctor-doom': '#23c29e',
       magneto: '#d355db',
@@ -121,7 +123,7 @@ export default defineAppConfig({
       blade: '#6fa4b8',
       loki: '#1fb47d',
       deadpool: '#de4e79',
-      // Unaffiliated — the hidden 21st fighter, absent from the design brief.
+      // Unaffiliated — the hidden fighter (21st at launch), absent from the design brief.
       // Derived by the handoff's own method, then confirmed by a design session
       // at the same hex; see design/handoff/tokens.css for why he was missing.
       champion: '#ec51c9',
@@ -197,8 +199,11 @@ export default defineAppConfig({
     },
     ogImage: '/og-default.png',
     // ComboForge cross-link on character pages (engine v0.11.0). Their game id
-    // for this one is 'marveltokon', not ours; every character id derives, so
-    // no map is needed. Gated with the engine's `npm run verify:comboforge`.
-    comboforge: { gameId: 'marveltokon' },
+    // for this one is 'marveltokon', not ours; every launch character id
+    // derives, so the map holds only the exceptions. Gated with the engine's
+    // `npm run verify:comboforge`. phoenix-cyclops is null — the band falls back
+    // to the game hub — until that check can confirm ComboForge carries him: on
+    // his release day it answered HTTP 429, so a derived deep link was unverified.
+    comboforge: { gameId: 'marveltokon', characters: { 'phoenix-cyclops': null } },
   } satisfies GameConfig,
 });

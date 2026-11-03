@@ -21,7 +21,7 @@
  * script ENUMERATES the category and matches on the subject, which is stable.
  *
  * THE BRIDGE. Renders are filed under comics identities, not fighter names, so
- * the roster needs a hand-authored 21-entry map (below). It is an ALLOW-LIST,
+ * the roster needs a hand-authored 22-entry map (below). It is an ALLOW-LIST,
  * which is what keeps the ~24 non-fighter subjects in the same category —
  * Dogpool, Dora Milaje, Odin Borson, a Hydra-Supreme Captain America, three
  * Iron Man armour variants, a Thanos from another Earth — out by construction
@@ -43,11 +43,17 @@
  * @error handler and degrades to an accent gradient, but the hero <img> has
  * none, so a 404 there stretches a broken image across the page.
  *
- * Run: npx tsx scripts/art.ts [--dry] [--only <id,…>]
+ * Run: npx tsx scripts/art.ts [--dry] [--only=<id,…>]
  *      --dry resolves and prints the table without downloading anything.
+ *      --only refreshes the named fighters and KEEPS every other fighter's
+ *      provenance entry. It used to rebuild the file from its own picks, which
+ *      would have erased 21 entries to add one fighter — and on 2026-11-02 a
+ *      full run was not an option either: the wiki had moved on (larger posters
+ *      for most of the roster, and no render left for magik or magneto), so it
+ *      would have swapped every fighter's art to add Phoenix Cyclops.
  */
 
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -93,6 +99,12 @@ const IDENTITY: Record<string, string> = {
   magik: 'Illyana Rasputina',
   wolverine: 'James Howlett',
   danger: 'Danger',
+  // Year-1 DLC #1 (2026-11-02). The wiki files him under the comics identity,
+  // "Scott Summers (Earth-358) from MARVEl Tokon … promotional 001/002" — note
+  // the "MARVEl Tokon" spelling, which is why matching is on the subject. No
+  // poster exists yet, so the portrait is cropped from the render (as for
+  // champion) until the wiki gains one.
+  'phoenix-cyclops': 'Scott Summers',
   'doctor-doom': 'Victor von Doom',
   magneto: 'Max Eisenhardt',
   'green-goblin': 'Norman Osborn',
@@ -102,6 +114,19 @@ const IDENTITY: Record<string, string> = {
   loki: 'Loki Laufeyson',
   deadpool: 'Wade Wilson',
   champion: 'Tryco Slatterus',
+};
+
+/** The render to use when the largest is not a render at all. Keyed by fighter
+ *  id, valued by the file's exact title; it wins only while that file is still
+ *  in the category, so a renamed or deleted file falls back to the size rule.
+ *  phoenix-cyclops: "promotional 001" (1920×1080) is the in-game intro CARD —
+ *  a "PHOENIX CYCLOPS" title banner and an "English VO" credit run across his
+ *  chest — while "promotional 002 cropped" (1020×734, uploaded 2026-11-02) is
+ *  the clean character art. By pixels 001 wins and both portrait and splash
+ *  would carry the banner text. */
+const RENDER_PICK: Record<string, string> = {
+  'phoenix-cyclops':
+    'File:Scott Summers (Earth-358) from MARVEl Tokon Fighting Souls promotional 002 cropped.png',
 };
 
 /** Display names as the poster filenames spell them. Mirrors ROSTER in
@@ -119,6 +144,7 @@ const POSTER_NAME: Record<string, string> = {
   magik: 'Magik',
   wolverine: 'Wolverine',
   danger: 'Danger',
+  'phoenix-cyclops': 'Phoenix Cyclops',
   'doctor-doom': 'Doctor Doom',
   magneto: 'Magneto',
   'green-goblin': 'Green Goblin',
@@ -271,7 +297,13 @@ async function main() {
     // biases right-of-centre, so between 001 and 002 the one with more pixels
     // survives that crop better; hardcoding 001 would be picking by filename
     // rather than by the property that matters.
-    if (renderFiles.length) {
+    const chosen = RENDER_PICK[id] && info.get(RENDER_PICK[id]!);
+    if (chosen && renderTitles.includes(RENDER_PICK[id]!)) {
+      pick.splash = {
+        file: chosen,
+        why: `chosen by hand over the larger render (${chosen.width}×${chosen.height}) — see RENDER_PICK`,
+      };
+    } else if (renderFiles.length) {
       const best = renderFiles.reduce((a, b) => (a.width * a.height >= b.width * b.height ? a : b));
       const mp = (f: FileInfo) => ((f.width * f.height) / 1e6).toFixed(1);
       pick.splash = {
@@ -372,27 +404,57 @@ async function main() {
     provenance[p.id] = entry;
   }
 
+  // --only MERGES: the named fighters are replaced (and stamped with their own
+  // retrieval date), everyone else's entry is carried as committed, in roster
+  // order. A full run still rebuilds the file from scratch.
+  const today = new Date().toISOString().slice(0, 10);
+  const provenancePath = join(ROOT, 'data/art-provenance.json');
+  let fighters: Record<string, unknown> = provenance;
+  let retrieved = today;
+  if (ONLY.size) {
+    const prev = JSON.parse(await readFile(provenancePath, 'utf8')) as {
+      retrieved?: string;
+      fighters?: Record<string, unknown>;
+    };
+    const merged: Record<string, unknown> = { ...(prev.fighters ?? {}) };
+    for (const [id, entry] of Object.entries(provenance)) {
+      merged[id] = { ...(entry as Record<string, unknown>), retrieved: today };
+    }
+    fighters = Object.fromEntries(
+      Object.keys(IDENTITY)
+        .filter((id) => id in merged)
+        .map((id) => [id, merged[id]]),
+    );
+    retrieved = prev.retrieved ?? today;
+  }
   await writeFile(
-    join(ROOT, 'data/art-provenance.json'),
+    provenancePath,
     JSON.stringify(
       {
         source: 'Marvel Database (marvel.fandom.com)',
         category: CATEGORY,
-        retrieved: new Date().toISOString().slice(0, 10),
+        retrieved,
         note: 'Per-file source page, original dimensions and the reason each file won its slot. Re-running is auditable and a swapped asset is visible in review.',
-        fighters: provenance,
+        fighters,
       },
       null,
       2,
     ) + '\n',
     'utf8',
   );
-  console.log(`\n✔ data/art-provenance.json written for ${picks.length} fighters`);
+  console.log(
+    `\n✔ data/art-provenance.json written for ${Object.keys(fighters).length} fighters` +
+      (ONLY.size ? ` (${picks.length} refreshed, the rest carried)` : ''),
+  );
   console.log('  next: npm run data:characters (re-reads the roster and asserts art exists)');
 }
 
 async function download(url: string): Promise<Buffer> {
-  const res = await fetch(url, { headers: { 'user-agent': UA } });
+  // The asset host answers 403 without a fandom Referer (measured 2026-11-02:
+  // the same URL is 403 bare and 200 with it); it served a plain UA in August.
+  const res = await fetch(url, {
+    headers: { 'user-agent': UA, referer: 'https://marvel.fandom.com/' },
+  });
   if (!res.ok) throw new Error(`asset ${res.status}: ${url}`);
   return Buffer.from(await res.arrayBuffer());
 }

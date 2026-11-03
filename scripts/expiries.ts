@@ -45,25 +45,21 @@ import type { Expiry } from '../types/index';
  *
  * Champion is deliberately absent: he is a hidden unlockable that shipped in
  * the base game, needs no patch and no purchase, and is already on the roster.
+ *
+ * Phoenix Cyclops, Year-1 character #1, left this list on 2026-11-02, his
+ * release day ("Patch Update - 2 November 2026").
+ *
+ * `vendorSlug` is Sony's Hero Select slug where it is not our id's kebab
+ * (`thor` for thor-jane-foster). scripts/roster-check.ts reads it to tell a
+ * gated card from a missing fighter.
  */
-export const UNRELEASED: { id: string; releases: string; accent?: string; note?: string }[] = [
-  {
-    id: 'phoenix-cyclops',
-    releases: '2026-11-02',
-    // Already derived — the design handoff's own worked DLC example carries it
-    // at 7.4:1, so release day is a one-line change rather than a design task.
-    accent: '#FF9D57',
-    note:
-      'Year-1 character #1. DATED: first announced 2026-10-07 (PlayStation Blog 17:00Z, ' +
-      'YouTube 3y9_kwKo3Fs, Bluesky), Steam copy 2026-10-08: "Phoenix Cyclops joins MARVEL ' +
-      'Tōkon: Fighting Souls on November 2". Fired at window open on 2026-10-01 (not playable ' +
-      'on 10-02), then was re-dated two weeks out while no date existed. This is the release ' +
-      'day, IN PACIFIC TIME: SIE\'s Japanese release writes "11月2日（月）（※太平洋時間）", so ' +
-      "the cron's 2026-11-02 07:47Z run is 11-01 23:47 PST and fires before the release day " +
-      "has begun — expected, and what this file's rule accepts (early costs one dismissed " +
-      'warning); 11-03 07:47Z is the first run on the release day. If it slips, re-date the ' +
-      'row — do not delete it.',
-  },
+export const UNRELEASED: {
+  id: string;
+  releases: string;
+  accent?: string;
+  vendorSlug?: string;
+  note?: string;
+}[] = [
   // ── THE YEAR-1 SLOTS, NAMED 2026-10-11 ─────────────────────────────────────
   // These three replace 'year1-character-2', 'year1-character-3-and-stage' and
   // 'year1-character-4' — the unnamed one-row-per-window placeholders, which in
@@ -98,14 +94,16 @@ export const UNRELEASED: { id: string; releases: string; accent?: string; note?:
   // Klyntar Stage = #3 and Jubilee = #4 are WINDOW MATCHES — strong, and marked
   // as inference in their notes rather than stated as fact.
   //
-  // Sony's Hero Select still lists 21 and none of the four (2026-10-15), so
-  // every id below is the kebab of the vendor's own spelling, to be confirmed
-  // there. No accent on any of them: never invented here — the action text says
-  // where one comes from, and phoenix-cyclops carries his only because the
-  // design handoff already had it.
+  // Sony's Hero Select listed none of the four on 2026-10-15. On 2026-11-02 it
+  // lists all four: phoenix_cyclops with its subtitle, and thor, venom and
+  // jubilee as TITLE-ONLY cards (no subtitle yet). The ids below are still the
+  // kebab of the vendor's own spelling; Sony's slug for Thor is `thor`, so that
+  // row carries `vendorSlug`. No accent on any of them yet: the action text says
+  // how one is derived.
   {
     id: 'thor-jane-foster',
     releases: '2027-01-01',
+    vendorSlug: 'thor',
     note:
       'Year-1 character #2. "Thor (Jane Foster) - Winter 2027" (Bluesky 3mxm5ioefd22t, ' +
       '2026-10-11); the ordinal is EXPLICIT — YouTube sNf7HHYxTAM: "Thor (Jane Foster), the ' +
@@ -192,13 +190,31 @@ export function dueExpiries(
         id: u.id,
         date: u.releases,
         action:
-          `${u.id} should now be playable. If it is: add --char-${u.id} to ` +
-          `design/handoff/tokens.css (${u.accent ? `the handoff already derived ${u.accent}` : 'accent from Claude Design — never invent one'} ` +
-          `— contrast ≥4.5:1 on --color-surface and a hue ≥8–12° off its roster neighbours), ` +
-          `add the same hex to accents in app/app.config.ts, add the fighter to ROSTER in ` +
-          `scripts/characters.ts, drop this entry from UNRELEASED, then run ` +
-          `\`npm run data:characters\` and \`npm run data:art\`. If it has NOT shipped, re-date ` +
-          `this row to the new window — do not delete it.`,
+          `${u.id} should now be playable. If it is, in this order (Phoenix Cyclops, ` +
+          `2026-11-02, needed every step): ` +
+          `(1) ACCENT — --char-${u.id} in design/handoff/tokens.css (${
+            u.accent
+              ? `the handoff already derived ${u.accent}`
+              : 'DERIVED in-session by engine checklist 14c: anchor on the vendor art, ≥8–12° of ' +
+                'hue off every roster accent or a documented ΔL ≥ .12 split, ≥4.5:1 on ' +
+                '--color-surface, 3–4 candidates and a person picks'
+          }) and the same hex in accents in app/app.config.ts; ` +
+          `(2) ROSTER — the fighter in ROSTER in scripts/characters.ts with its team and every ` +
+          `spelling the titles already use (report.md's residue, review-queue.json), and this ` +
+          `entry dropped from UNRELEASED; ` +
+          `(3) ART — IDENTITY and POSTER_NAME rows in scripts/art.ts, then ` +
+          `\`npx tsx scripts/art.ts --only=${u.id}\` (a full run re-picks EVERY fighter's art from ` +
+          `today's wiki) and the portrait checked by eye — RENDER_PICK when the largest file is a ` +
+          `card, not a render; ` +
+          `(4) \`npm run data:characters\` (it refuses a missing portrait, so art comes first), ` +
+          `then \`npm run data:og\`; ` +
+          `(5) a null for ${u.id} in comboforge.characters in app/app.config.ts until ` +
+          `\`verify:comboforge\` confirms ComboForge carries it; ` +
+          `(6) the release patch in scripts/patches.ts, then fresh dumps and \`npm run data:parse\` ` +
+          `+ \`npm run data:emit\` — the records already published without the fighter are fixed ` +
+          `only by a re-parse; ` +
+          `(7) the prose that counts the roster (grep for the old count). ` +
+          `If ${u.id} has NOT shipped, re-date this row to the new window — do not delete it.`,
       });
     }
   }

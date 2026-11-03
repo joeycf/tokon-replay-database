@@ -71,6 +71,7 @@
   --char-magik: #B650F2;              /* Soulsword sorcery violet · 4.6:1 */
   --char-wolverine: #FFD23B;          /* classic suit yellow · 12.5:1 */
   --char-danger: #2ED2C8;             /* Shi’ar chrome teal (the X-Men fighter “Danger”) · 9.6:1 */
+  --char-phoenix-cyclops: #FF9D57;    /* Year-1 DLC #1, released 2026-11-02 — phoenix ember, from the handoff spec: hue 25° collides with --color-secondary (24°) and no free hue exists in the warm arc, so the documented fallback applies — lightness split L .67 vs .52 (ΔL .15). Clears carnage by 13°, ms-marvel by 16°, iron-man by ΔL .16 · 7.4:1 */
   /* NOTE (build, 2026-08-13): was --char-danger-x. The stated reason for the
      -x suffix — avoiding a “--color-danger clash” — does not hold: they are
      distinct custom-property names and never collide, and the engine injects

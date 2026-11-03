@@ -4,7 +4,7 @@
 // path is a live 404 on every social embed.
 //
 // Reads data/characters.json so the accent strip along the bottom tracks the
-// roster: add a fighter, re-run, and the card reflects it. All 21 accents show,
+// roster: add a fighter, re-run, and the card reflects it. All 22 accents show,
 // which at 4v4 is the point — the strip IS the roster.
 //
 // DIFFERS FROM THE SIBLINGS IN ONE WAY, DELIBERATELY: they <link> the Google

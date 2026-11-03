@@ -63,8 +63,8 @@ jobs:
         # committed and pushed by the data run that triggered this workflow, so a
         # red run never costs a refresh — it only makes the pending work
         # impossible to miss. Two things can trip it: a Year-1 character's
-        # release day or window opening (phoenix-cyclops 2026-11-02, then
-        # thor-jane-foster 2027-01-01, venom 2027-04-01 and jubilee 2027-07-01),
+        # window opening (thor-jane-foster 2027-01-01, venom 2027-04-01 and
+        # jubilee 2027-07-01; phoenix-cyclops fired 2026-11-02 and was promoted),
         # and the patch table going more than STALE_PATCH_DAYS (10) stale on a
         # vendor that shipped twice in its first five days.
         # Clear it by doing the work, NOT by deleting this step. For the patch

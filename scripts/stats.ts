@@ -16,7 +16,7 @@
 // counts side appearances, and "a tag game on a shared roster may instead count
 // a per-record deduped union". Tōkon takes side appearances anyway, because the
 // question this archive answers is *how often was this fighter fielded*, not
-// *how many replays feature them*. With 21 fighters in 4 slots, side overlap is
+// *how many replays feature them*. With 22 fighters in 4 slots, side overlap is
 // common — Magik appears on both sides often — and de-duplicating would quietly
 // erase half of those real fieldings.
 //

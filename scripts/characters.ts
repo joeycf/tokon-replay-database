@@ -180,6 +180,18 @@ const ROSTER: RosterEntry[] = [
   { id: 'magik', name: 'Magik', team: 'Unbreakable X-Men', aliases: ['magik'] },
   { id: 'wolverine', name: 'Wolverine', team: 'Unbreakable X-Men', aliases: ['wolverine'] },
   { id: 'danger', name: 'Danger', team: 'Unbreakable X-Men', aliases: ['danger'] },
+  // PHOENIX CYCLOPS — Year-1 DLC #1, shipped 2026-11-02 with "Patch Update - 2
+  // November 2026"; Sony's Hero Select card names him "The Cosmic Flame". The
+  // aliases are the spellings the first day's titles used ("P. Cyclops" ×4,
+  // "P.Cyclops" ×1, "PhoenixCyclops" — the matcher already reads the de-spaced
+  // form). No bare "cyclops" or "phoenix": UMvC3 uploads on the same channels
+  // carry both, and Cyclops-without-the-Phoenix is a different character.
+  {
+    id: 'phoenix-cyclops',
+    name: 'Phoenix Cyclops',
+    team: 'Unbreakable X-Men',
+    aliases: ['phoenix cyclops', 'phoenix-cyclops', 'p. cyclops', 'p.cyclops'],
+  },
 
   // ── Knights of Doom ────────────────────────────────────────────────────────
   {
@@ -323,10 +335,10 @@ async function main() {
   // Tokens with no roster entry are the same defect seen from the other side:
   // a renamed id leaves an orphan that silently styles nothing. A token for a
   // fighter still gated in scripts/expiries.ts is NOT an orphan — it is an
-  // accent derived ahead of release (phoenix-cyclops's #FF9D57 sits in the
-  // handoff spec at 7.4:1 and is pasted into tokens.css on release day; no such
-  // token exists yet) — so the exemption reads UNRELEASED instead of naming an
-  // id here, and the next pre-derived token needs no edit to this file.
+  // accent derived ahead of release (phoenix-cyclops's #FF9D57 sat in the
+  // handoff spec at 7.4:1 and was pasted into tokens.css on release day,
+  // 2026-11-02) — so the exemption reads UNRELEASED instead of naming an id
+  // here, and the next pre-derived token needs no edit to this file.
   const orphans = Object.keys(accents).filter(
     (k) => !ROSTER.some((r) => r.id === k) && !UNRELEASED.some((u) => u.id === k),
   );

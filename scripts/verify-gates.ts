@@ -438,7 +438,7 @@ try {
   // on one record side, the elimination rule (which only rescues exactly-one-null)
   // does not fire, `settled()` skips both, and the incomplete side is unreachable.
   // Observed on L_s3lYOuR3k: the right plate read the LEFT player's title fighter
-  // — ordinary on a 21-fighter roster, not necessarily an OCR error — and HADO's
+  // — ordinary on a 22-fighter roster, not necessarily an OCR error — and HADO's
   // bench sat behind 72 frames nobody was ever shown.
   console.log('\n[1d] bench worklist — contradictory attribution asks instead of skipping');
   {

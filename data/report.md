@@ -1,34 +1,20 @@
 # Tōkon pipeline report
 
-## ⚠ ACTION REQUIRED
-
-1 self-expiring gate(s) are due:
-
-- **phoenix-cyclops** (unreleased-character, due 2026-11-02)
-  phoenix-cyclops should now be playable. If it is: add --char-phoenix-cyclops to design/handoff/tokens.css (the handoff already derived #FF9D57 — contrast ≥4.5:1 on --color-surface and a hue ≥8–12° off its roster neighbours), add the same hex to accents in app/app.config.ts, add the fighter to ROSTER in scripts/characters.ts, drop this entry from UNRELEASED, then run `npm run data:characters` and `npm run data:art`. If it has NOT shipped, re-date this row to the new window — do not delete it.
-
-2 unmatched character-slot string(s) appear on 3+ records:
-- `PhoenixCyclops` × 7 (e.g. v7S9y4Sko8E)
-- `P.Cyclops` × 11 (e.g. SfQGaXJDI6c)
-
-A new fighter has probably shipped. Add it to scripts/characters.ts and
-get an accent token before it silently shortens every side it appears on.
-
-_Generated 2026-11-04T15:47:37.545Z_
+_Generated 2026-11-04T20:46:46.446Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 281 | 281 | 100.0% |
+| highLevelReplays | 283 | 283 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 883 | 180 | 20.4% |
-| replaysHub | 490 | 465 | 94.9% |
-| fightingStationX | 3377 | 224 | 6.6% |
-| fgcReplaysHub | 2855 | 41 | 1.4% |
+| hadoukenReplays | 883 | 184 | 20.8% |
+| replaysHub | 491 | 482 | 98.2% |
+| fightingStationX | 3379 | 224 | 6.6% |
+| fgcReplaysHub | 2856 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1307** | |
+| **total** | | **1330** | |
 
 ## Index intakes
 
@@ -50,21 +36,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2614 sides got its characters.
+How every one of the 2660 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 46 | 1.8% |
-| description | 650 | 24.9% |
-| index | 184 | 7.0% |
-| footage | 142 | 5.4% |
-| human | 1561 | 59.7% |
+| title | 88 | 3.3% |
+| description | 654 | 24.6% |
+| index | 184 | 6.9% |
+| footage | 142 | 5.3% |
+| human | 1561 | 58.7% |
 | review | 31 | 1.2% |
 
-- complete (4/4): **2549/2614** (97.5%)
+- complete (4/4): **2572/2660** (96.7%)
 - oversize (>4, mid-set team change): **10** — counted in usage, excluded from pairing
-- bench alignment: handle 752 · character-subset 36 · ambiguous 8
-- title slot order: handle-first 1975 · chars-first 177 · parallel-lists 244
+- bench alignment: character-subset 37 · handle 770 · ambiguous 8
+- title slot order: handle-first 2017 · chars-first 181 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **10** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -73,24 +59,27 @@ How every one of the 2614 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 35 | 1.3% |
-| 2 | 11 | 0.4% |
-| 3 | 19 | 0.7% |
-| 4 | 2539 | 97.1% |
+| 1 | 76 | 2.9% |
+| 2 | 12 | 0.5% |
+| 4 | 2562 | 96.3% |
 | 5 _(mid-set change)_ | 7 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **65 side(s) awaiting a drain** across 36 record(s) — oldest published **8 day(s)** ago
+- **88 side(s) awaiting a drain** across 44 record(s) — oldest published **8 day(s)** ago
+
+> The bench queue is at 44 (nudge threshold 40).
+> Run `npm run data:catchup` locally — the cron cannot do this: extraction
+> needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
-- review queue (never published): **34** — character-completion 34
-- bench queue (published, incomplete): **36**
+- review queue (never published): **14** — character-completion 14
+- bench queue (published, incomplete): **44**
 
 ## Player identity
 
-13 identity(s) resolved from more than one spelling. The
+14 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -100,6 +89,7 @@ after changing scripts/players.ts, or the old URLs 404.
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
 | `ghost-of-evo` | `ghostofevo` |
+| `gotham-paladin` | `gothampaladin` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
 | `kingcreed` | `king-creed` |
@@ -148,12 +138,12 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4297 |
+| other-game | 4299 |
 | not-tokon | 1373 |
 | pre-launch | 663 |
 | not-a-match | 254 |
-| short-duration | 62 |
-| char-unresolved | 55 |
+| short-duration | 63 |
+| char-unresolved | 35 |
 | not-an-event | 35 |
 | no-vs-title | 12 |
 | bad-handle | 1 |
@@ -172,8 +162,6 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
-| `P.Cyclops` | 11 | SfQGaXJDI6c |
-| `PhoenixCyclops` | 7 | v7S9y4Sko8E |
 | `D.` | 1 | WeItyxM6nxg |
 | `Paker` | 1 | lvIsJvSRS5o |
 | `SipderMan` | 1 | 7Muj4Ha1FyI |

@@ -10,7 +10,7 @@
  *     marketing never covered, so no poster exists for him.
  *  2. FALLBACK. A fighter with no usable art at all gets a tile carrying the
  *     accent, the halftone, and the name set in Bangers. Nothing uses this
- *     today — coverage is 21/21 — but it is what lets scripts/characters.ts go
+ *     today — coverage is 22/22 — but it is what lets scripts/characters.ts go
  *     back to FAIL-LOUD honestly: every roster id resolves to a real file, and
  *     a DLC fighter landing before its art does still ships something on-brand
  *     instead of a 404 or a build break.

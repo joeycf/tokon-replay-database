@@ -13,7 +13,7 @@
 // So: match roster aliases longest-first as non-overlapping spans, and treat
 // the separators as the GAPS BETWEEN spans. One code path then handles
 // "A/B", "A, B", "A- B" and "A and B" identically, because it never looks at
-// the separators at all. Ten of the twenty-one fighters are multi-word or
+// the separators at all. Eleven of the twenty-two fighters are multi-word or
 // punctuated, so this is the common case, not an edge case.
 //
 // The safety net is the residue gate (scripts/parse.ts): whatever text a span
@@ -162,15 +162,15 @@ export function buildAliasMatcher(characters: CharacterRecord[]): AliasMatcher {
 // share a key set.
 //
 // The HUD nameplate prints exactly one string per fighter: its canonical name.
-// Feeding the 54 prose aliases to a pixel reader does two kinds of damage. It
+// Feeding the 75 prose aliases to a pixel reader does two kinds of damage. It
 // adds four-letter mint targets, so an OCR artefact that would have matched
 // nothing now lands on `DOOM` or `PENI`. And it collapses the roster's own
 // spacing — `DOOM`/`LOKI`/`PENI`/`STORM` sit at pairwise distance 3, so two edits
 // from a true plate falls inside another fighter's decoding ball, and the radius
 // cap has to spend its entire budget defending against strings the plate can
-// never show. Over the canonical 21 the minimum cross-distance is 4 instead of 3.
+// never show. Over the canonical 22 the minimum cross-distance is 4 instead of 3.
 //
-// The prose matcher keeps every alias. The reader gets the 21.
+// The prose matcher keeps every alias. The reader gets the 22.
 
 /** The whitelist handed to tesseract, the normalise class in `norm()` and the
  *  plate keys below must agree on `.`, `-` and space. Ms. Marvel, Doctor Doom,
@@ -285,16 +285,18 @@ function trims(text: string): string[] {
  *  So each key also carries its own unique-decoding radius and the effective
  *  budget is the MINIMUM of the two.
  *
- *  Measured on the canonical 21 (scripts/spike/radius.ts prints the table):
- *  minimum cross-distance 4 (HULK/MAGIK), and the radii come out 8 keys at 1
- *  (BLADE, CARNAGE, DANGER, HULK, LOKI, MAGIK, MAGNETO, STORM), 5 at 2, 7 at 3,
- *  and CAPTAIN AMERICA alone at 4.
+ *  Measured on the canonical 22 (scripts/spike/radius.ts prints the table;
+ *  re-run 2026-11-02 when PHOENIX CYCLOPS joined): minimum cross-distance 4
+ *  (HULK/MAGIK), and the radii come out 8 keys at 1 (BLADE, CARNAGE, DANGER,
+ *  HULK, LOKI, MAGIK, MAGNETO, STORM), 5 at 2, 7 at 3, and CAPTAIN AMERICA and
+ *  PHOENIX CYCLOPS at 4.
  *
  *  Keep the two guards distinct when quoting them. The radius is a property of
  *  the ROSTER; the effective budget on a given read is `min(radius, length)` and
  *  is therefore a property of the READ. They coincide only for a full-length
- *  one, which is why the same roster yields 8/5/7/1 radii but 8/7/5/1 effective
- *  caps on perfectly-lengthed text. */
+ *  one, which is why the same roster yields 8/5/7/2 radii but 8/6/6/2 effective
+ *  caps on perfectly-lengthed text (`min(lengthScaled(len), radius)`, measured
+ *  2026-11-02; it was 8/6/6/1 before him — an earlier 8/7/5/1 here was a slip). */
 export function buildPlateRoster(characters: CharacterRecord[]): PlateRoster {
   const flat = characters.map((c) => ({ id: c.id, key: norm(c.name) }));
   const dupes = flat.filter((a, i) => flat.findIndex((b) => b.key === a.key) !== i);

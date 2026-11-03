@@ -29,7 +29,7 @@ The engine offers a genuine choice here (`types/stats.ts`): a 1v1 game counts
 side appearances, and a tag game on a shared roster may instead count a
 per-record deduped union. Tōkon takes **side appearances**, because the question
 this archive answers is _how often was this fighter fielded_, not _how many
-replays feature them_ — and with 21 fighters in 4 slots, side overlap is common
+replays feature them_ — and with 22 fighters in 4 slots, side overlap is common
 enough that de-duplicating would quietly erase half of the real fieldings.
 
 `scripts/emit.ts` asserts `Σ characterUsage === Σ side.characters.length`.
@@ -81,20 +81,26 @@ handles were fighter names. `scripts/e2e.ts` now asserts that no player handle
 is a fighter name.
 
 Characters are extracted as **spans, never by splitting on a separator**. A
-split on `[/-]` shreds `Spider-Man`, `Star-Lord` and `Ms. Marvel`; ten of the
-21 fighters are multi-word or punctuated, so that is the common case. Whatever
+split on `[/-]` shreds `Spider-Man`, `Star-Lord` and `Ms. Marvel`; eleven of the
+22 fighters are multi-word or punctuated, so that is the common case. Whatever
 text no span covered is reported as **residue** — that is how `G.Rider` was
 found.
 
-## The roster is 21
+## The roster is 22
 
-Twenty announced fighters in five teams, plus **Champion** — a hidden unlockable
+Twenty launch fighters in five teams, **Phoenix Cyclops** (Year-1 character #1,
+2026-11-02, Unbreakable X-Men), plus **Champion** — a hidden unlockable
 (clear Episode chapter 11) who is fully playable online and is the 7th
 most-used fighter in the launch corpus. No Sony/Marvel/ASW page announces him;
 publisher-authored achievement strings confirm he exists. Shipping the announced
 20 would have hard-failed ~15% of the archive on every run.
 
-His accent was derived by the design handoff's own 4-step method, shipped
+Phoenix Cyclops's `#FF9D57` was derived in the handoff spec before he shipped
+and pasted in on release day. His art is the wiki's clean character art, picked
+over a larger intro card in `scripts/art.ts` (`RENDER_PICK`), and ComboForge is
+nulled for him until `verify:comboforge` can confirm it carries him.
+
+Champion's accent was derived by the design handoff's own 4-step method, shipped
 flagged, and has since been **confirmed by a design session at the same hex**
 (`#EC51C9`). Every accent comes from `design/handoff/tokens.css`, and **a roster
 id with no token fails `scripts/characters.ts` loud** rather than shipping an
@@ -128,10 +134,10 @@ strictly worse than the misfiling it warns about. **The red Pending work run and
 the `exit 1` are the design, not a bug** — clear them by doing the work, never by
 deleting the check.
 
-Two things can trip them: a Year-1 character's release day or window opening
-(`phoenix-cyclops` 2026-11-02, then `thor-jane-foster` 2027-01-01, `venom`
-2027-04-01 and `jubilee` 2027-07-01 — the vendor's own quarters, fired at window
-open) and the patch table going 10 days stale on a vendor that shipped twice in
+Two things can trip them: a Year-1 character's window opening
+(`thor-jane-foster` 2027-01-01, `venom` 2027-04-01 and `jubilee` 2027-07-01 —
+the vendor's own quarters, fired at window open; `phoenix-cyclops` fired on
+2026-11-02 and was promoted that day) and the patch table going 10 days stale on a vendor that shipped twice in
 its first five days. When the vendor has simply shipped nothing,
 `npm run data:patch-check -- --confirm-quiet` records a clean feed read in
 `scripts/patches.ts`. Commit it, and the alarm counts its 10 days from that date

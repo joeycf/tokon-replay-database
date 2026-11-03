@@ -22,9 +22,21 @@
  *
  * TWO SIGNALS, ONE COMPARISON. The names are what this repo's roster is
  * canonically spelled from (see scripts/characters.ts), so names are what the
- * comparison uses. The slugs are read too, purely as a shape control: if the
- * titles and subtitles ever stop pairing up, the block is not what this parser
- * thinks it is and no verdict about our roster would mean anything.
+ * comparison uses. The slugs are read too, as a shape control: every subtitle
+ * must belong to a title card, and no title card may sit outside the block.
+ *
+ * ANNOUNCED FIGHTERS ARE TITLE-ONLY CARDS. Until 2026-11-02 every card had both
+ * a title and a subtitle, and this check required the two counts to be equal.
+ * That day the block listed 25 titles against 22 subtitles: Phoenix Cyclops
+ * had shipped with his ("The Cosmic Flame"), and Thor, Venom and Jubilee —
+ * announced, not playable — were title cards with no epithet. The check read
+ * UNREADABLE. A title with no subtitle is now accepted; a subtitle with no
+ * title is still refused. A card whose slug is gated in scripts/expiries.ts
+ * (by id, or by the row's `vendorSlug` where Sony spells it differently —
+ * `thor` for thor-jane-foster) is reported as gated rather than MISSING.
+ *
+ * THE BLOCK ENDS AT THE NEXT <section>. It was a fixed 40,000-character window;
+ * on 2026-11-02 the last card already sat at character 38,305 of it.
  *
  * AN UNLOCKABLE MAY BE ABSENT UPSTREAM, AND THAT IS WHY THIS SCRIPT HAS AN
  * EXEMPTION RULE. Champion is a hidden unlockable who shipped in the base game.
@@ -81,7 +93,10 @@ async function main(): Promise<void> {
       .map((c) => c.id),
   );
   const nameToId = new Map(local.map((c) => [norm(c.name), c.id]));
-  const gated = new Set(UNRELEASED.map((u) => u.id));
+  /** Sony slug → gated id. Sony writes slugs with underscores. */
+  const gatedSlugs = new Map(
+    UNRELEASED.map((u) => [(u.vendorSlug ?? u.id).replace(/-/g, '_'), u.id]),
+  );
 
   let html: string;
   try {
@@ -100,32 +115,47 @@ async function main(): Promise<void> {
         '  The block moved once before, intact, to another page (see the header).\n' +
         '  Find it, or re-derive the parse target, before trusting any roster verdict.',
     );
-  const block = html.slice(start, start + 40_000);
+  const next = html.indexOf('<section', start);
+  const end = next > start ? next : html.length;
+  const block = html.slice(start, end);
 
   const titles = [
     ...block.matchAll(
       /id="([a-z0-9_]+)_title"[^>]*>[\s\S]*?<p class="txt-style-base">([^<]+)<\/p>/g,
     ),
   ].map((m) => ({ slug: m[1]!, name: m[2]!.trim() }));
-  const subtitleCount = [...block.matchAll(/id="([a-z0-9_]+)_subtitle"/g)].length;
+  const subtitled = new Set([...block.matchAll(/id="([a-z0-9_]+)_subtitle"/g)].map((m) => m[1]!));
+  const titleSlugs = new Set(titles.map((t) => t.slug));
+  const orphanSubtitles = [...subtitled].filter((s) => !titleSlugs.has(s));
+  const strayTitles = [...html.slice(end).matchAll(/id="([a-z0-9_]+)_title"/g)].map((m) => m[1]!);
 
   if (titles.length === 0)
     return void verdict(
       'UNREADABLE',
       '✖ the Hero Select block yielded no fighters — markup drift.',
     );
-  if (titles.length !== subtitleCount)
+  if (orphanSubtitles.length || strayTitles.length)
     return void verdict(
       'UNREADABLE',
-      `✖ ${titles.length} hero title(s) but ${subtitleCount} subtitle(s) — the block is not the\n` +
-        '  shape this parser expects, so its count cannot be trusted.',
+      `✖ the Hero Select block is not the shape this parser expects, so its count cannot be\n` +
+        `  trusted. Titles read: ${titles.map((t) => t.slug).join(', ')}.\n` +
+        (orphanSubtitles.length
+          ? `  Subtitle(s) with no title card: ${orphanSubtitles.join(', ')}.\n`
+          : '') +
+        (strayTitles.length
+          ? `  Title card(s) after the block's end: ${strayTitles.join(', ')}.\n`
+          : ''),
     );
 
   const upstreamIds: string[] = [];
   const unknown: string[] = [];
+  const gatedListed: string[] = [];
   for (const t of titles) {
     const id = nameToId.get(norm(t.name));
+    const gatedId = gatedSlugs.get(t.slug);
     if (id) upstreamIds.push(id);
+    else if (gatedId)
+      gatedListed.push(`${gatedId}${subtitled.has(t.slug) ? ' (WITH a subtitle — shipped?)' : ''}`);
     else unknown.push(`${t.name} (${t.slug})`);
   }
 
@@ -136,7 +166,8 @@ async function main(): Promise<void> {
     .sort();
 
   console.log(
-    `  ${titles.length} fighter(s) in Sony's Hero Select · ${local.length} in characters.json`,
+    `  ${titles.length} card(s) in Sony's Hero Select (${subtitled.size} with an epithet) · ` +
+      `${local.length} in characters.json`,
   );
   if (unlockable.size) {
     const absent = [...unlockable].filter((id) => !known.has(id));
@@ -145,7 +176,11 @@ async function main(): Promise<void> {
         (absent.length ? `absent ${absent.join(', ')}` : 'all listed'),
     );
   }
-  if (gated.size) console.log(`  ${gated.size} announced and gated: ${[...gated].join(', ')}`);
+  if (gatedSlugs.size)
+    console.log(
+      `  ${gatedSlugs.size} announced and gated in scripts/expiries.ts` +
+        (gatedListed.length ? ` — listed by Sony: ${gatedListed.join(', ')}` : ''),
+    );
 
   if (!unknown.length && !extra.length)
     return void verdict('CURRENT', '✓ roster matches Sony’s Hero Select block');
