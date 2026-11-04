@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-04T20:46:46.446Z_
+_Generated 2026-11-04T22:16:11.813Z_
 
 ## Coverage
 
@@ -74,7 +74,7 @@ How every one of the 2660 sides got its characters.
 
 ## Queues
 
-- review queue (never published): **14** — character-completion 14
+- review queue (never published): **1** — character-completion 1
 - bench queue (published, incomplete): **44**
 
 ## Player identity
@@ -143,10 +143,26 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 | pre-launch | 663 |
 | not-a-match | 254 |
 | short-duration | 63 |
-| char-unresolved | 35 |
 | not-an-event | 35 |
+| char-unresolved | 22 |
+| no-handle | 13 |
 | no-vs-title | 12 |
 | bad-handle | 1 |
+
+- `no-handle` (checklist 5r): **13** title(s) with no fighter slot and a side that is only fighter names. No person to recover, so refused rather than queued.
+  - Phoenix Cyclops vs Wolverine ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` 8FenYyfKZ0I)
+  - Phoenix Cyclops vs Storm ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` Tdt8UaRFUak)
+  - Phoenix Cyclops vs Deadpool ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` 1Q-5_a8fD3I)
+  - Peni Parker vs Phoenix Cyclops ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` yqlVwzWNk4o)
+  - Black Panther vs Phoenix Cyclops ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` ZIZAH2velJI)
+  - Phoenix Cyclops vs Spider-Man ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` 24kwOWehdNo)
+  - Carnage vs Phoenix Cyclops ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` R7L7m1RFQjI)
+  - Blade vs Phoenix Cyclops ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` ygJROv87bHE)
+  - Star-Lord vs Phoenix Cyclops ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` gRTj42xOWKU)
+  - Phoenix Cyclops vs Phoenix Cyclops  ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` 8kddhKdYxEI)
+  - Magik vs Phoenix Cyclops ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` 3hYWzU_KtMA)
+  - Loki vs Phoenix Cyclops ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` LGZF9PzD2Pk)
+  - Phoenix Cyclops vs Phoenix Cyclops ▰ Online Match ▰ Marvel Tokon Fighting Souls  (`fightingStationX` UrW3VESB8ig)
 
 - `marvelTokonYT` events-only gate: **35** upload(s) carried no known event brand.
   - MARVEL Tokon ▰ Save The Queen (Magik) vs FilipinoChamp (Black Phanter) High Level Match

@@ -80,6 +80,17 @@ titles satisfy the paren parser's outer shape and produced records whose player
 handles were fighter names. `scripts/e2e.ts` now asserts that no player handle
 is a fighter name.
 
+Since 2026-11-04 the parse enforces that too (checklist 5n), through one list
+and one predicate in `scripts/roster.ts` (`CONFIRMED_FIGHTER_NAMED_PLAYERS`,
+`fighterNamedHits`: the handle _is_ fighter names, nothing left over). A **new**
+record whose handle is a fighter with no row is held in `data/review-queue.json`
+as `fighter-named-handle`, the rest of the day publishes, and Pending work goes
+red naming it. Add the row with its video id, or a `sides` override, to clear
+it. A hit on an already-published record is a hard stop. A title with **no**
+fighter slot whose side is only fighter names
+(`Phoenix Cyclops vs Wolverine ▰ Online Match`) has no person to recover, so it
+is refused as `no-handle` (checklist 5r) and listed in report.md with its title.
+
 Characters are extracted as **spans, never by splitting on a separator**. A
 split on `[/-]` shreds `Spider-Man`, `Star-Lord` and `Ms. Marvel`; eleven of the
 22 fighters are multi-word or punctuated, so that is the common case. Whatever

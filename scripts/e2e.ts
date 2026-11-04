@@ -27,7 +27,12 @@ import { fileURLToPath } from 'node:url';
 
 import { chromium, type Page } from 'playwright-core';
 
-import { idKey } from './roster';
+import {
+  buildAliasMatcher,
+  CONFIRMED_FIGHTER_NAMED_PLAYERS,
+  fighterNamedHits,
+  idKey,
+} from './roster';
 import { CHAR_TIERS } from '../types/index';
 import { DISTINCT_KEYS } from './players';
 import { CHANNELS } from './channels';
@@ -370,36 +375,39 @@ function testSubstrate(): void {
   // THE ASSERTION THAT CAUGHT THE FIFTH GRAMMAR. Player handles came from a
   // title slot that actually held fighter names; nothing else noticed.
   //
-  // SOME PEOPLE ARE JUST NAMED AFTER A FIGHTER, and the check cannot tell that
-  // from a parse error — both produce a player whose handle is a roster name.
-  // So the exception is a NAMED LIST WITH ITS EVIDENCE rather than a softened
-  // rule: the assertion keeps its full strength for every handle nobody has
-  // vouched for, and each entry here records who confirmed it and from what.
+  // CHECKLIST 5n ON WHAT SHIPPED, since 2026-11-04 through the SAME list and
+  // the SAME predicate the parse holds records on (scripts/roster.ts). Until
+  // then the list was a Map literal in this file and the parse never saw it,
+  // so "DANGER" (XvlWpCke4Go) published on 10-26 and this check was the first
+  // red, on 11-03. Now parse.ts holds a NEW record whose handle is a fighter
+  // with no row ('fighter-named-handle' in the review queue) and stops on an
+  // already-published one; this is the check that the hold held. Every
+  // published side's player is read through players.json, and a side whose
+  // player is missing from players.json is read by its id, so it cannot pass
+  // by default. The registry itself is checked too.
   //
-  // Adding to this list is a human verdict, not a way to make the suite green.
-  // The test is: does the TITLE parse cleanly with the fighter in its own slot?
-  // If it does, the handle is really that person's name. If it does not, the
-  // handle is wreckage from a slot boundary and belongs in the review queue.
-  const CONFIRMED_FIGHTER_HANDLES = new Map<string, string>([
-    [
-      'deadpool',
-      // "MARVEL TOKON ▰ GR7 (#1 Ranked Peni Parker) vs DEADPOOL (Magik) ▰ …"
-      // (fcUF-QsUdz0, replaysHub). Handle-then-paren, Magik in its own slot —
-      // the parse is right and the player is called DEADPOOL. Confirmed by the
-      // maintainer 2026-08-26.
-      'fcUF-QsUdz0 — clean handle/paren split, player is genuinely named DEADPOOL',
-    ],
-  ]);
-  const rosterNames = new Set(characters.map((c) => c.name.toLowerCase()));
-  const collisions = players.filter(
-    (p) =>
-      rosterNames.has(p.handle.toLowerCase()) &&
-      !CONFIRMED_FIGHTER_HANDLES.has(p.handle.toLowerCase()),
+  // Adding a row is a human verdict, not a way to make the suite green. The
+  // test is: does the TITLE parse cleanly with the fighter in its own slot?
+  const fighterMatcher = buildAliasMatcher(characters);
+  const confirmedReal = new Set(CONFIRMED_FIGHTER_NAMED_PLAYERS.map((c) => c.id));
+  const handleOf = new Map(players.map((p) => [p.id, p.handle]));
+  const unconfirmedNamed = [
+    ...new Set([...replays.flatMap((r) => r.sides.map((sd) => sd.player)), ...handleOf.keys()]),
+  ].filter(
+    (id) =>
+      !confirmedReal.has(id) && fighterNamedHits(handleOf.get(id) ?? id, fighterMatcher).length > 0,
   );
   expect(
-    collisions.length === 0,
-    `no player handle is a fighter name (${collisions.map((c) => c.handle).join(', ') || 'clean'}` +
-      `${CONFIRMED_FIGHTER_HANDLES.size ? `; ${CONFIRMED_FIGHTER_HANDLES.size} confirmed real` : ''})`,
+    unconfirmedNamed.length === 0,
+    `no published side names a fighter-named handle without a CONFIRMED row (` +
+      `${unconfirmedNamed.map((id) => `${id} "${handleOf.get(id) ?? id}"`).join(', ') || 'clean'}` +
+      `; ${confirmedReal.size} confirmed real)`,
+  );
+  expect(
+    CONFIRMED_FIGHTER_NAMED_PLAYERS.every(
+      (c) => /^[\w-]{11}$/.test(c.video) && /^\d{4}-\d{2}-\d{2}$/.test(c.confirmed) && !!c.why,
+    ),
+    `every CONFIRMED_FIGHTER_NAMED_PLAYERS row carries a video id, a date and a reason (${CONFIRMED_FIGHTER_NAMED_PLAYERS.length})`,
   );
 
   // ITS SIBLING, AND THE ONE THAT WOULD HAVE CAUGHT THE BRACKET TAIL. A title
@@ -415,11 +423,22 @@ function testSubstrate(): void {
   );
 
   // queues — two of them, and they mean different things
-  const KINDS = new Set(['character-completion', 'bench-conflict', 'slot-ambiguous']);
+  const KINDS = new Set([
+    'character-completion',
+    'bench-conflict',
+    'slot-ambiguous',
+    'fighter-named-handle',
+  ]);
   expect(
     queue.every(
       (q) =>
-        typeof q.id === 'string' && KINDS.has(q.kind) && /^\d{4}-\d{2}-\d{2}T/.test(q.publishedAt),
+        typeof q.id === 'string' &&
+        KINDS.has(q.kind) &&
+        /^\d{4}-\d{2}-\d{2}T/.test(q.publishedAt) &&
+        // A held record carries itself (the index carry reads it back) and
+        // names every held side; one without either cannot be released.
+        (q.kind !== 'fighter-named-handle' ||
+          (q.record?.id === q.id && !!q.held?.length && q.held.every((h) => h.resolvesTo.length))),
     ),
     `review-queue.json schema validates (${queue.length} pending)`,
   );

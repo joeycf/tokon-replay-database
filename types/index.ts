@@ -532,10 +532,19 @@ export type VideoOverride = Partial<Pick<MatchVideo, 'season' | 'sides' | 'chann
  *                            unresolved data, not partial data, so it is not
  *                            the bench queue's case.
  *   'slot-ambiguous'       — a side segment carried 2+ parens, so which one names
- *                            the characters is a guess. Never guessed. */
+ *                            the characters is a guess. Never guessed.
+ *   'fighter-named-handle' — a NEW record (not in the committed videos.json, not
+ *                            from a frozen channel) whose handle IS a fighter
+ *                            (scripts/roster.ts fighterNamedHits) and has no
+ *                            CONFIRMED_FIGHTER_NAMED_PLAYERS row (checklist 5n).
+ *                            The record is held, the rest of the day publishes,
+ *                            and Pending work is red naming the handle. A row
+ *                            with a video id releases it on the next parse; a
+ *                            `sides` override (the handle IS the fighter) or an
+ *                            `exclude` resolves it the way every kind resolves. */
 export interface ReviewQueueItem {
   id: string;
-  kind: 'character-completion' | 'bench-conflict' | 'slot-ambiguous';
+  kind: 'character-completion' | 'bench-conflict' | 'slot-ambiguous' | 'fighter-named-handle';
   channel: ChannelKey;
   title: string;
   publishedAt: string;
@@ -548,6 +557,15 @@ export interface ReviewQueueItem {
   /** For 'bench-conflict': what each tier claimed, so the reviewer sees the
    *  disagreement rather than re-deriving it. */
   conflict?: { side: 0 | 1; fromTitle: string[]; fromDescription: string[] };
+  /** For 'fighter-named-handle': each side whose handle is a fighter with no
+   *  CONFIRMED row: the side index, the handle, the player id the registry
+   *  would mint, and the fighter id(s) it resolves to. */
+  held?: { side: 0 | 1; handle: string; player: string; resolvesTo: string[] }[];
+  /** For 'fighter-named-handle': the held record itself, post-override. The
+   *  index intake is read through a cursor, so a held index record is in no
+   *  later dump and not in videos.json; parse.ts carries it from HERE until
+   *  it is confirmed or rejected. */
+  record?: MatchVideo;
 }
 
 /**

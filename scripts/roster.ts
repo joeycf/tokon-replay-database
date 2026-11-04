@@ -431,3 +431,86 @@ export const playerId = (handle: string): string => {
     .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '');
 };
+
+// ── THE REGISTRY INVARIANT (checklist 5n) ───────────────────────────────────
+//
+// No published player's handle may BE a fighter unless a human vouched for it.
+// Until 2026-11-04 this lived only inside scripts/e2e.ts, as a Map literal and
+// an exact display-name comparison, so the parse never saw it. On 2026-10-26
+// XvlWpCke4Go published a player "DANGER", nothing in the cron noticed, and
+// the next local e2e (11-03) was the first red: nine days of production.
+//
+// ONE LIST AND ONE PREDICATE, read by parse.ts (which holds a NEW record on a
+// hit) and by e2e.ts (which asserts the built site). Two copies would drift,
+// and the hold and the check that the hold worked would disagree in silence.
+
+export interface ConfirmedFighterNamedPlayer {
+  /** The player id (playerId of the handle), as minted in players.json. */
+  id: string;
+  /** The handle as the evidence spells it. */
+  handle: string;
+  /** The video id that settled it. A row without one is not a verdict. */
+  video: string;
+  /** YYYY-MM-DD the row was added. */
+  confirmed: string;
+  /** What was read, and by whom. */
+  why: string;
+}
+
+/**
+ * SOME PEOPLE ARE JUST NAMED AFTER A FIGHTER, and the predicate cannot tell
+ * that from a parse error: both give a player whose handle is a roster name.
+ * So the exception is a NAMED LIST WITH ITS EVIDENCE, never a softer rule.
+ *
+ * Adding a row is a human verdict, not a way to turn a red green. The test:
+ * does the TITLE parse cleanly with the fighter in its own slot? If it does,
+ * the handle is really that person's name. If it does not, the handle is
+ * wreckage from a slot boundary, and the record wants a `sides` override.
+ */
+export const CONFIRMED_FIGHTER_NAMED_PLAYERS: ConfirmedFighterNamedPlayer[] = [
+  {
+    id: 'deadpool',
+    handle: 'DEADPOOL',
+    video: 'fcUF-QsUdz0',
+    confirmed: '2026-08-26',
+    why:
+      '"MARVEL TOKON ▰ GR7 (#1 Ranked Peni Parker) vs DEADPOOL (Magik) ▰ …" (replaysHub). ' +
+      'Handle-then-paren with Magik in its own slot: the player is called DEADPOOL. ' +
+      'Confirmed by the maintainer.',
+  },
+  {
+    id: 'danger',
+    handle: 'DANGER',
+    video: 'XvlWpCke4Go',
+    confirmed: '2026-11-04',
+    why:
+      '"MARVEL TOKON ▰ DANGER (Green Goblin Storm) vs PSALM (Peni Parker Loki) ▰ High Level ' +
+      'Gameplay" (replaysHub, 2026-10-26). Handle-then-paren with the fighters in their own ' +
+      'slot, the DEADPOOL class. The description agrees: "Player 1: DANGER (Green Goblin/Storm)", ' +
+      '"DANGER\'s Green Goblin and Storm", and the footage-read bench has no Danger the fighter ' +
+      'in it. Confirmed on the title test by the owner (loose-ends brief); footage not watched.',
+  },
+];
+
+/**
+ * THE ONE PREDICATE: the fighter id(s) a handle IS, or [] when it names a
+ * person. Through the alias matcher, so "Spidey" and "SPIDER MAN" count as
+ * Spider-Man the way the parser would read them.
+ *
+ * "IS", NOT "CONTAINS". A hit needs the handle to be nothing BUT fighter
+ * spans and separators: the residue is empty. "Hulk Mash", "KID CARNaGE",
+ * "MAJIN GOBLIN" and "CHAMPION EYEZ" each carry a person that no fighter span
+ * explains, which is the same handle-recoverability signal checklist 5r uses.
+ * GGST's predicate is the wider "contains a fighter as a word"; on this corpus
+ * that adds exactly those four published handles (2026-11-04), each one a row
+ * a human would have to vouch for, and no case the narrower test misses.
+ *
+ * parse.ts uses this twice. In a title with a fighter slot, a hit is a
+ * person who may be named after a fighter: held for review (5n). In a title
+ * with NO fighter slot ("Phoenix Cyclops vs Wolverine ▰ Online Match"), a hit
+ * is a side with no person in it at all: refused (5r).
+ */
+export function fighterNamedHits(handle: string, matcher: AliasMatcher): string[] {
+  const ids = matcher.ids(handle);
+  return ids.length && matcher.residue(handle) === '' ? ids : [];
+}

@@ -3,7 +3,9 @@ name: Pending work
 # THE OTHER MEANING OF RED. "Daily data refresh" goes red when the archive is
 # stale or wrong. THIS workflow goes red when a person has work: a gated
 # character's window has opened, a season is unconfirmed, a patch table has
-# been quiet too long. The two used to share one job, and on 2026-10-12 Tekken's
+# been quiet too long, or a new record is HELD on an unconfirmed fighter-named
+# handle (checklist 5n, since 2026-11-04: the parse holds the record and ships
+# the day; before, nothing but a local e2e looked). The two used to share one job, and on 2026-10-12 Tekken's
 # data run stopped at "Refuse redirect drift", so the due expiry behind it never
 # ran — while from 10-07 Tōkon was red BY DESIGN next to the one run that was
 # holding data. One job, two meanings, and the by-design red had normalised
@@ -70,6 +72,13 @@ jobs:
         # Clear it by doing the work, NOT by deleting this step. For the patch
         # table, when the vendor has simply been quiet, the work is
         # `npm run data:patch-check -- --confirm-quiet`, committed.
+        #
+        # THE HELD-HANDLE ARM reads the committed data/review-queue.json: every
+        # 'fighter-named-handle' item is a record the parse held because its
+        # handle IS a fighter with no CONFIRMED row (scripts/roster.ts), and the
+        # step names each handle and its record count. Add the row with its video
+        # id (or a `sides` override), push, then dispatch "Daily data refresh";
+        # this workflow follows it and goes green once the record has published.
         run: npx tsx scripts/expiries.ts --check
 
       # THE PLATFORM CHECK'S OWN SURVIVAL. replay-engine's "Platform freshness"

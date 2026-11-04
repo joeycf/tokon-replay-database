@@ -20,6 +20,13 @@
  * the pending work is impossible to miss — and a held data run can no longer
  * hide a due expiry behind it, which it did on 2026-10-12.
  *
+ * THE SAME SEVERITY COVERS A HELD FIGHTER-NAMED HANDLE (checklist 5n, since
+ * 2026-11-04): parse.ts holds the RECORD in the review queue and ships the day,
+ * and `--check` goes red on every 'fighter-named-handle' item in
+ * data/review-queue.json, naming the handle and its count. Before this, Tōkon
+ * had no parse-time check at all: "DANGER" (XvlWpCke4Go) published on 10-26 and
+ * the first red was a local e2e on 11-03.
+ *
  * THE RED PENDING-WORK RUN AND THE exit 1 ARE THE DESIGN, NOT A BUG. Clear them by
  * doing the work below — never by deleting the check.
  *
@@ -31,8 +38,12 @@
  * Run: npm run data:expiries   (tsx scripts/expiries.ts --check)
  */
 
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { CONFIRMED_QUIET_THROUGH, PATCHES, SEASONS } from './patches';
-import type { Expiry } from '../types/index';
+import type { Expiry, ReviewQueueItem } from '../types/index';
 
 /**
  * Fighters that are announced but NOT yet playable.
@@ -271,6 +282,57 @@ export function dueExpiries(
   return due;
 }
 
+// ── held fighter-named handles (checklist 5n) ────────────────────────────────
+// Not dated, so not an Expiry: a TASK the review queue already holds. parse.ts
+// routes a NEW record whose handle IS a fighter with no CONFIRMED row into
+// data/review-queue.json as 'fighter-named-handle', ships the rest of the day,
+// and this is the red that makes the held record impossible to miss. Refuse the
+// record, not the day (GGST 130717f, ported 2026-11-04).
+
+export interface HeldHandle {
+  player: string;
+  /** The handle as the first held record spells it. */
+  handle: string;
+  resolvesTo: string[];
+  /** Held record ids, queue order. */
+  ids: string[];
+}
+
+/** The queue's 'fighter-named-handle' items, one row per player id. */
+export function heldHandles(queue: ReviewQueueItem[]): HeldHandle[] {
+  const by = new Map<string, HeldHandle>();
+  for (const q of queue) {
+    if (q.kind !== 'fighter-named-handle') continue;
+    for (const h of q.held ?? []) {
+      const row = by.get(h.player) ?? {
+        player: h.player,
+        handle: h.handle,
+        resolvesTo: [],
+        ids: [],
+      };
+      for (const id of h.resolvesTo) if (!row.resolvesTo.includes(id)) row.resolvesTo.push(id);
+      if (!row.ids.includes(q.id)) row.ids.push(q.id);
+      by.set(h.player, row);
+    }
+  }
+  return [...by.values()].sort(
+    (a, b) => b.ids.length - a.ids.length || a.player.localeCompare(b.player),
+  );
+}
+
+/** One line per handle: report.md, the parse console and `--check` all print it. */
+export const heldLine = (h: HeldHandle): string =>
+  `${h.ids.length} record(s) held on unconfirmed fighter-named handle "${h.handle}" — confirm ` +
+  `with a video id (scripts/roster.ts) or reject  [${h.player} → ${h.resolvesTo.join(', ')}; ` +
+  `e.g. ${h.ids[0]}]`;
+
+/** How a held handle is cleared, for the two places that tell a person. */
+export const HELD_HOW = [
+  'A person named after a fighter: add the CONFIRMED_FIGHTER_NAMED_PLAYERS row WITH its video',
+  'id, push, then dispatch "Daily data refresh" — the record publishes and the item clears. A',
+  "fighter filed as a person: a `sides` override in data/overrides.json (resolvedBy: 'human').",
+];
+
 /** Rendered into data/report.md by parse.ts when anything is due. */
 export function expiryBlock(due: Expiry[]): string[] {
   if (!due.length) return [];
@@ -290,20 +352,57 @@ export function expiryBlock(due: Expiry[]): string[] {
 const isMain = !!process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop()!);
 if (isMain && process.argv.includes('--check')) {
   const due = dueExpiries();
-  if (!due.length) {
+  // The committed queue: Pending work checks out main after the data run, so
+  // this is exactly what that run published. An unreadable queue is a red, not
+  // a clean bill — "could not look" must never read as "nothing held".
+  const queuePath = join(
+    dirname(fileURLToPath(import.meta.url)),
+    '..',
+    'data',
+    'review-queue.json',
+  );
+  let held: HeldHandle[] = [];
+  let unreadable: string | null = null;
+  try {
+    const q: unknown = JSON.parse(readFileSync(queuePath, 'utf8'));
+    if (Array.isArray(q)) held = heldHandles(q as ReviewQueueItem[]);
+    else unreadable = 'not a JSON array';
+  } catch (err) {
+    unreadable = (err as Error).message;
+  }
+  if (!due.length && !held.length && unreadable === null) {
     console.log(
       `✓ no expiries due — ${UNRELEASED.length} unreleased row(s) pending, ` +
         `newest patch ${PATCHES.at(-1)?.version}` +
         (CONFIRMED_QUIET_THROUGH > (PATCHES.at(-1)?.start ?? '')
           ? `, feed confirmed quiet ${CONFIRMED_QUIET_THROUGH}`
-          : ''),
+          : '') +
+        '; no record held on a fighter-named handle',
     );
     process.exit(0);
   }
-  console.error(`\n✖ ${due.length} EXPIRY(S) DUE — this step is designed to go red.\n`);
-  for (const d of due) {
-    console.error(`  ${d.id}  (${d.kind}, due ${d.date})`);
-    console.error(`    ${d.action}\n`);
+  if (due.length) {
+    console.error(`\n✖ ${due.length} EXPIRY(S) DUE — this step is designed to go red.\n`);
+    for (const d of due) {
+      console.error(`  ${d.id}  (${d.kind}, due ${d.date})`);
+      console.error(`    ${d.action}\n`);
+    }
+  }
+  if (held.length) {
+    const n = new Set(held.flatMap((h) => h.ids)).size;
+    console.error(
+      `\n✖ ${n} RECORD(S) HELD ON ${held.length} UNCONFIRMED FIGHTER-NAMED HANDLE(S) — this step ` +
+        `is designed to go red.\n`,
+    );
+    for (const h of held) console.error(`  ${heldLine(h)}`);
+    console.error('');
+    for (const l of HELD_HOW) console.error(`  ${l}`);
+    console.error('');
+  }
+  if (unreadable !== null) {
+    console.error(
+      `\n✖ data/review-queue.json is unreadable (${unreadable}) — held handles unknown.\n`,
+    );
   }
   console.error('  Clear these by doing the work above. Never by deleting the check.');
   process.exit(1);

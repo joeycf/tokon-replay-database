@@ -23,7 +23,14 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
-import { buildAliasMatcher, idKey, loadCharacters, playerId, stripLeaderboard } from './roster';
+import {
+  buildAliasMatcher,
+  fighterNamedHits,
+  idKey,
+  loadCharacters,
+  playerId,
+  stripLeaderboard,
+} from './roster';
 import { alignBench, readBench } from './bench';
 import {
   benchPartition,
@@ -189,6 +196,36 @@ try {
         `typo alias: "${typo}" → ${want}`,
         matcher.ids(typo).join(',') === want && matcher.residue(typo) === '',
         `ids=${matcher.ids(typo).join(',')} residue="${matcher.residue(typo)}"`,
+      );
+    }
+  }
+
+  // ── 1f. the registry predicate (checklist 5n, and 5r's refusal) ─────────────
+  // ONE predicate, two uses in parse.ts: a hit in a title WITH a fighter slot is
+  // held for review (a person may be called DANGER); a hit in a title with NO
+  // fighter slot is refused (nobody is in it). "IS a fighter", not "contains
+  // one": the four published handles that contain a fighter as a word must
+  // stay clean, or the port would have hard-stopped on its first morning.
+  console.log('\n[1f] registry predicate — the handle IS a fighter, not contains one');
+  {
+    for (const [h, want] of [
+      ['DANGER', 'danger'],
+      ['DEADPOOL', 'deadpool'],
+      ['Phoenix Cyclops', 'phoenix-cyclops'],
+      ['Spider-Man', 'spider-man'],
+      ['Storm and Loki', 'storm,loki'],
+    ] as const) {
+      check(
+        `"${h}" is a fighter → ${want}`,
+        fighterNamedHits(h, matcher).join(',') === want,
+        fighterNamedHits(h, matcher).join(',') || '(none)',
+      );
+    }
+    for (const h of ['Hulk Mash', 'KID CARNaGE', 'MAJIN GOBLIN', 'CHAMPION EYEZ', 'PSALM', 'GR7']) {
+      check(
+        `"${h}" names a person (residue left after the fighter span)`,
+        fighterNamedHits(h, matcher).length === 0,
+        fighterNamedHits(h, matcher).join(',') || '(none)',
       );
     }
   }
@@ -2444,6 +2481,365 @@ try {
     );
 
     await writeFile(rawPath, JSON.stringify(original, null, 1));
+  }
+
+  // ── 6. the registry hold (checklist 5n) and the 5r refusal ──────────────────
+  //
+  // Until 2026-11-04 Tōkon's only registry check was an e2e assertion, so
+  // "DANGER" (XvlWpCke4Go) published on 10-26 and nothing went red for nine
+  // days. The parse now holds a NEW fighter-named record in the review queue
+  // and ships the day; an ALREADY-PUBLISHED one is a hard stop; a slotless
+  // title with no person in it is refused. Every branch driven through a real
+  // parse run, against the snapshot this file restores.
+  console.log('\n[6] registry hold — held, released, hard stop, refused, index carry');
+  {
+    const run = (script: string, args: string[] = []) => {
+      try {
+        const out = execFileSync('npx', ['tsx', script, ...args], {
+          cwd: ROOT,
+          stdio: 'pipe',
+          encoding: 'utf8',
+        });
+        return { code: 0, out };
+      } catch (e) {
+        const err = e as { status?: number; stdout?: string; stderr?: string };
+        return { code: err.status ?? 1, out: `${err.stdout ?? ''}${err.stderr ?? ''}` };
+      }
+    };
+    const rawPath = join(ROOT, 'raw', 'proReplays.json');
+    const ovPath = join(ROOT, 'data', 'overrides.json');
+    const vidPath = join(ROOT, 'data', 'videos.json');
+    const qPath = join(ROOT, 'data', 'review-queue.json');
+    const pinPath = join(ROOT, 'data', 'source-pins.json');
+    const theaterPath = join(ROOT, 'raw', 'replayTheater.json');
+    const originalRaw = await readFile(rawPath, 'utf8');
+    const originalOv = await readFile(ovPath, 'utf8');
+    const originalVideos = await readFile(vidPath, 'utf8');
+    const originalQueue = await readFile(qPath, 'utf8');
+    const originalPins = await readFile(pinPath, 'utf8');
+    const originalTheater = await readFile(theaterPath, 'utf8');
+    const readJsonFile = async <T>(path: string) => JSON.parse(await readFile(path, 'utf8')) as T;
+    type Q = {
+      id: string;
+      kind: string;
+      held?: { side: number; player: string; resolvesTo: string[] }[];
+      record?: MatchVideo;
+    }[];
+    const restore6 = async () => {
+      await writeFile(rawPath, originalRaw);
+      await writeFile(ovPath, originalOv);
+      await writeFile(vidPath, originalVideos);
+      await writeFile(qPath, originalQueue);
+      await writeFile(pinPath, originalPins);
+      await writeFile(theaterPath, originalTheater);
+    };
+
+    // The fighter sits in its own slot, so the handle slot is a real handle
+    // slot: the DEADPOOL / DANGER class. "WOLVERINE" has no CONFIRMED row.
+    const HID = 'CTLHELD0001';
+    const heldBait = {
+      id: HID,
+      channel: 'proReplays',
+      title: 'Marvel Tokon ▰ WOLVERINE (Magik) vs CTLPERSON (Storm) ▰ Pro level replays',
+      description: 'MARVEL TOKON high level replay',
+      publishedAt: '2026-08-11T00:00:00Z',
+      durationSec: 600,
+      viewCount: 10,
+      liveBroadcastContent: 'none',
+    };
+    const raw0 = JSON.parse(originalRaw) as Record<string, unknown>[];
+
+    // 6a — HELD. A new record: queued as fighter-named-handle, absent from
+    // videos/players/replays, the day still writes, and Pending work is red
+    // naming it.
+    await writeFile(rawPath, JSON.stringify([...raw0, heldBait]));
+    let r = run('scripts/parse.ts');
+    let q = await readJsonFile<Q>(qPath);
+    let vids = await readJsonFile<MatchVideo[]>(vidPath);
+    const playersNow = await readJsonFile<PlayerRecord[]>(join(ROOT, 'data', 'players.json'));
+    const replaysNow = await readJsonFile<{ id: string }[]>(join(ROOT, 'data', 'replays.json'));
+    const item = q.find((x) => x.id === HID);
+    check(
+      'a new fighter-named record: parse exits 0 (the day publishes)',
+      r.code === 0,
+      `exit ${r.code}`,
+    );
+    check(
+      'it is queued as fighter-named-handle, naming the side and the fighter',
+      item?.kind === 'fighter-named-handle' &&
+        item.held?.length === 1 &&
+        item.held[0]!.side === 0 &&
+        item.held[0]!.player === 'wolverine' &&
+        item.held[0]!.resolvesTo.join(',') === 'wolverine' &&
+        item.record?.id === HID,
+      item ? `${item.kind} ${JSON.stringify(item.held)}` : 'NOT QUEUED',
+    );
+    check(
+      'and absent from videos.json, players.json and replays.json',
+      !vids.some((v) => v.id === HID) &&
+        !playersNow.some((p) => p.id === 'wolverine' || p.id === 'ctlperson') &&
+        !replaysNow.some((x) => x.id === HID),
+      `videos ${vids.some((v) => v.id === HID)} players ${playersNow.some((p) => p.id === 'wolverine')} replays ${replaysNow.some((x) => x.id === HID)}`,
+    );
+    check(
+      'the rest of the day is unchanged',
+      vids.length === (JSON.parse(originalVideos) as unknown[]).length,
+      `${vids.length} records`,
+    );
+    const exp = run('scripts/expiries.ts', ['--check']);
+    check(
+      'Pending work (expiries --check) is red and names the handle',
+      exp.code === 1 && exp.out.includes('"WOLVERINE"') && exp.out.includes(HID),
+      `exit ${exp.code}`,
+    );
+    const report = await readFile(join(ROOT, 'data', 'report.md'), 'utf8');
+    check(
+      'report.md names it under ACTION REQUIRED',
+      /## ⚠ ACTION REQUIRED[\s\S]*HELD on 1 unconfirmed fighter-named handle[\s\S]*"WOLVERINE"/.test(
+        report,
+      ),
+      undefined,
+    );
+
+    // 6b — RELEASED BY A VERDICT. A `sides` override is the other exit; the
+    // record publishes and the queue clears.
+    const sides = [
+      {
+        player: 'ctlrealname',
+        handle: 'CTLREALNAME',
+        characters: ['magik'],
+        provenance: {
+          tier: 'review',
+          tiers: ['review'],
+          fromTitle: [],
+          fromHuman: ['magik'],
+          slotOrder: 'handle-first',
+          complete: false,
+        },
+      },
+      {
+        player: 'ctlperson',
+        handle: 'CTLPERSON',
+        characters: ['storm'],
+        provenance: {
+          tier: 'review',
+          tiers: ['review'],
+          fromTitle: [],
+          fromHuman: ['storm'],
+          slotOrder: 'handle-first',
+          complete: false,
+        },
+      },
+    ];
+    const ov0 = JSON.parse(originalOv) as Record<string, unknown>;
+    await writeFile(
+      ovPath,
+      JSON.stringify({ ...ov0, [HID]: { sides, resolvedBy: 'human' } }, null, 2),
+    );
+    r = run('scripts/parse.ts');
+    q = await readJsonFile<Q>(qPath);
+    vids = await readJsonFile<MatchVideo[]>(vidPath);
+    check(
+      'a sides verdict releases it: published, dequeued',
+      r.code === 0 && vids.some((v) => v.id === HID) && !q.some((x) => x.id === HID),
+      `exit ${r.code} published ${vids.some((v) => v.id === HID)} queued ${q.some((x) => x.id === HID)}`,
+    );
+    check(
+      'and Pending work is green again',
+      run('scripts/expiries.ts', ['--check']).code === 0,
+      undefined,
+    );
+
+    // 6c — THE HARD STOP. The same record, already PUBLISHED with the
+    // fighter-named side (videos.json is the baseline). Holding it would
+    // unpublish a live page with exit 0, so the parse refuses to write.
+    const published = JSON.parse(originalVideos) as MatchVideo[];
+    const asPublished: MatchVideo = {
+      id: HID,
+      channel: 'proReplays',
+      intake: 'proReplays',
+      title: heldBait.title,
+      publishedAt: heldBait.publishedAt,
+      durationSec: 600,
+      season: published[0]!.season,
+      sides: [
+        {
+          ...(sides[0] as unknown as MatchVideo['sides'][0]),
+          player: 'wolverine',
+          handle: 'WOLVERINE',
+        },
+        sides[1] as unknown as MatchVideo['sides'][0],
+      ],
+    };
+    await writeFile(ovPath, originalOv);
+    await writeFile(vidPath, JSON.stringify([asPublished, ...published], null, 2));
+    const before = await readFile(join(ROOT, 'data', 'players.json'), 'utf8');
+    r = run('scripts/parse.ts');
+    check(
+      'an ALREADY-PUBLISHED fighter-named record is a hard stop',
+      r.code !== 0 && r.out.includes('ALREADY-PUBLISHED') && r.out.includes('wolverine'),
+      `exit ${r.code}`,
+    );
+    check(
+      'and nothing was written',
+      (await readFile(join(ROOT, 'data', 'players.json'), 'utf8')) === before &&
+        (await readFile(vidPath, 'utf8')).includes(`"id": "${HID}"`),
+      undefined,
+    );
+    await writeFile(vidPath, originalVideos);
+
+    // 6d — CHECKLIST 5r. A slotless title whose sides are only fighters: no
+    // person to recover, so REFUSED (a named miss with its literal title),
+    // never queued for a reviewer who has nothing to go on. 5a above is the
+    // other half: a slotless title with two PEOPLE still queues.
+    const RID = 'CTLNOHANDLE1';
+    await writeFile(
+      rawPath,
+      JSON.stringify([
+        ...raw0,
+        {
+          ...heldBait,
+          id: RID,
+          title: 'Phoenix Cyclops vs Wolverine ▰ Online Match ▰ Marvel Tokon Fighting Souls',
+        },
+      ]),
+    );
+    r = run('scripts/parse.ts');
+    q = await readJsonFile<Q>(qPath);
+    vids = await readJsonFile<MatchVideo[]>(vidPath);
+    const rep6 = await readFile(join(ROOT, 'data', 'report.md'), 'utf8');
+    check(
+      '"X vs Y ▰ Online Match" is refused: not queued, not published',
+      r.code === 0 && !q.some((x) => x.id === RID) && !vids.some((v) => v.id === RID),
+      `exit ${r.code} queued ${q.some((x) => x.id === RID)} published ${vids.some((v) => v.id === RID)}`,
+    );
+    check(
+      'and report.md names it as no-handle with the literal title',
+      /\| no-handle \| \d+ \|/.test(rep6) &&
+        rep6.includes(
+          `Phoenix Cyclops vs Wolverine ▰ Online Match ▰ Marvel Tokon Fighting Souls  (\`proReplays\` ${RID})`,
+        ),
+      undefined,
+    );
+    await writeFile(rawPath, originalRaw);
+
+    // 6e — THE INDEX CARRY TRAP, both halves. A held index record is in no
+    // later cursor dump, so the committed queue carries it; and the pin counts
+    // what ships, so a record released on a CARRY (empty dump) enters the pin,
+    // or the next carrying morning refuses the day. The carry is FORCED here
+    // (an empty dump), whatever raw/ held: [4f] may have left a full sweep.
+    const theaterRecs = published.filter((v) => v.intake === 'replayTheater');
+    const pin0 = (JSON.parse(originalPins) as Record<string, number>).replayTheater;
+    const q0 = JSON.parse(originalQueue) as Q;
+    const ov0e = JSON.parse(originalOv) as Record<string, unknown>;
+    /** A held index record cloned from a committed one: same VOD, a segment
+     *  start no catalogue entry has, and a fighter as side 0's handle. */
+    const heldIndexItem = (base: MatchVideo, start: number) => {
+      const rec: MatchVideo = {
+        ...base,
+        id: `${base.videoId}@${start}`,
+        startSeconds: start,
+        sides: [{ ...base.sides[0]!, player: 'storm', handle: 'Storm' }, base.sides[1]!],
+      };
+      return {
+        rec,
+        item: {
+          id: rec.id,
+          kind: 'fighter-named-handle',
+          channel: 'replayTheater',
+          title: rec.title,
+          publishedAt: rec.publishedAt,
+          durationSec: 0,
+          held: [{ side: 0, handle: 'Storm', player: 'storm', resolvesTo: ['storm'] }],
+          record: rec,
+        },
+      };
+    };
+    const releaseOv = (base: MatchVideo, id: string) => ({
+      ...ov0e,
+      [id]: {
+        sides: [
+          { ...base.sides[0]!, player: 'ctlstormfan', handle: 'CTLSTORMFAN' },
+          base.sides[1]!,
+        ],
+        resolvedBy: 'human',
+      },
+    });
+    if (theaterRecs.length === 0 || pin0 === undefined) {
+      check(
+        '[6e] fixture: committed replayTheater records and a pin',
+        false,
+        `records ${theaterRecs.length}, pin ${pin0}`,
+      );
+    } else {
+      await writeFile(theaterPath, '[]');
+      const base = theaterRecs[0]!;
+      const TID = `${base.videoId}@99999`;
+      await writeFile(qPath, JSON.stringify([...q0, heldIndexItem(base, 99999).item], null, 2));
+      r = run('scripts/parse.ts');
+      q = await readJsonFile<Q>(qPath);
+      vids = await readJsonFile<MatchVideo[]>(vidPath);
+      check(
+        'a held index record survives a carry: still queued, still unpublished, pin asserted',
+        r.code === 0 && q.some((x) => x.id === TID) && !vids.some((v) => v.id === TID),
+        `exit ${r.code} queued ${q.some((x) => x.id === TID)} published ${vids.some((v) => v.id === TID)}`,
+      );
+      // Released on a carry by a verdict that names the person.
+      await writeFile(ovPath, JSON.stringify(releaseOv(base, TID), null, 2));
+      r = run('scripts/parse.ts');
+      vids = await readJsonFile<MatchVideo[]>(vidPath);
+      const pin1 = (await readJsonFile<Record<string, number>>(pinPath)).replayTheater;
+      check(
+        'released on a carry: it publishes and ENTERS THE PIN',
+        r.code === 0 && vids.some((v) => v.id === TID) && pin1 === pin0 + 1,
+        `exit ${r.code} published ${vids.some((v) => v.id === TID)} pin ${pin0} → ${pin1}`,
+      );
+      r = run('scripts/parse.ts');
+      check(
+        'and the NEXT carrying morning still passes its pin (the trap)',
+        r.code === 0,
+        r.code === 0
+          ? 'exit 0'
+          : (r.out.split('\n').find((l) => l.includes('pin')) ?? `exit ${r.code}`),
+      );
+    }
+    await restore6();
+
+    // 6f — THE SAME HOLD ON A REBUILD. With a dump in raw/, the intake is
+    // rebuilt (dump + survivors), and a held record the dump does not name
+    // must still come back from the queue, while the re-pin counts only what
+    // ships. Needs a non-empty dump — the state [4f] asks for.
+    if (originalTheater.trim() === '[]' || theaterRecs.length === 0) {
+      console.log('  – [6f] skipped: raw/replayTheater.json is empty (seed it as [4f] says)');
+    } else {
+      const base = theaterRecs[0]!;
+      const { rec, item: fItem } = heldIndexItem(base, 99998);
+      await writeFile(qPath, JSON.stringify([...(JSON.parse(originalQueue) as Q), fItem], null, 2));
+      r = run('scripts/parse.ts');
+      q = await readJsonFile<Q>(qPath);
+      vids = await readJsonFile<MatchVideo[]>(vidPath);
+      let pinNow = (await readJsonFile<Record<string, number>>(pinPath)).replayTheater;
+      let shipped = vids.filter((v) => v.intake === 'replayTheater').length;
+      check(
+        'on a rebuild a held index record the dump omits stays queued, and the pin counts what ships',
+        r.code === 0 &&
+          q.some((x) => x.id === rec.id) &&
+          !vids.some((v) => v.id === rec.id) &&
+          pinNow === shipped,
+        `exit ${r.code} queued ${q.some((x) => x.id === rec.id)} pin ${pinNow} shipped ${shipped}`,
+      );
+      await writeFile(ovPath, JSON.stringify(releaseOv(base, rec.id), null, 2));
+      r = run('scripts/parse.ts');
+      vids = await readJsonFile<MatchVideo[]>(vidPath);
+      pinNow = (await readJsonFile<Record<string, number>>(pinPath)).replayTheater;
+      shipped = vids.filter((v) => v.intake === 'replayTheater').length;
+      check(
+        'released on a rebuild: it publishes and the re-pin includes it',
+        r.code === 0 && vids.some((v) => v.id === rec.id) && pinNow === shipped,
+        `exit ${r.code} published ${vids.some((v) => v.id === rec.id)} pin ${pinNow} shipped ${shipped}`,
+      );
+      await restore6();
+    }
   }
 } finally {
   await restoreAll();
