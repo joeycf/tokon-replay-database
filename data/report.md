@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-05T21:52:00.778Z_
+_Generated 2026-11-07T03:46:33.217Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 287 | 287 | 100.0% |
+| highLevelReplays | 292 | 292 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 885 | 186 | 21.0% |
-| replaysHub | 497 | 488 | 98.2% |
-| fightingStationX | 3392 | 224 | 6.6% |
-| fgcReplaysHub | 2860 | 41 | 1.4% |
+| hadoukenReplays | 886 | 187 | 21.1% |
+| replaysHub | 505 | 496 | 98.2% |
+| fightingStationX | 3407 | 224 | 6.6% |
+| fgcReplaysHub | 2865 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1342** | |
+| **total** | | **1356** | |
 
 ## Index intakes
 
@@ -36,51 +36,45 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2684 sides got its characters.
+How every one of the 2712 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 48 | 1.8% |
-| description | 662 | 24.7% |
-| index | 184 | 6.9% |
-| footage | 198 | 7.4% |
-| human | 1561 | 58.2% |
-| review | 31 | 1.2% |
+| title | 24 | 0.9% |
+| description | 672 | 24.8% |
+| index | 184 | 6.8% |
+| footage | 154 | 5.7% |
+| human | 1647 | 60.7% |
+| review | 31 | 1.1% |
 
-- complete (4/4): **2593/2684** (96.6%)
-- oversize (>4, mid-set team change): **11** — counted in usage, excluded from pairing
-- bench alignment: handle 780 · character-subset 37 · ambiguous 8
-- title slot order: handle-first 2039 · chars-first 183 · parallel-lists 244
+- complete (4/4): **2688/2712** (99.1%)
+- oversize (>4, mid-set team change): **12** — counted in usage, excluded from pairing
+- bench alignment: handle 793 · character-subset 37 · ambiguous 8
+- title slot order: handle-first 2066 · chars-first 184 · parallel-lists 244
 - tier conflicts (queued for review): 1
-- title refutations (a person ruled the title wrong): **10** side(s) — named, with their evidence, by `npm run test:e2e`
+- title refutations (a person ruled the title wrong): **12** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
 
 ### Side-size distribution
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 58 | 2.2% |
-| 2 | 15 | 0.6% |
-| 3 | 18 | 0.7% |
-| 4 | 2582 | 96.2% |
-| 5 _(mid-set change)_ | 8 | 0.3% |
+| 1 | 24 | 0.9% |
+| 4 | 2676 | 98.7% |
+| 5 _(mid-set change)_ | 9 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **91 side(s) awaiting a drain** across 50 record(s) — oldest published **9 day(s)** ago
-
-> The bench queue is at 50 (nudge threshold 40).
-> Run `npm run data:catchup` locally — the cron cannot do this: extraction
-> needs a logged-in YouTube session from a residential address.
+- **24 side(s) awaiting a drain** across 12 record(s) — oldest published **1 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **50**
+- bench queue (published, incomplete): **12**
 
 ## Player identity
 
-14 identity(s) resolved from more than one spelling. The
+15 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -94,6 +88,7 @@ after changing scripts/players.ts, or the old URLs 404.
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
 | `kingcreed` | `king-creed` |
+| `majin-burno` | `majinburno` |
 | `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
 | `nychrisg` | `nychris-g` |
@@ -139,11 +134,11 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4304 |
-| not-tokon | 1384 |
+| other-game | 4309 |
+| not-tokon | 1398 |
 | pre-launch | 663 |
 | not-a-match | 254 |
-| short-duration | 64 |
+| short-duration | 65 |
 | not-an-event | 35 |
 | char-unresolved | 22 |
 | no-handle | 13 |
