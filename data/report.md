@@ -1,20 +1,27 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-12T16:17:07.665Z_
+## ⚠ ACTION REQUIRED
+
+1 self-expiring gate(s) are due:
+
+- **patch-table** (stale-patch-table, due 2026-11-02)
+  The newest patch in scripts/patches.ts is 2026-11-02, 11 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
+
+_Generated 2026-11-13T15:51:41.084Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 320 | 320 | 100.0% |
+| highLevelReplays | 324 | 324 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 891 | 192 | 21.5% |
-| replaysHub | 538 | 529 | 98.3% |
-| fightingStationX | 3474 | 224 | 6.4% |
-| fgcReplaysHub | 2889 | 41 | 1.4% |
+| hadoukenReplays | 892 | 193 | 21.6% |
+| replaysHub | 544 | 535 | 98.3% |
+| fightingStationX | 3486 | 224 | 6.4% |
+| fgcReplaysHub | 2893 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1422** | |
+| **total** | | **1433** | |
 
 ## Index intakes
 
@@ -36,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2844 sides got its characters.
+How every one of the 2866 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 100 | 3.5% |
-| description | 728 | 25.6% |
-| index | 184 | 6.5% |
+| title | 114 | 4.0% |
+| description | 736 | 25.7% |
+| index | 184 | 6.4% |
 | footage | 154 | 5.4% |
-| human | 1647 | 57.9% |
+| human | 1647 | 57.5% |
 | review | 31 | 1.1% |
 
-- complete (4/4): **2744/2844** (96.5%)
+- complete (4/4): **2752/2866** (96.0%)
 - oversize (>4, mid-set team change): **12** — counted in usage, excluded from pairing
-- bench alignment: handle 854 · character-subset 37 · ambiguous 8
-- title slot order: handle-first 2193 · chars-first 189 · parallel-lists 244
+- bench alignment: handle 863 · character-subset 37 · ambiguous 9
+- title slot order: handle-first 2214 · chars-first 190 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **12** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,23 +66,23 @@ How every one of the 2844 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 92 | 3.2% |
-| 2 | 8 | 0.3% |
-| 4 | 2732 | 96.1% |
+| 1 | 105 | 3.7% |
+| 2 | 9 | 0.3% |
+| 4 | 2740 | 95.6% |
 | 5 _(mid-set change)_ | 9 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **100 side(s) awaiting a drain** across 50 record(s) — oldest published **7 day(s)** ago
+- **114 side(s) awaiting a drain** across 57 record(s) — oldest published **8 day(s)** ago
 
-> The bench queue is at 50 (nudge threshold 40).
+> The bench queue is at 57 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **50**
+- bench queue (published, incomplete): **57**
 
 ## Player identity
 
@@ -142,10 +149,10 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4342 |
-| not-tokon | 1429 |
+| other-game | 4346 |
+| not-tokon | 1437 |
 | pre-launch | 663 |
-| not-a-match | 274 |
+| not-a-match | 278 |
 | short-duration | 71 |
 | not-an-event | 35 |
 | char-unresolved | 22 |
