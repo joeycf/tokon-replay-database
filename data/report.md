@@ -5,23 +5,23 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-11-02)
-  The newest patch in scripts/patches.ts is 2026-11-02, 12 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
+  The newest patch in scripts/patches.ts is 2026-11-02, 13 days old. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-11-14T14:32:24.511Z_
+_Generated 2026-11-15T14:59:52.568Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 329 | 329 | 100.0% |
+| highLevelReplays | 334 | 334 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 893 | 194 | 21.7% |
-| replaysHub | 550 | 541 | 98.4% |
-| fightingStationX | 3497 | 224 | 6.4% |
-| fgcReplaysHub | 2897 | 41 | 1.4% |
+| hadoukenReplays | 894 | 195 | 21.8% |
+| replaysHub | 556 | 547 | 98.4% |
+| fightingStationX | 3509 | 224 | 6.4% |
+| fgcReplaysHub | 2901 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1445** | |
+| **total** | | **1457** | |
 
 ## Index intakes
 
@@ -43,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 2890 sides got its characters.
+How every one of the 2914 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 128 | 4.4% |
-| description | 746 | 25.8% |
-| index | 184 | 6.4% |
+| title | 142 | 4.9% |
+| description | 756 | 25.9% |
+| index | 184 | 6.3% |
 | footage | 154 | 5.3% |
-| human | 1647 | 57.0% |
+| human | 1647 | 56.5% |
 | review | 31 | 1.1% |
 
-- complete (4/4): **2762/2890** (95.6%)
+- complete (4/4): **2772/2914** (95.1%)
 - oversize (>4, mid-set team change): **12** — counted in usage, excluded from pairing
-- bench alignment: handle 874 · character-subset 37 · ambiguous 9
-- title slot order: handle-first 2237 · chars-first 191 · parallel-lists 244
+- bench alignment: handle 885 · character-subset 37 · ambiguous 9
+- title slot order: handle-first 2260 · chars-first 192 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **12** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -66,23 +66,23 @@ How every one of the 2890 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 119 | 4.1% |
+| 1 | 133 | 4.6% |
 | 2 | 9 | 0.3% |
-| 4 | 2750 | 95.2% |
+| 4 | 2760 | 94.7% |
 | 5 _(mid-set change)_ | 9 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **128 side(s) awaiting a drain** across 64 record(s) — oldest published **9 day(s)** ago
+- **142 side(s) awaiting a drain** across 71 record(s) — oldest published **10 day(s)** ago
 
-> The bench queue is at 64 (nudge threshold 40).
+> The bench queue is at 71 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **64**
+- bench queue (published, incomplete): **71**
 
 ## Player identity
 
@@ -150,11 +150,11 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4353 |
-| not-tokon | 1443 |
+| other-game | 4362 |
+| not-tokon | 1449 |
 | pre-launch | 663 |
 | not-a-match | 278 |
-| short-duration | 73 |
+| short-duration | 74 |
 | not-an-event | 35 |
 | char-unresolved | 22 |
 | no-vs-title | 13 |
