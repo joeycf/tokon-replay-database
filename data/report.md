@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-16T14:20:40.042Z_
+_Generated 2026-11-16T17:28:42.106Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 337 | 337 | 100.0% |
+| highLevelReplays | 340 | 340 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 894 | 195 | 21.8% |
-| replaysHub | 559 | 550 | 98.4% |
-| fightingStationX | 3516 | 224 | 6.4% |
-| fgcReplaysHub | 2903 | 41 | 1.4% |
+| hadoukenReplays | 895 | 196 | 21.9% |
+| replaysHub | 562 | 553 | 98.4% |
+| fightingStationX | 3522 | 224 | 6.4% |
+| fgcReplaysHub | 2905 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1463** | |
+| **total** | | **1470** | |
 
 ## Index intakes
 
@@ -29,28 +29,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor did not move: the catalogue has taken no new Tōkon entry since_
-_the last pull — quieter still, and equally ordinary._
+_The cursor still advanced — a quiet day is the ordinary case here, not a_
+_failed one._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 2926 sides got its characters.
+How every one of the 2940 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 58 | 2.0% |
-| description | 762 | 26.0% |
+| title | 66 | 2.2% |
+| description | 768 | 26.1% |
 | index | 184 | 6.3% |
 | footage | 244 | 8.3% |
-| human | 1647 | 56.3% |
+| human | 1647 | 56.0% |
 | review | 31 | 1.1% |
 
-- complete (4/4): **2800/2926** (95.7%)
+- complete (4/4): **2806/2940** (95.4%)
 - oversize (>4, mid-set team change): **12** — counted in usage, excluded from pairing
-- bench alignment: handle 891 · character-subset 37 · ambiguous 9
-- title slot order: handle-first 2272 · chars-first 192 · parallel-lists 244
+- bench alignment: handle 896 · character-subset 38 · ambiguous 9
+- title slot order: handle-first 2285 · chars-first 193 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **12** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,24 +59,24 @@ How every one of the 2926 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 72 | 2.5% |
+| 1 | 80 | 2.7% |
 | 2 | 20 | 0.7% |
 | 3 | 34 | 1.2% |
-| 4 | 2788 | 95.3% |
+| 4 | 2794 | 95.0% |
 | 5 _(mid-set change)_ | 9 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **126 side(s) awaiting a drain** across 69 record(s) — oldest published **11 day(s)** ago
+- **134 side(s) awaiting a drain** across 73 record(s) — oldest published **11 day(s)** ago
 
-> The bench queue is at 69 (nudge threshold 40).
+> The bench queue is at 73 (nudge threshold 40).
 > Run `npm run data:catchup` locally — the cron cannot do this: extraction
 > needs a logged-in YouTube session from a residential address.
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **69**
+- bench queue (published, incomplete): **73**
 
 ## Player identity
 
@@ -145,11 +145,11 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4364 |
-| not-tokon | 1456 |
+| other-game | 4370 |
+| not-tokon | 1457 |
 | pre-launch | 663 |
 | not-a-match | 278 |
-| short-duration | 74 |
+| short-duration | 75 |
 | not-an-event | 35 |
 | char-unresolved | 22 |
 | no-vs-title | 13 |
@@ -200,7 +200,7 @@ garbled game name gets a human verdict instead of a quiet player page.
 
 | handle | records | example |
 | --- | ---: | --- |
-| `TOKON` | 8 | 3kn0YRHRYj8 |
+| `TOKON` | 9 | 1_WCacg-NBs |
 | `TOKON PLAYER` | 6 | 9G-yCsKqlDI |
 | `JOHN TOKON` | 4 | fy_q-s3C8m8 |
 | `DR. MARVEL` | 2 | P1UvhORYCpM |
