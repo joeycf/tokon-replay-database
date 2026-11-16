@@ -201,9 +201,10 @@ export default defineAppConfig({
     // ComboForge cross-link on character pages (engine v0.11.0). Their game id
     // for this one is 'marveltokon', not ours; every launch character id
     // derives, so the map holds only the exceptions. Gated with the engine's
-    // `npm run verify:comboforge`. phoenix-cyclops is null — the band falls back
-    // to the game hub — until that check can confirm ComboForge carries him: on
-    // his release day it answered HTTP 429, so a derived deep link was unverified.
-    comboforge: { gameId: 'marveltokon', characters: { 'phoenix-cyclops': null } },
+    // `npm run verify:comboforge`. phoenix-cyclops shipped null (the live check
+    // answered 429 on his release day) and now derives: a browser check on
+    // 2026-11-16 found marveltokon-phoenix-cyclops, recorded in the engine's
+    // scripts/comboforge-verified.json.
+    comboforge: { gameId: 'marveltokon' },
   } satisfies GameConfig,
 });
