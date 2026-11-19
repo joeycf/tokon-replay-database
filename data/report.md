@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-19T03:28:14.326Z_
+_Generated 2026-11-19T05:14:07.707Z_
 
 ## Coverage
 
@@ -40,14 +40,14 @@ How every one of the 2996 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 40 | 1.3% |
+| title | 12 | 0.4% |
 | description | 792 | 26.4% |
 | index | 184 | 6.1% |
-| footage | 174 | 5.8% |
+| footage | 202 | 6.7% |
 | human | 1775 | 59.2% |
 | review | 31 | 1.0% |
 
-- complete (4/4): **2956/2996** (98.7%)
+- complete (4/4): **2963/2996** (98.9%)
 - oversize (>4, mid-set team change): **13** — counted in usage, excluded from pairing
 - bench alignment: handle 920 · character-subset 39 · ambiguous 10
 - title slot order: handle-first 2339 · chars-first 195 · parallel-lists 244
@@ -59,14 +59,15 @@ How every one of the 2996 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 39 | 1.3% |
-| 2 | 1 | 0.0% |
-| 4 | 2943 | 98.2% |
+| 1 | 20 | 0.7% |
+| 2 | 7 | 0.2% |
+| 3 | 6 | 0.2% |
+| 4 | 2950 | 98.5% |
 | 5 _(mid-set change)_ | 10 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **40 side(s) awaiting a drain** across 20 record(s) — oldest published **2 day(s)** ago
+- **33 side(s) awaiting a drain** across 20 record(s) — oldest published **2 day(s)** ago
 
 ## Queues
 
@@ -75,7 +76,7 @@ How every one of the 2996 sides got its characters.
 
 ## Player identity
 
-20 identity(s) resolved from more than one spelling. The
+19 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -85,7 +86,6 @@ after changing scripts/players.ts, or the old URLs 404.
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
 | `dragon-von-doom` | `dragonvondoom` |
-| `f-champ` | `fchamp` |
 | `ghost-of-evo` | `ghostofevo` |
 | `gotham-paladin` | `gothampaladin` |
 | `hulk-mash` | `hulkmash` |
