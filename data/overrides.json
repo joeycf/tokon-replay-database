@@ -88329,22 +88329,23 @@
     "sideVotes": 80
   },
   "27przjMYGKs": {
-    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-11-17]",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-11-17]. Side 0 (TA Gio) read by a person from the HUD portrait cluster [2026-11-19]: the footage read carried spider-man, LavishXL’s point fighter, in place of magik; the players appear to switch screen sides partway through.",
     "sides": [
       {
         "player": "ta-gio",
         "handle": "TA Gio",
         "characters": [
-          "phoenix-cyclops",
+          "magneto",
           "blade",
-          "spider-man",
-          "magneto"
+          "magik",
+          "phoenix-cyclops"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "magneto",
@@ -88359,7 +88360,14 @@
             "spider-man",
             "magneto"
           ],
-          "confidence": 0.878
+          "confidence": 0.878,
+          "fromHuman": [
+            "magneto",
+            "blade",
+            "magik",
+            "phoenix-cyclops"
+          ],
+          "humanScreenSide": "L"
         }
       },
       {
