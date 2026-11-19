@@ -7391,16 +7391,17 @@
         "player": "ta-gio",
         "handle": "TA Gio",
         "characters": [
-          "phoenix-cyclops",
+          "magneto",
           "blade",
-          "spider-man",
-          "magneto"
+          "magik",
+          "phoenix-cyclops"
         ],
         "provenance": {
-          "tier": "footage",
+          "tier": "human",
           "tiers": [
             "title",
-            "footage"
+            "footage",
+            "human"
           ],
           "fromTitle": [
             "magneto",
@@ -7415,7 +7416,14 @@
             "spider-man",
             "magneto"
           ],
-          "confidence": 0.878
+          "confidence": 0.878,
+          "fromHuman": [
+            "magneto",
+            "blade",
+            "magik",
+            "phoenix-cyclops"
+          ],
+          "humanScreenSide": "L"
         }
       },
       {

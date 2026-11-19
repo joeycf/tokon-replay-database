@@ -1,6 +1,6 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-19T03:18:56.081Z_
+_Generated 2026-11-19T03:28:14.326Z_
 
 ## Coverage
 
@@ -43,8 +43,8 @@ How every one of the 2996 sides got its characters.
 | title | 40 | 1.3% |
 | description | 792 | 26.4% |
 | index | 184 | 6.1% |
-| footage | 175 | 5.8% |
-| human | 1774 | 59.2% |
+| footage | 174 | 5.8% |
+| human | 1775 | 59.2% |
 | review | 31 | 1.0% |
 
 - complete (4/4): **2956/2996** (98.7%)
