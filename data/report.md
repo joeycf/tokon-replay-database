@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-18T16:44:47.651Z_
+_Generated 2026-11-19T03:18:56.081Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 349 | 349 | 100.0% |
+| highLevelReplays | 352 | 352 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 897 | 198 | 22.1% |
-| replaysHub | 573 | 564 | 98.4% |
-| fightingStationX | 3545 | 224 | 6.3% |
-| fgcReplaysHub | 2913 | 41 | 1.4% |
+| replaysHub | 576 | 567 | 98.4% |
+| fightingStationX | 3551 | 224 | 6.3% |
+| fgcReplaysHub | 2915 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1492** | |
+| **total** | | **1498** | |
 
 ## Index intakes
 
@@ -29,58 +29,53 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 2984 sides got its characters.
+How every one of the 2996 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 92 | 3.1% |
-| description | 786 | 26.3% |
-| index | 184 | 6.2% |
-| footage | 244 | 8.2% |
-| human | 1647 | 55.2% |
+| title | 40 | 1.3% |
+| description | 792 | 26.4% |
+| index | 184 | 6.1% |
+| footage | 175 | 5.8% |
+| human | 1774 | 59.2% |
 | review | 31 | 1.0% |
 
-- complete (4/4): **2824/2984** (94.6%)
-- oversize (>4, mid-set team change): **12** — counted in usage, excluded from pairing
-- bench alignment: handle 914 · character-subset 39 · ambiguous 10
-- title slot order: handle-first 2327 · chars-first 195 · parallel-lists 244
+- complete (4/4): **2956/2996** (98.7%)
+- oversize (>4, mid-set team change): **13** — counted in usage, excluded from pairing
+- bench alignment: handle 920 · character-subset 39 · ambiguous 10
+- title slot order: handle-first 2339 · chars-first 195 · parallel-lists 244
 - tier conflicts (queued for review): 1
-- title refutations (a person ruled the title wrong): **12** side(s) — named, with their evidence, by `npm run test:e2e`
+- title refutations (a person ruled the title wrong): **13** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
 
 ### Side-size distribution
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 105 | 3.5% |
-| 2 | 21 | 0.7% |
-| 3 | 34 | 1.1% |
-| 4 | 2812 | 94.2% |
-| 5 _(mid-set change)_ | 9 | 0.3% |
+| 1 | 39 | 1.3% |
+| 2 | 1 | 0.0% |
+| 4 | 2943 | 98.2% |
+| 5 _(mid-set change)_ | 10 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **160 side(s) awaiting a drain** across 86 record(s) — oldest published **13 day(s)** ago
-
-> The bench queue is at 86 (nudge threshold 40).
-> Run `npm run data:catchup` locally — the cron cannot do this: extraction
-> needs a logged-in YouTube session from a residential address.
+- **40 side(s) awaiting a drain** across 20 record(s) — oldest published **2 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **86**
+- bench queue (published, incomplete): **20**
 
 ## Player identity
 
-21 identity(s) resolved from more than one spelling. The
+20 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -89,15 +84,14 @@ after changing scripts/players.ts, or the old URLs 404.
 | `ajaxfidelity` | `ajax-fidelity` |
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
+| `dragon-von-doom` | `dragonvondoom` |
 | `f-champ` | `fchamp` |
 | `ghost-of-evo` | `ghostofevo` |
 | `gotham-paladin` | `gothampaladin` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
 | `jonniea` | `jonnie-a` |
-| `kingafrica` | `king-africa` |
 | `kingcreed` | `king-creed` |
-| `majin-burno` | `majinburno` |
 | `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
 | `nychrisg` | `nychris-g` |
@@ -146,11 +140,11 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4380 |
-| not-tokon | 1470 |
+| other-game | 4382 |
+| not-tokon | 1471 |
 | pre-launch | 663 |
-| not-a-match | 282 |
-| short-duration | 79 |
+| not-a-match | 286 |
+| short-duration | 80 |
 | not-an-event | 35 |
 | char-unresolved | 22 |
 | no-vs-title | 13 |
