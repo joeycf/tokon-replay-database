@@ -93091,11 +93091,11 @@
     "resolvedBy": "human"
   },
   "z5YXGXIAaLY": {
-    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-11-19]. The title was ruled wrong on side 0 (iron-man): the evidence is that side's provenance.titleRefutedWhy.",
+    "//": "bench-completion: read by a person from the HUD portrait cluster [2026-11-19]. The title was ruled wrong on side 0 (iron-man): the evidence is that side's provenance.titleRefutedWhy. Side 0 handle corrected by hand: the HUD reads THE DARK KNIGHT, not the NITRO the title names [2026-11-19].",
     "sides": [
       {
-        "player": "nitro",
-        "handle": "NITRO",
+        "player": "the-dark-knight",
+        "handle": "THE DARK KNIGHT",
         "characters": [
           "magik",
           "blade",
