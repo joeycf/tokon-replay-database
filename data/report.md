@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-19T16:49:27.654Z_
+_Generated 2026-11-20T19:41:04.036Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 355 | 355 | 100.0% |
+| highLevelReplays | 360 | 360 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 898 | 199 | 22.2% |
-| replaysHub | 579 | 570 | 98.4% |
-| fightingStationX | 3557 | 224 | 6.3% |
-| fgcReplaysHub | 2917 | 41 | 1.4% |
+| replaysHub | 586 | 577 | 98.5% |
+| fightingStationX | 3571 | 224 | 6.3% |
+| fgcReplaysHub | 2921 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1505** | |
+| **total** | | **1517** | |
 
 ## Index intakes
 
@@ -29,28 +29,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 3010 sides got its characters.
+How every one of the 3034 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 20 | 0.7% |
-| description | 798 | 26.5% |
+| title | 22 | 0.7% |
+| description | 808 | 26.6% |
 | index | 184 | 6.1% |
-| footage | 202 | 6.7% |
-| human | 1775 | 59.0% |
+| footage | 181 | 6.0% |
+| human | 1808 | 59.6% |
 | review | 31 | 1.0% |
 
-- complete (4/4): **2969/3010** (98.6%)
+- complete (4/4): **3012/3034** (99.3%)
 - oversize (>4, mid-set team change): **13** — counted in usage, excluded from pairing
-- bench alignment: handle 926 · character-subset 39 · ambiguous 10
-- title slot order: handle-first 2352 · chars-first 196 · parallel-lists 244
+- bench alignment: handle 938 · character-subset 39 · ambiguous 10
+- title slot order: handle-first 2376 · chars-first 196 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **13** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,24 +59,23 @@ How every one of the 3010 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 28 | 0.9% |
-| 2 | 7 | 0.2% |
-| 3 | 6 | 0.2% |
-| 4 | 2956 | 98.2% |
+| 1 | 18 | 0.6% |
+| 2 | 4 | 0.1% |
+| 4 | 2999 | 98.8% |
 | 5 _(mid-set change)_ | 10 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **41 side(s) awaiting a drain** across 24 record(s) — oldest published **3 day(s)** ago
+- **22 side(s) awaiting a drain** across 11 record(s) — oldest published **1 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **24**
+- bench queue (published, incomplete): **11**
 
 ## Player identity
 
-20 identity(s) resolved from more than one spelling. The
+21 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -86,6 +85,7 @@ after changing scripts/players.ts, or the old URLs 404.
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
 | `dragon-von-doom` | `dragonvondoom` |
+| `f-champ` | `fchamp` |
 | `ghost-of-evo` | `ghostofevo` |
 | `gotham-paladin` | `gothampaladin` |
 | `hulk-mash` | `hulkmash` |
@@ -141,11 +141,11 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4384 |
-| not-tokon | 1475 |
+| other-game | 4394 |
+| not-tokon | 1482 |
 | pre-launch | 663 |
 | not-a-match | 286 |
-| short-duration | 82 |
+| short-duration | 83 |
 | not-an-event | 35 |
 | char-unresolved | 22 |
 | no-vs-title | 13 |
@@ -181,12 +181,12 @@ Text no roster alias covered. A new fighter, a new nickname, or a typo —
 
 | text | count | example |
 | --- | ---: | --- |
+| `Raked` | 2 | 8YIAqBNiMhU |
 | `D.` | 1 | WeItyxM6nxg |
 | `B.Penther` | 1 | tKpnZ4wyuPg |
 | `Paker` | 1 | lvIsJvSRS5o |
 | `SipderMan` | 1 | 7Muj4Ha1FyI |
 | `GreenGoblin` | 1 | gy5Cd9rpbng |
-| `Raked` | 1 | f_RPQ0HmHXE |
 
 ## Handles that resemble the game name
 
