@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-19T05:55:58.649Z_
+_Generated 2026-11-19T16:49:27.654Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 352 | 352 | 100.0% |
+| highLevelReplays | 355 | 355 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 897 | 198 | 22.1% |
-| replaysHub | 576 | 567 | 98.4% |
-| fightingStationX | 3551 | 224 | 6.3% |
-| fgcReplaysHub | 2915 | 41 | 1.4% |
+| hadoukenReplays | 898 | 199 | 22.2% |
+| replaysHub | 579 | 570 | 98.4% |
+| fightingStationX | 3557 | 224 | 6.3% |
+| fgcReplaysHub | 2917 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1498** | |
+| **total** | | **1505** | |
 
 ## Index intakes
 
@@ -29,28 +29,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor did not move: the catalogue has taken no new Tōkon entry since_
-_the last pull — quieter still, and equally ordinary._
+_The cursor still advanced — a quiet day is the ordinary case here, not a_
+_failed one._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 2996 sides got its characters.
+How every one of the 3010 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 0 | 0.0% |
-| description | 792 | 26.4% |
+| title | 20 | 0.7% |
+| description | 798 | 26.5% |
 | index | 184 | 6.1% |
-| footage | 181 | 6.0% |
-| human | 1808 | 60.3% |
+| footage | 202 | 6.7% |
+| human | 1775 | 59.0% |
 | review | 31 | 1.0% |
 
-- complete (4/4): **2996/2996** (100.0%)
+- complete (4/4): **2969/3010** (98.6%)
 - oversize (>4, mid-set team change): **13** — counted in usage, excluded from pairing
-- bench alignment: handle 920 · character-subset 39 · ambiguous 10
-- title slot order: handle-first 2339 · chars-first 195 · parallel-lists 244
+- bench alignment: handle 926 · character-subset 39 · ambiguous 10
+- title slot order: handle-first 2352 · chars-first 196 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **13** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,21 +59,24 @@ How every one of the 2996 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 4 | 2983 | 99.6% |
+| 1 | 28 | 0.9% |
+| 2 | 7 | 0.2% |
+| 3 | 6 | 0.2% |
+| 4 | 2956 | 98.2% |
 | 5 _(mid-set change)_ | 10 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **0 side(s) awaiting a drain** across 0 record(s)
+- **41 side(s) awaiting a drain** across 24 record(s) — oldest published **3 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **0**
+- bench queue (published, incomplete): **24**
 
 ## Player identity
 
-19 identity(s) resolved from more than one spelling. The
+20 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -96,6 +99,7 @@ after changing scripts/players.ts, or the old URLs 404.
 | `ray-monkey` | `raymonkey` |
 | `sasukedavid` | `sasuke-david` |
 | `sonicfox` | `sonic-fox` |
+| `tiempogris` | `tiempo-gris` |
 | `tokon-player` | `to-kon-player` |
 | `vivid-aspiration` | `vividaspiration` |
 
@@ -137,11 +141,11 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4382 |
-| not-tokon | 1471 |
+| other-game | 4384 |
+| not-tokon | 1475 |
 | pre-launch | 663 |
 | not-a-match | 286 |
-| short-duration | 80 |
+| short-duration | 82 |
 | not-an-event | 35 |
 | char-unresolved | 22 |
 | no-vs-title | 13 |
@@ -197,6 +201,7 @@ garbled game name gets a human verdict instead of a quiet player page.
 | `JOHN TOKON` | 4 | fy_q-s3C8m8 |
 | `DR. MARVEL` | 2 | P1UvhORYCpM |
 | `The Tokon Texan` | 2 | 26SqJz0Xlpo |
+| `HTokon` | 1 | iJfeIXRC27c |
 | `MARKTOKON` | 1 | 0rL0Mx_AFI8 |
 | `Marvel larper` | 1 | Z1uK06owFng |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
