@@ -1,20 +1,20 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-20T21:09:00.085Z_
+_Generated 2026-11-21T15:38:46.227Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 360 | 360 | 100.0% |
+| highLevelReplays | 363 | 363 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 898 | 199 | 22.2% |
-| replaysHub | 586 | 577 | 98.5% |
-| fightingStationX | 3571 | 224 | 6.3% |
-| fgcReplaysHub | 2921 | 41 | 1.4% |
+| replaysHub | 591 | 582 | 98.5% |
+| fightingStationX | 3581 | 224 | 6.3% |
+| fgcReplaysHub | 2925 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1517** | |
+| **total** | | **1525** | |
 
 ## Index intakes
 
@@ -29,28 +29,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor did not move: the catalogue has taken no new Tōkon entry since_
-_the last pull — quieter still, and equally ordinary._
+_The cursor still advanced — a quiet day is the ordinary case here, not a_
+_failed one._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 3034 sides got its characters.
+How every one of the 3050 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 0 | 0.0% |
-| description | 808 | 26.6% |
-| index | 184 | 6.1% |
+| title | 10 | 0.3% |
+| description | 814 | 26.7% |
+| index | 184 | 6.0% |
 | footage | 183 | 6.0% |
-| human | 1828 | 60.3% |
+| human | 1828 | 59.9% |
 | review | 31 | 1.0% |
 
-- complete (4/4): **3034/3034** (100.0%)
+- complete (4/4): **3040/3050** (99.7%)
 - oversize (>4, mid-set team change): **13** — counted in usage, excluded from pairing
-- bench alignment: handle 938 · character-subset 39 · ambiguous 10
-- title slot order: handle-first 2376 · chars-first 196 · parallel-lists 244
+- bench alignment: handle 946 · character-subset 39 · ambiguous 10
+- title slot order: handle-first 2392 · chars-first 196 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **13** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,21 +59,22 @@ How every one of the 3034 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 4 | 3021 | 99.6% |
+| 1 | 10 | 0.3% |
+| 4 | 3027 | 99.2% |
 | 5 _(mid-set change)_ | 10 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **0 side(s) awaiting a drain** across 0 record(s)
+- **10 side(s) awaiting a drain** across 5 record(s) — oldest published **0 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **0**
+- bench queue (published, incomplete): **5**
 
 ## Player identity
 
-20 identity(s) resolved from more than one spelling. The
+21 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -83,11 +84,12 @@ after changing scripts/players.ts, or the old URLs 404.
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
 | `dragon-von-doom` | `dragonvondoom` |
+| `f-champ` | `fchamp` |
 | `ghost-of-evo` | `ghostofevo` |
 | `gotham-paladin` | `gothampaladin` |
 | `hulk-mash` | `hulkmash` |
 | `jaazzrap` | `jaazz-rap` |
-| `jonniea` | `jonnie-a` |
+| `jonnie-a` | `jonniea` |
 | `kingcreed` | `king-creed` |
 | `mr-marben` | `mrmarben` |
 | `mrchupy` | `mr-chupy` |
@@ -138,11 +140,11 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4394 |
-| not-tokon | 1482 |
+| other-game | 4402 |
+| not-tokon | 1486 |
 | pre-launch | 663 |
 | not-a-match | 286 |
-| short-duration | 83 |
+| short-duration | 85 |
 | not-an-event | 35 |
 | char-unresolved | 22 |
 | no-vs-title | 13 |
