@@ -1,12 +1,12 @@
 # Tōkon pipeline report
 
-_Generated 2026-11-22T15:42:10.486Z_
+_Generated 2026-11-22T17:37:48.553Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 367 | 367 | 100.0% |
+| highLevelReplays | 368 | 368 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
 | hadoukenReplays | 898 | 199 | 22.2% |
 | replaysHub | 597 | 588 | 98.5% |
@@ -14,7 +14,7 @@ _Generated 2026-11-22T15:42:10.486Z_
 | fgcReplaysHub | 2929 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1535** | |
+| **total** | | **1536** | |
 
 ## Index intakes
 
@@ -29,28 +29,28 @@ the committed records are carried, and the run stays green.
 
 _The pull ran and found no new tournament entries, so the committed catalogue_
 _was carried unchanged._
-_The cursor still advanced — a quiet day is the ordinary case here, not a_
-_failed one._
+_The cursor did not move: the catalogue has taken no new Tōkon entry since_
+_the last pull — quieter still, and equally ordinary._
 
 _Entries skipped as already-known: **0** — this pull carried no tagged rows to check._
 
 ## Character provenance
 
-How every one of the 3070 sides got its characters.
+How every one of the 3072 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 22 | 0.7% |
-| description | 822 | 26.8% |
+| title | 2 | 0.1% |
+| description | 824 | 26.8% |
 | index | 184 | 6.0% |
-| footage | 183 | 6.0% |
+| footage | 203 | 6.6% |
 | human | 1828 | 59.5% |
 | review | 31 | 1.0% |
 
-- complete (4/4): **3048/3070** (99.3%)
+- complete (4/4): **3055/3072** (99.4%)
 - oversize (>4, mid-set team change): **13** — counted in usage, excluded from pairing
-- bench alignment: handle 956 · character-subset 39 · ambiguous 10
-- title slot order: handle-first 2412 · chars-first 196 · parallel-lists 244
+- bench alignment: character-subset 40 · handle 956 · ambiguous 10
+- title slot order: handle-first 2414 · chars-first 196 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **13** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -59,22 +59,24 @@ How every one of the 3070 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 22 | 0.7% |
-| 4 | 3035 | 98.9% |
+| 1 | 6 | 0.2% |
+| 2 | 4 | 0.1% |
+| 3 | 7 | 0.2% |
+| 4 | 3042 | 99.0% |
 | 5 _(mid-set change)_ | 10 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **22 side(s) awaiting a drain** across 11 record(s) — oldest published **1 day(s)** ago
+- **17 side(s) awaiting a drain** across 10 record(s) — oldest published **1 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **1** — character-completion 1
-- bench queue (published, incomplete): **11**
+- bench queue (published, incomplete): **10**
 
 ## Player identity
 
-21 identity(s) resolved from more than one spelling. The
+20 identity(s) resolved from more than one spelling. The
 retired ids are 301-redirected from vercel.json — run `npm run data:redirects`
 after changing scripts/players.ts, or the old URLs 404.
 
@@ -84,7 +86,6 @@ after changing scripts/players.ts, or the old URLs 404.
 | `blueskyguy` | `blue-sky-guy` |
 | `boymanguy` | `boy-man-guy` |
 | `dragon-von-doom` | `dragonvondoom` |
-| `f-champ` | `fchamp` |
 | `ghost-of-evo` | `ghostofevo` |
 | `gotham-paladin` | `gothampaladin` |
 | `hulk-mash` | `hulkmash` |
