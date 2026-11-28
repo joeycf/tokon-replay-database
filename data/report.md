@@ -5,23 +5,23 @@
 1 self-expiring gate(s) are due:
 
 - **patch-table** (stale-patch-table, due 2026-11-16)
-  The newest patch in scripts/patches.ts is 2026-11-02, and the feed was last confirmed quiet 2026-11-16, 11 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
+  The newest patch in scripts/patches.ts is 2026-11-02, and the feed was last confirmed quiet 2026-11-16, 12 days ago. Run `npm run data:patch-check` against the vendor's news feed. If a patch shipped and is not in the table, every replay since is filed under the previous token — silently wrong. If genuinely nothing shipped, run it as `npm run data:patch-check -- --confirm-quiet` and commit scripts/patches.ts: that records today and quiets this alarm for 10 days.
 
-_Generated 2026-11-27T17:40:55.857Z_
+_Generated 2026-11-28T16:26:17.526Z_
 
 ## Coverage
 
 | channel | uploads | parsed | share |
 | --- | ---: | ---: | ---: |
-| highLevelReplays | 393 | 393 | 100.0% |
+| highLevelReplays | 398 | 398 | 100.0% |
 | proReplays | 14 | 13 | 92.9% |
-| hadoukenReplays | 900 | 201 | 22.3% |
-| replaysHub | 627 | 617 | 98.4% |
-| fightingStationX | 3643 | 224 | 6.1% |
-| fgcReplaysHub | 2949 | 41 | 1.4% |
+| hadoukenReplays | 901 | 202 | 22.4% |
+| replaysHub | 633 | 623 | 98.4% |
+| fightingStationX | 3653 | 224 | 6.1% |
+| fgcReplaysHub | 2953 | 41 | 1.4% |
 | marvelTokonYT _(events only)_ | 46 | 11 | 23.9% |
 | replayTheater _(carried)_ | — | 92 | — |
-| **total** | | **1592** | |
+| **total** | | **1604** | |
 
 ## Index intakes
 
@@ -43,21 +43,21 @@ _Entries skipped as already-known: **0** — this pull carried no tagged rows to
 
 ## Character provenance
 
-How every one of the 3184 sides got its characters.
+How every one of the 3208 sides got its characters.
 
 | tier | sides | share |
 | --- | ---: | ---: |
-| title | 62 | 1.9% |
-| description | 874 | 27.4% |
-| index | 184 | 5.8% |
+| title | 76 | 2.4% |
+| description | 884 | 27.6% |
+| index | 184 | 5.7% |
 | footage | 188 | 5.9% |
-| human | 1845 | 57.9% |
+| human | 1845 | 57.5% |
 | review | 31 | 1.0% |
 
-- complete (4/4): **3122/3184** (98.1%)
+- complete (4/4): **3132/3208** (97.6%)
 - oversize (>4, mid-set team change): **13** — counted in usage, excluded from pairing
-- bench alignment: handle 1006 · character-subset 41 · ambiguous 13
-- title slot order: handle-first 2524 · chars-first 198 · parallel-lists 244
+- bench alignment: handle 1017 · character-subset 41 · ambiguous 13
+- title slot order: handle-first 2547 · chars-first 199 · parallel-lists 244
 - tier conflicts (queued for review): 1
 - title refutations (a person ruled the title wrong): **13** side(s) — named, with their evidence, by `npm run test:e2e`
 - decomposed-Ō titles seen: 0
@@ -66,19 +66,19 @@ How every one of the 3184 sides got its characters.
 
 | fighters on a side | sides | share |
 | --- | ---: | ---: |
-| 1 | 56 | 1.8% |
-| 2 | 6 | 0.2% |
-| 4 | 3109 | 97.6% |
+| 1 | 68 | 2.1% |
+| 2 | 8 | 0.2% |
+| 4 | 3119 | 97.2% |
 | 5 _(mid-set change)_ | 10 | 0.3% |
 | 6 _(mid-set change)_ | 2 | 0.1% |
 | 7 _(mid-set change)_ | 1 | 0.0% |
 
-- **62 side(s) awaiting a drain** across 31 record(s) — oldest published **4 day(s)** ago
+- **76 side(s) awaiting a drain** across 38 record(s) — oldest published **5 day(s)** ago
 
 ## Queues
 
 - review queue (never published): **2** — character-completion 2
-- bench queue (published, incomplete): **31**
+- bench queue (published, incomplete): **38**
 
 ## Player identity
 
@@ -147,10 +147,10 @@ No data/tournaments.json — Tōkon has no Liquipedia page yet (scripts/tourname
 
 | reason | count |
 | --- | ---: |
-| other-game | 4434 |
-| not-tokon | 1526 |
+| other-game | 4438 |
+| not-tokon | 1532 |
 | pre-launch | 663 |
-| not-a-match | 294 |
+| not-a-match | 298 |
 | short-duration | 91 |
 | not-an-event | 35 |
 | char-unresolved | 23 |
@@ -205,9 +205,9 @@ garbled game name gets a human verdict instead of a quiet player page.
 | `TOKON` | 9 | 1_WCacg-NBs |
 | `TOKON PLAYER` | 6 | 9G-yCsKqlDI |
 | `JOHN TOKON` | 4 | fy_q-s3C8m8 |
+| `HTokon` | 2 | lzN1vgTJqO4 |
 | `DR. MARVEL` | 2 | P1UvhORYCpM |
 | `The Tokon Texan` | 2 | 26SqJz0Xlpo |
-| `HTokon` | 1 | iJfeIXRC27c |
 | `MARKTOKON` | 1 | 0rL0Mx_AFI8 |
 | `Marvel larper` | 1 | Z1uK06owFng |
 | `JUGADOR TOKON` | 1 | AXxi2TgiEQM |
